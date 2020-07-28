@@ -1831,7 +1831,7 @@
 		}
 	};
 
-	CellEditor.prototype._selectChars = function (kind, pos) {
+	CellEditor.prototype._selectChars = function (kind, pos, flag) {
 		var t = this;
 		var begPos, endPos;
 
@@ -1846,9 +1846,13 @@
 		if (t.isTopLineActive && !t.skipTLUpdate) {
 			t._updateTopLineCurPos();
 		}
+		if (!flag) {
+			var ws = this.handlers.trigger("getActiveWS");
+			ws.workbook.handlers.trigger("asc_onSelectionEnd");
+		}
 	};
 
-	CellEditor.prototype._changeSelection = function (coord) {
+	CellEditor.prototype._changeSelection = function (coord, flag) {
 		var t = this;
 
 		function doChangeSelection(coordTmp) {
@@ -1858,7 +1862,7 @@
 			}
 			var pos = t._findCursorPosition(coordTmp);
 			if (pos !== undefined) {
-				pos >= 0 ? t._selectChars(kPosition, pos) : t._selectChars(pos);
+				pos >= 0 ? t._selectChars(kPosition, pos, flag) : t._selectChars(pos, flag);
 			}
 		}
 
@@ -2158,6 +2162,7 @@
 		var xfs = new AscCommonExcel.CellXfs();
 		xfs.setFont(this.newTextFormat || this.options.fragments[f.index].format);
 		this.handlers.trigger("updateEditorSelectionInfo", xfs);
+		this.handlers.trigger("asc_onSelectionEnd");
 	};
 
 	CellEditor.prototype._checkMaxCellLength = function ( length ) {
@@ -2605,7 +2610,7 @@
 	/** @param event {MouseEvent} */
 	CellEditor.prototype._onWindowMouseMove = function (event) {
 		if (c_oAscCellEditorSelectState.no !== this.isSelectMode && !this.hasCursor) {
-			this._changeSelection(this._getCoordinates(event));
+			this._changeSelection(this._getCoordinates(event), true);
 		}
 		return true;
 	};
@@ -2643,7 +2648,7 @@
 						pos >= 0 ? this._moveCursor(kPosition, pos) : this._moveCursor(pos);
 					}
 				} else {
-					this._changeSelection(coord);
+					this._changeSelection(coord, true);
 				}
 			} else {
 				// Dbl click
@@ -2654,7 +2659,7 @@
 				var startWord = this.textRender.getPrevWord(endWord);
 
 				this._moveCursor(kPosition, startWord);
-				this._selectChars(kPosition, endWord);
+				this._selectChars(kPosition, endWord, true);
 			}
 		} else if (2 === button) {
 			this.handlers.trigger('onContextMenu', event);
@@ -2673,6 +2678,8 @@
 			this.cleanSelectRange();
 		}
 		this.isSelectMode = c_oAscCellEditorSelectState.no;
+		var ws = this.handlers.trigger("getActiveWS");
+		ws.workbook.handlers.trigger("asc_onSelectionEnd");
 		return true;
 	};
 
@@ -2682,7 +2689,7 @@
 		this.clickCounter.mouseMoveEvent(coord.x, coord.y);
 		this.hasCursor = true;
 		if (c_oAscCellEditorSelectState.no !== this.isSelectMode) {
-			this._changeSelection(coord);
+			this._changeSelection(coord, true);
 		}
 		return true;
 	};
