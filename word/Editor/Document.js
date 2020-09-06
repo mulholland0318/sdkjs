@@ -13255,6 +13255,15 @@ CDocument.prototype.Get_SectionPageNumInfo = function(Page_abs)
 
 	return new CSectionPageNumInfo(FP, CP, bFirst, bEven, Page_abs);
 };
+
+CDocument.prototype._sectArray = new Int32Array(100);
+CDocument.prototype._sectArrayCheck = function(size)
+{
+    if (size > this._sectArray.length)
+        this._sectArray = new Int32Array(Math.max(size, 2 * this._sectArray.length));
+    return this._sectArray;
+};
+
 CDocument.prototype.Get_SectionPageNumInfo2 = function(Page_abs)
 {
 	var StartIndex = 0;
@@ -13288,8 +13297,14 @@ CDocument.prototype.Get_SectionPageNumInfo2 = function(Page_abs)
 	var PageNumStart = this.SectionsInfo.Get_SectPr2(SectIndex).SectPr.Get_PageNum_Start();
 	var BreakType    = this.SectionsInfo.Get_SectPr2(SectIndex).SectPr.Get_Type();
 
-	var StartInfo = [];
-	StartInfo.push({FirstPage : FirstPage, BreakType : BreakType});
+	var InfoCount = 0;
+
+	var StartInfo = this._sectArrayCheck(2 * (SectIndex + 1));
+    StartInfo[InfoCount++] = FirstPage;
+    StartInfo[InfoCount++] = BreakType;
+
+    //var StartInfo = new Array(SectIndex + 1);
+	//StartInfo[InfoCount++] = {FirstPage : FirstPage, BreakType : BreakType};
 
 	while ((PageNumStart < 0 || c_oAscSectionBreakType.Continuous === BreakType) && SectIndex > 0)
 	{
@@ -13299,7 +13314,9 @@ CDocument.prototype.Get_SectionPageNumInfo2 = function(Page_abs)
 		PageNumStart = this.SectionsInfo.Get_SectPr2(SectIndex).SectPr.Get_PageNum_Start();
 		BreakType    = this.SectionsInfo.Get_SectPr2(SectIndex).SectPr.Get_Type();
 
-		StartInfo.splice(0, 0, {FirstPage : FirstPage, BreakType : BreakType});
+        //StartInfo[InfoCount++] = {FirstPage : FirstPage, BreakType : BreakType};
+        StartInfo[InfoCount++] = FirstPage;
+        StartInfo[InfoCount++] = BreakType;
 	}
 
 	// Нумерация начинается с 1, если начальное значение не задано. Заметим, что в Word нумерация может начинаться и
@@ -13307,17 +13324,21 @@ CDocument.prototype.Get_SectionPageNumInfo2 = function(Page_abs)
 	if (PageNumStart < 0)
 		PageNumStart = 1;
 
-	var InfoIndex = 0;
-	var InfoCount = StartInfo.length;
+    var InfoIndex = InfoCount - 1;
+	//var FP     = StartInfo[InfoIndex].FirstPage;
+	//var BT     = StartInfo[InfoIndex].BreakType;
+	//var PrevFP = StartInfo[InfoIndex].FirstPage;
 
-	var FP     = StartInfo[0].FirstPage;
-	var BT     = StartInfo[0].BreakType;
-	var PrevFP = StartInfo[0].FirstPage;
+    var FP     = StartInfo[InfoIndex - 1];
+    var BT     = StartInfo[InfoIndex];
+    var PrevFP = FP;
 
-	while (InfoIndex < InfoCount)
+	while (InfoIndex >= 0)
 	{
-		FP = StartInfo[InfoIndex].FirstPage;
-		BT = StartInfo[InfoIndex].BreakType;
+		//FP = StartInfo[InfoIndex].FirstPage;
+		//BT = StartInfo[InfoIndex].BreakType;
+        BT = StartInfo[InfoIndex--];
+        FP = StartInfo[InfoIndex--];
 
 		PageNumStart += FP - PrevFP;
 		PrevFP = FP;
@@ -13325,7 +13346,7 @@ CDocument.prototype.Get_SectionPageNumInfo2 = function(Page_abs)
 		if ((c_oAscSectionBreakType.OddPage === BT && 0 === PageNumStart % 2) || (c_oAscSectionBreakType.EvenPage === BT && 1 === PageNumStart % 2))
 			PageNumStart++;
 
-		InfoIndex++;
+		//InfoIndex--;
 	}
 
 	if (FP > Page_abs)
