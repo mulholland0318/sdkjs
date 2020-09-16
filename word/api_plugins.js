@@ -494,6 +494,31 @@
 		}
 
 		this.asc_changeComment(sId, new window['Asc']['asc_CCommentDataWord'](oCD));
-	};
+    };
+    /**
+	 * Search text in document
+	 * @memberof Api
+	 * @typeofeditors ["CDE"]
+	 * @alias SearchText
+	 * @param {string} text
+	 * @param {boolean} isNext
+	 */
+	window["asc_docs_api"].prototype["pluginMethod_SearchText"] = function(text, isNext)
+	{
+        if (text) {
+            // this._selectSearchingResults(isNext);
+            if (null != this.WordControl.m_oDrawingDocument.m_oDocumentRenderer) {
+                this.WordControl.m_oDrawingDocument.m_oDocumentRenderer.findText(text, false, isNext);
+                return;
+            }
+
+            this.WordControl.m_oLogicDocument.Search(text, {MatchCase : false});
+
+            var Id = this.WordControl.m_oLogicDocument.GetSearchElementId(isNext);
+
+            if (null != Id)
+                this.WordControl.m_oLogicDocument.SelectSearchElement(Id);
+        }
+    };
 
 })(window);
