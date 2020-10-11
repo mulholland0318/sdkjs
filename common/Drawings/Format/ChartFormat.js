@@ -3421,6 +3421,13 @@ function CDLbl()
         }
         this.parent.onDataUpdate();
     };
+    CSeriesBase.prototype.asc_getChartType = function() {
+        if(this.parent) {
+            return this.parent.getChartType();
+        }
+        return Asc.c_oAscChartTypeSettings.unknown;
+    };
+    CSeriesBase.prototype["asc_getChartType"] = CSeriesBase.prototype.asc_getChartType;
 
 function CPlotArea()
 {
@@ -4002,20 +4009,20 @@ CPlotArea.prototype =
         History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_CommonChart_AddSeries, this.series.length, [ser], true));
         this.series.push(ser);
         ser.setParent(this);
-        if(this.parent && this.parent.parent && this.parent.parent.parent) {
-            this.parent.parent.parent.handleUpdateType();
+        var oCS = this.getChartSpace();
+        if(oCS) {
+            oCS.handleUpdateType();
         }
     };
     CChartBase.prototype.setDLbls = function(pr) {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_CommonChart_SetDlbls, this.dLbls, pr));
         this.dLbls = pr;
-        if(this.dLbls)
-        {
+        if(this.dLbls) {
             this.dLbls.setParent(this);
         }
-        if(this.parent && this.parent.parent && this.parent.parent.parent)
-        {
-            this.parent.parent.parent.handleUpdateDataLabels();
+        var oCS = this.getChartSpace();
+        if(oCS) {
+            oCS.handleUpdateDataLabels();
         }
     };
     CChartBase.prototype.setParent = function(pr) {
@@ -4084,6 +4091,16 @@ CPlotArea.prototype =
             History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_CommonChart_AddFilteredSeries, idx, this.filteredSeries.splice(idx, 1), false));
         }
     };
+    CChartBase.prototype.getChartSpace = function() {
+        if(this.parent && this.parent.parent && this.parent.parent.parent) {
+            return this.parent.parent.parent;
+        }
+        return null;
+    };
+    CChartBase.prototype.getChartType = function() {
+        return Asc.c_oAscChartTypeSettings.unknown;
+    };
+
 function CBarChart()
 {
     CChartBase.call(this);
@@ -4306,6 +4323,61 @@ function CBarChart()
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_BarChart_SetSerLines, this.serLines, pr));
         this.serLines = pr;
     };
+    CBarChart.prototype.getChartType = function() {
+        var nType = Asc.c_oAscChartTypeSettings.unknown;
+        var bHBar = (this.barDir === BAR_DIR_BAR);
+        var oCS = this.getChartSpace();
+        var b3D = false;
+        if(oCS && AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(oCS)) {
+            b3D = true;
+        }
+        if(bHBar) {
+            switch(this.grouping) {
+                case AscFormat.BAR_GROUPING_CLUSTERED: {
+                    nType = b3D ? Asc.c_oAscChartTypeSettings.hBarNormal3d : Asc.c_oAscChartTypeSettings.hBarNormal;
+                    break;
+                }
+                case AscFormat.BAR_GROUPING_STACKED: {
+                    nType = b3D ? Asc.c_oAscChartTypeSettings.hBarStacked3d : Asc.c_oAscChartTypeSettings.hBarStacked;
+                    break;
+                }
+                case AscFormat.BAR_GROUPING_PERCENT_STACKED: {
+                    nType = b3D ? Asc.c_oAscChartTypeSettings.hBarStackedPer3d : Asc.c_oAscChartTypeSettings.hBarStackedPer;
+                    break;
+                }
+                default: {
+                    nType = b3D ? Asc.c_oAscChartTypeSettings.hBarNormal3d : Asc.c_oAscChartTypeSettings.hBarNormal;
+                    break;
+                }
+            }
+        }
+        else {
+            switch(this.grouping) {
+                case AscFormat.BAR_GROUPING_CLUSTERED: {
+                    nType = b3D ? Asc.c_oAscChartTypeSettings.barNormal3d : Asc.c_oAscChartTypeSettings.barNormal;
+                    break;
+                }
+                case AscFormat.BAR_GROUPING_STACKED: {
+                    nType = b3D ? Asc.c_oAscChartTypeSettings.barStacked3d : Asc.c_oAscChartTypeSettings.barStacked;
+                    break;
+                }
+                case AscFormat.BAR_GROUPING_PERCENT_STACKED: {
+                    nType = b3D ? Asc.c_oAscChartTypeSettings.barStackedPer3d : Asc.c_oAscChartTypeSettings.barStackedPer;
+                    break;
+                }
+                default: {
+                    if(AscFormat.BAR_GROUPING_STANDARD && b3D) {
+                        nType = Asc.c_oAscChartTypeSettings.barNormal3dPerspective;
+                    }
+                    else {
+                        nType = Asc.c_oAscChartTypeSettings.barNormal;
+                    }
+                    break;
+                }
+            }
+        }
+        return nType;
+    };
 
 function CAreaChart()
 {
@@ -4448,6 +4520,24 @@ CAreaChart.prototype.setGrouping = function(pr)
         this.parent.parent.parent.handleUpdateInternalChart();
     }
 };
+    CAreaChart.prototype.getChartType = function() {
+        var nType = Asc.c_oAscChartTypeSettings.unknown;
+        switch(chart_type.grouping) {
+            case AscFormat.GROUPING_PERCENT_STACKED: {
+                nType = Asc.c_oAscChartTypeSettings.areaStackedPer;
+                break;
+            }
+            case AscFormat.GROUPING_STACKED: {
+                nType = Asc.c_oAscChartTypeSettings.areaStacked;
+                break;
+            }
+            default: {
+                nType = Asc.c_oAscChartTypeSettings.areaNormal;
+                break;
+            }
+        }
+        return nType;
+    };
 
 
 function CAreaSeries()
@@ -8187,7 +8277,9 @@ CDoughnutChart.prototype.setHoleSize = function(pr) {
     History.Add(new CChangesDrawingsLong(this, AscDFH.historyitem_DoughnutChart_SetHoleSize, this.holeSize, pr));
     this.holeSize = pr;
 };
-
+    CDoughnutChart.prototype.getChartType = function() {
+        return Asc.c_oAscChartTypeSettings.doughnut;
+    };
 
 function CErrBars()
 {
@@ -9156,6 +9248,30 @@ CLineChart.prototype = Object.create(CChartBase.prototype);
         {
             pr.setParent(this);
         }
+    };
+    CLineChart.prototype.getChartType = function() {
+        var nType = Asc.c_oAscChartTypeSettings.unknown;
+        switch(this.grouping) {
+            case AscFormat.GROUPING_PERCENT_STACKED: {
+                nType = Asc.c_oAscChartTypeSettings.lineStackedPer;
+                break;
+            }
+            case AscFormat.GROUPING_STACKED: {
+                nType = Asc.c_oAscChartTypeSettings.lineStacked;
+                break;
+            }
+            default: {
+                var oCS = this.getChartSpace();
+                if(oCS && AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(oCS)) {
+                    nType = Asc.c_oAscChartTypeSettings.line3d;
+                }
+                else {
+                    nType = Asc.c_oAscChartTypeSettings.lineNormal;
+                }
+                break;
+            }
+        }
+        return nType;
     };
 
 function CLineSeries()
@@ -10538,6 +10654,15 @@ function CPieChart()
         History.Add(new CChangesDrawingsLong(this, AscDFH.historyitem_PieChart_SetFirstSliceAng, this.firstSliceAng, pr));
         this.firstSliceAng = pr;
     };
+    CPieChart.prototype.getChartType = function() {
+        var oCS = this.getChartSpace();
+        if(oCS && AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(oCS)) {
+            return c_oAscChartTypeSettings.pie3d;
+        }
+        else {
+            return c_oAscChartTypeSettings.pie;
+        }
+    };
 
 
 function CPieSeries()
@@ -11170,6 +11295,9 @@ CScatterChart.prototype = Object.create(CChartBase.prototype);
             this.parent.parent.parent.handleUpdateType();
         }
     };
+    CScatterChart.prototype.getChartType = function() {
+        return Asc.c_oAscChartTypeSettings.scatter;
+    };
 
 
 
@@ -11578,6 +11706,9 @@ CStockChart.prototype.constructor = CStockChart;
         {
             pr.setParent(this);
         }
+    };
+    CStockChart.prototype.getChartType = function() {
+        return Asc.c_oAscChartTypeSettings.stock;
     };
 
 
@@ -12107,6 +12238,28 @@ CSurfaceChart.prototype = Object.create(CChartBase.prototype);
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_SurfaceChart_SetWireframe, this.wireframe, pr));
         this.wireframe = pr;
+    };
+    CSurfaceChart.prototype.getChartType = function() {
+        var oCS = this.getChartSpace();
+        var oView3D = oCS && oCS.chart.view3D;
+        var nType = Asc.c_oAscChartTypeSettings.unknown;
+        if(this.isWireframe()){
+            if(oView3D && oView3D.rotX === 90 && oView3D.rotY === 0 && oView3D.rAngAx === false && oView3D.perspective === 0){
+                nType = Asc.c_oAscChartTypeSettings.contourWireframe;
+            }
+            else{
+                nType = Asc.c_oAscChartTypeSettings.surfaceWireframe;
+            }
+        }
+        else{
+            if(oView3D && oView3D.rotX === 90 && oView3D.rotY === 0 && oView3D.rAngAx === false && oView3D.perspective === 0){
+                nType = Asc.c_oAscChartTypeSettings.contourNormal;
+            }
+            else{
+                nType = Asc.c_oAscChartTypeSettings.surfaceNormal;
+            }
+        }
+        return nType;
     };
 
 

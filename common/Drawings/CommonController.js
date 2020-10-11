@@ -5953,112 +5953,24 @@ DrawingObjectsController.prototype =
 
 
         var calc_chart_type;
-        if(chart_type_object_type === AscDFH.historyitem_type_PieChart)
+        if(plot_area.charts[0].length > 1)
         {
-            if(!AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(chart_space))
+            calc_chart_type = c_oAscChartTypeSettings.multichart;
+        }
+        else
+        {
+            if(chart_type)
             {
-                calc_chart_type = c_oAscChartTypeSettings.pie;
+                calc_chart_type = chart_type.getChartType();
             }
             else
             {
-                calc_chart_type = c_oAscChartTypeSettings.pie3d;
+                calc_chart_type = c_oAscChartTypeSettings.unknown;
             }
         }
-        else if(chart_type_object_type === AscDFH.historyitem_type_DoughnutChart)
-            calc_chart_type = c_oAscChartTypeSettings.doughnut;
-        else if(chart_type_object_type === AscDFH.historyitem_type_StockChart)
-            calc_chart_type = c_oAscChartTypeSettings.stock;
-        else if(chart_type_object_type === AscDFH.historyitem_type_BarChart)
+
+        if(chart_type_object_type === AscDFH.historyitem_type_LineChart)
         {
-            var b_hbar = chart_type.barDir === BAR_DIR_BAR;
-            var bView3d = AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(chart_space);
-            if(b_hbar)
-            {
-                switch(chart_type.grouping)
-                {
-                    case BAR_GROUPING_CLUSTERED:
-                    {
-                        calc_chart_type = bView3d ? c_oAscChartTypeSettings.hBarNormal3d : c_oAscChartTypeSettings.hBarNormal;
-                        break;
-                    }
-                    case BAR_GROUPING_STACKED:
-                    {
-                        calc_chart_type = bView3d ? c_oAscChartTypeSettings.hBarStacked3d : c_oAscChartTypeSettings.hBarStacked;
-                        break;
-                    }
-                    case BAR_GROUPING_PERCENT_STACKED:
-                    {
-                        calc_chart_type = bView3d ? c_oAscChartTypeSettings.hBarStackedPer3d : c_oAscChartTypeSettings.hBarStackedPer;
-                        break;
-                    }
-                    default:
-                    {
-                        calc_chart_type = bView3d ? c_oAscChartTypeSettings.hBarNormal3d : c_oAscChartTypeSettings.hBarNormal;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                switch(chart_type.grouping)
-                {
-                    case BAR_GROUPING_CLUSTERED:
-                    {
-                        calc_chart_type = bView3d ? c_oAscChartTypeSettings.barNormal3d : c_oAscChartTypeSettings.barNormal;
-                        break;
-                    }
-                    case BAR_GROUPING_STACKED:
-                    {
-                        calc_chart_type = bView3d ? c_oAscChartTypeSettings.barStacked3d : c_oAscChartTypeSettings.barStacked;
-                        break;
-                    }
-                    case BAR_GROUPING_PERCENT_STACKED:
-                    {
-                        calc_chart_type = bView3d ? c_oAscChartTypeSettings.barStackedPer3d : c_oAscChartTypeSettings.barStackedPer;
-                        break;
-                    }
-                    default:
-                    {
-                        if(BAR_GROUPING_STANDARD && bView3d)
-                        {
-                            calc_chart_type = c_oAscChartTypeSettings.barNormal3dPerspective;
-                        }
-                        else
-                        {
-                            calc_chart_type = c_oAscChartTypeSettings.barNormal;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        else if(chart_type_object_type === AscDFH.historyitem_type_LineChart)
-        {
-            switch(chart_type.grouping)
-            {
-                case GROUPING_PERCENT_STACKED :
-                {
-                    calc_chart_type = c_oAscChartTypeSettings.lineStackedPer;
-                    break;
-                }
-                case GROUPING_STACKED         :
-                {
-                    calc_chart_type = c_oAscChartTypeSettings.lineStacked;
-                    break;
-                }
-                default        :
-                {
-                    if(!AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(chart_space))
-                    {
-                        calc_chart_type = c_oAscChartTypeSettings.lineNormal;
-                    }
-                    else
-                    {
-                        calc_chart_type = c_oAscChartTypeSettings.line3d;
-                    }
-                    break;
-                }
-            }
             var bShowMarker = false;
             if(chart_type.marker !== false)
             {
@@ -6129,7 +6041,6 @@ DrawingObjectsController.prototype =
         }
         else if(chart_type_object_type === AscDFH.historyitem_type_ScatterChart)
         {
-            calc_chart_type = c_oAscChartTypeSettings.scatter;
             switch(chart_type.scatterStyle)
             {
                 case SCATTER_STYLE_LINE:
@@ -6209,29 +6120,6 @@ DrawingObjectsController.prototype =
                 }
                 ret.putSmooth(b_smooth);
             }
-        }
-        else if(chart_type_object_type === AscDFH.historyitem_type_SurfaceChart){
-            var oView3D = chart_space.chart.view3D;
-            if(chart_type.isWireframe()){
-                if(oView3D && oView3D.rotX === 90 && oView3D.rotY === 0 && oView3D.rAngAx === false && oView3D.perspective === 0){
-                    calc_chart_type = c_oAscChartTypeSettings.contourWireframe;
-                }
-                else{
-                    calc_chart_type = c_oAscChartTypeSettings.surfaceWireframe;
-                }
-            }
-            else{
-                if(oView3D && oView3D.rotX === 90 && oView3D.rotY === 0 && oView3D.rAngAx === false && oView3D.perspective === 0){
-                    calc_chart_type = c_oAscChartTypeSettings.contourNormal;
-                }
-                else{
-                    calc_chart_type = c_oAscChartTypeSettings.surfaceNormal;
-                }
-            }
-        }
-        else
-        {
-            calc_chart_type = c_oAscChartTypeSettings.unknown;
         }
         ret.type = calc_chart_type;
         return ret;
