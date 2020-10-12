@@ -3458,7 +3458,7 @@ function CDLbl()
         oGraphics.RestoreGrState();
     };
     CSeriesBase.prototype.asc_drawPreviewRect = function(sDivId) {
-        this.drawPreviewRect();
+        this.drawPreviewRect(sDivId);
     };
     CSeriesBase.prototype["asc_drawPreviewRect"] = CSeriesBase.prototype.asc_drawPreviewRect;
 
