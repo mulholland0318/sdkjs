@@ -4325,7 +4325,7 @@ function CBarChart()
     };
     CBarChart.prototype.getChartType = function() {
         var nType = Asc.c_oAscChartTypeSettings.unknown;
-        var bHBar = (this.barDir === BAR_DIR_BAR);
+        var bHBar = (this.barDir === AscFormat.BAR_DIR_BAR);
         var oCS = this.getChartSpace();
         var b3D = false;
         if(oCS && AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(oCS)) {
