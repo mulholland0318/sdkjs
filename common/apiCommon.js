@@ -161,6 +161,41 @@
 		return window["NATIVE_EDITOR_ENJINE"] && !window["IS_NATIVE_EDITOR"] && !window["DoctRendererMode"];
 	}
 
+	function checkCanvasInDiv(sDivId)
+	{
+		var oDiv = document.getElementById(sDivId);
+		if(!oDiv)
+		{
+			return null;
+		}
+		var aChildren = oDiv.children;
+		var oCanvas = null, i;
+		for(i = 0; i < aChildren.length; ++i)
+		{
+			if(aChildren[i].nodeName && aChildren[i].nodeName.toUpperCase() === 'CANVAS')
+			{
+				oCanvas = aChildren[i];
+				break;
+			}
+		}
+		if(null === oCanvas)
+		{
+			oCanvas = document.createElement('canvas');
+			oCanvas.style.width = "100%";
+			oCanvas.style.height = "100%";
+			oDiv.appendChild(oCanvas);
+			var nCanvasW = oCanvas.clientWidth;
+			var nCanvasH = oCanvas.clientHeight;
+			if (AscCommon.AscBrowser.isRetina)
+			{
+				nCanvasW = AscCommon.AscBrowser.convertToRetinaValue(nCanvasW, true);
+				nCanvasH = AscCommon.AscBrowser.convertToRetinaValue(nCanvasH, true);
+			}
+			oCanvas.width = nCanvasW;
+			oCanvas.height = nCanvasH;
+		}
+		return oCanvas;
+	}
 
 	var c_oLicenseResult = {
 		Error         : 1,
@@ -5626,6 +5661,7 @@
 
     window["AscCommon"].CWatermarkOnDraw = CWatermarkOnDraw;
     window["AscCommon"].isFileBuild = isFileBuild;
+    window["AscCommon"].checkCanvasInDiv = checkCanvasInDiv;
 
 	window["Asc"]["CPluginVariation"] = window["Asc"].CPluginVariation = CPluginVariation;
 	window["Asc"]["CPlugin"] = window["Asc"].CPlugin = CPlugin;

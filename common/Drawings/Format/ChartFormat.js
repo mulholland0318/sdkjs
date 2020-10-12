@@ -3428,6 +3428,39 @@ function CDLbl()
         return Asc.c_oAscChartTypeSettings.unknown;
     };
     CSeriesBase.prototype["asc_getChartType"] = CSeriesBase.prototype.asc_getChartType;
+    CSeriesBase.prototype.getPreviewBrush = function() {
+        if(this.compiledSeriesBrush) {
+            return this.compiledSeriesBrush;
+        }
+        return null;
+    };
+    CSeriesBase.prototype.drawPreviewRect = function(sDivId) {
+        var oCanvas = AscCommon.checkCanvasInDiv(sDivId);
+        if(!oCanvas) {
+            return;
+        }
+        var oContext = oCanvas.getContext("2d");
+        if(!oContext) {
+            return;
+        }
+        var dMMW = oCanvas.width / 96 * 25.4;
+        var dMMH = oCanvas.height / 96 * 25.4;
+        oContext.clearRect(0, 0, oCanvas.width, oCanvas.height);
+        var oGraphics = new AscCommon.CGraphics();
+        oGraphics.init(oContext, oCanvas.width, oCanvas.height, dMMW, dMMH);
+        oGraphics.m_oFontManager = AscCommon.g_fontManager;
+        oGraphics.transform(1,0,0,1,0,0);
+        oGraphics.SaveGrState();
+        oGraphics.SetIntegerGrid(false);
+        var ShapeDrawer = new AscCommon.CShapeDrawer();
+        oGraphics.fromShape2(new AscFormat.ObjectToDraw(this.getPreviewBrush(), null, dMMW, dMMH, null, new AscCommon.CMatrix()), oGraphics, null);
+        ShapeDrawer.draw(null);
+        oGraphics.RestoreGrState();
+    };
+    CSeriesBase.prototype.asc_drawPreviewRect = function(sDivId) {
+        this.drawPreviewRect();
+    };
+    CSeriesBase.prototype["asc_drawPreviewRect"] = CSeriesBase.prototype.asc_drawPreviewRect;
 
 function CPlotArea()
 {
@@ -9450,6 +9483,12 @@ CLineSeries.prototype.setVal = function(pr)
             this.val.setParent(this);
         }
 };
+    CLineSeries.prototype.getPreviewBrush = function() {
+        if(this.compiledSeriesPen && this.compiledSeriesPen.Fill) {
+            return this.compiledSeriesPen.Fill;
+        }
+        return null;
+    };
 
 
 var SYMBOL_CIRCLE   = 0;
