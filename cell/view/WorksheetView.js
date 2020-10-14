@@ -12755,7 +12755,7 @@
 						type: CellValueType.String
 					})));
 			} else {
-				range.setValue(rangeStyle.val, null, null, null, pasteOnlyText);
+				range.setValue(rangeStyle.val, null, null, undefined, pasteOnlyText);
 			}
 		}
 
@@ -14295,7 +14295,7 @@
     };
 
 	WorksheetView.prototype._saveCellValueAfterEdit = function (c, val, flags, isNotHistory, lockDraw) {
-	    var bbox = c.bbox;
+		var bbox = c.bbox;
 		var t = this;
 
 		var ctrlKey = flags && flags.ctrlKey;
@@ -14333,6 +14333,10 @@
 			changeRangesIfArrayFormula();
 			if(ctrlKey) {
 				this.model.workbook.dependencyFormulas.lockRecal();
+			}
+
+			if (!applyByArray && ctrlKey) {
+				applyByArray = null;
 			}
 
 			c.setValue(AscCommonExcel.getFragmentsText(val), function (r) {
