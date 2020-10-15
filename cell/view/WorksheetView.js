@@ -11801,9 +11801,12 @@
 
 		var addComments = function (pasteRow, pasteCol, comments) {
 			var comment;
+			var isMergedCell = val.getMergedByCell(pasteRow, pasteCol)
+
 			for (var i = 0; i < comments.length; i++) {
 				comment = comments[i];
-				if (comment.nCol == pasteCol && comment.nRow == pasteRow) {
+				var _isMergedContain = isMergedCell && isMergedCell.contains(comment.nCol, comment.nRow);
+				if (_isMergedContain || (comment.nCol === pasteCol && comment.nRow === pasteRow)) {
 					var commentData = comment.clone(true);
 					//change nRow, nCol
 					commentData.asc_putCol(nCol);
@@ -12453,6 +12456,10 @@
 			return res;
 		};
 
+		if (specialPasteProps.format && range.getHyperlink()) {
+			range.removeHyperlink();
+		}
+
 		//column width
 		var col = range.bbox.c1;
 		if (specialPasteProps.width && rangeStyle.colsWidth[col]) {
@@ -12559,7 +12566,7 @@
 						type: CellValueType.String
 					})));
 			} else {
-				range.setValue(rangeStyle.val, null, null, null, pasteOnlyText);
+				range.setValue(rangeStyle.val, null, null, undefined, pasteOnlyText);
 			}
 		}
 
@@ -14131,7 +14138,7 @@
     };
 
 	WorksheetView.prototype._saveCellValueAfterEdit = function (c, val, flags, isNotHistory, lockDraw) {
-	    var bbox = c.bbox;
+		var bbox = c.bbox;
 		var t = this;
 
 		var ctrlKey = flags && flags.ctrlKey;
@@ -14169,6 +14176,10 @@
 			changeRangesIfArrayFormula();
 			if(ctrlKey) {
 				this.model.workbook.dependencyFormulas.lockRecal();
+			}
+
+			if (!applyByArray && ctrlKey) {
+				applyByArray = null;
 			}
 
 			c.setValue(AscCommonExcel.getFragmentsText(val), function (r) {
