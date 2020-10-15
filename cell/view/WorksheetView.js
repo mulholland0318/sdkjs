@@ -12652,6 +12652,10 @@
 			return res;
 		};
 
+		if (specialPasteProps.format && range.getHyperlink()) {
+			range.removeHyperlink();
+		}
+
 		//column width
 		var col = range.bbox.c1;
 		if (specialPasteProps.width && rangeStyle.colsWidth[col]) {
