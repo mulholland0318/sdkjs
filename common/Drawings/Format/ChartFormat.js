@@ -4141,7 +4141,25 @@ CPlotArea.prototype =
         return Asc.c_oAscChartTypeSettings.unknown;
     };
     CChartBase.prototype.isSecondaryAxis = function() {
-
+        if(!Array.isArray(this.axId) || this.axId.length === 0) {
+            return false;
+        }
+        var oPlotArea = this.parent;
+        if(!oPlotArea) {
+            return false;
+        }
+        var aAllAxes = oPlotArea.axId;
+        var oFirstAxis = aAllAxes[0];
+        if(!oFirstAxis) {
+            return false;
+        }
+        var nAxis, oAxis;
+        for(nAxis = 0; nAxis < this.axId.length; ++nAxis) {
+            if(this.axId[nAxis] === oFirstAxis) {
+                return false;
+            }
+        }
+        return true;
     };
 
 function CBarChart()
