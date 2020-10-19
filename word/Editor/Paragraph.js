@@ -1957,6 +1957,7 @@ Paragraph.prototype.Internal_Draw_3 = function(CurPage, pGraphics, Pr)
 	var DrawMMFields       = !!(this.LogicDocument && this.LogicDocument.Is_HighlightMailMergeFields && true === this.LogicDocument.Is_HighlightMailMergeFields());
 	var DrawSolvedComments = DocumentComments ? DocumentComments.IsUseSolved() : false;
 	var SdtHighlightColor  = this.LogicDocument.GetSdtGlobalShowHighlight && this.LogicDocument.GetSdtGlobalShowHighlight() && undefined === pGraphics.RENDERER_PDF_FLAG ? this.LogicDocument.GetSdtGlobalColor() : null;
+	var FormsHighlight     = this.LogicDocument.GetSpecialFormsHighlight && this.LogicDocument.GetSpecialFormsHighlight() && undefined === pGraphics.RENDERER_PDF_FLAG ? this.LogicDocument.GetSpecialFormsHighlight() : null;
 
 	PDSH.Reset(this, pGraphics, DrawColl, DrawFind, DrawComm, DrawMMFields, this.GetEndInfoByPage(CurPage - 1), DrawSolvedComments);
 
@@ -2161,13 +2162,38 @@ Paragraph.prototype.Internal_Draw_3 = function(CurPage, pGraphics, Pr)
 			//----------------------------------------------------------------------------------------------------------
 			// Рисуем подсветку InlineSdt
 			//----------------------------------------------------------------------------------------------------------
-			if (SdtHighlightColor)
+			if (SdtHighlightColor || FormsHighlight)
 			{
-				pGraphics.b_color1(SdtHighlightColor.r, SdtHighlightColor.g, SdtHighlightColor.b, 255);
-				var oSdtBounds;
+				var oSdtBounds, oInlineSdt, isForm;
+				var nPrevColorState = 0;
+
 				for (var nSdtIndex = 0, nSdtCount = PDSH.InlineSdt.length; nSdtIndex < nSdtCount; ++nSdtIndex)
 				{
+					oInlineSdt = PDSH.InlineSdt[nSdtIndex];
+					isForm     = oInlineSdt.IsForm();
 					oSdtBounds = PDSH.InlineSdt[nSdtIndex].GetRangeBounds(CurLine, CurRange);
+
+					if (isForm && FormsHighlight)
+					{
+						if (1 !== nPrevColorState)
+						{
+							pGraphics.b_color1(FormsHighlight.r, FormsHighlight.g, FormsHighlight.b, 255);
+							nPrevColorState = 1;
+						}
+					}
+					else if (!isForm && SdtHighlightColor)
+					{
+						if (2 !== nPrevColorState)
+						{
+							pGraphics.b_color1(SdtHighlightColor.r, SdtHighlightColor.g, SdtHighlightColor.b, 255);
+							nPrevColorState = 2;
+						}
+					}
+					else
+					{
+						continue;
+					}
+
 					if (oSdtBounds)
 					{
 						pGraphics.rect(oSdtBounds.X, oSdtBounds.Y, oSdtBounds.W, oSdtBounds.H);
@@ -2706,7 +2732,10 @@ Paragraph.prototype.Internal_Draw_4 = function(CurPage, pGraphics, Pr, BgColor, 
 				}
 				else if (para_PresentationNumbering === this.Numbering.Type)
 				{
-					if (true != this.IsEmpty())
+					var bIsEmpty = this.IsEmpty();
+					if (!bIsEmpty ||
+						this.Is_ThisElementCurrent() ||
+						this.Parent.IsSelectionUse() && this.Parent.IsSelectionEmpty() && this.Parent.Selection.StartPos === this.Index)
 					{
 						if (Pr.ParaPr.Ind.FirstLine < 0)
 							NumberingItem.Draw(X, Y, pGraphics, PDSE);
@@ -2925,7 +2954,7 @@ Paragraph.prototype.Internal_Draw_5 = function(CurPage, pGraphics, Pr, BgColor)
 		{
 			var arrRunReviewRects = arrRunReviewAreas[ReviewAreaIndex];
 			var oRunReviewColor   = arrRunReviewAreasColors[ReviewAreaIndex];
-			var ReviewPolygon     = new CPolygon();
+			var ReviewPolygon     = new AscCommon.CPolygon();
 			ReviewPolygon.fill(arrRunReviewRects);
 			var PolygonPaths = ReviewPolygon.GetPaths(0);
 			pGraphics.p_color(oRunReviewColor.r, oRunReviewColor.g, oRunReviewColor.b, 255);
@@ -9039,7 +9068,7 @@ Paragraph.prototype.Add_PresentationNumbering = function(Bullet)
 					bEqualBulletType = this.Pr.Bullet.bulletType.IsIdentical(oBullet2.bulletType);
 				}
 				this.Set_Bullet(oBullet2.createDuplicate());
-				if(bEqualBulletType)
+				if(!bEqualBulletType)
 				{
 					LeftInd = Math.min(ParaPr.Ind.Left, ParaPr.Ind.Left + ParaPr.Ind.FirstLine);
 					var oFirstRunPr = this.Get_FirstTextPr2();
