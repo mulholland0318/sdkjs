@@ -7360,12 +7360,14 @@ CChartSpace.prototype.getValAxisCrossType = function()
                 this.chartObj = new AscFormat.CChartsDrawer()
             }
             var i, j;
-            var aCharts = this.chart.plotArea.charts, oChart;
+            var aCharts = oPlotArea.charts, oChart;
             var oCurAxis, oCurAxis2, aCurAxesSet;
             //temporary add axes to charts with deleted axes
             var oChartsToAxesCount = {};
             var bAdd, nAxesCount;
             var oReplaceAxis;
+
+            var oAxesMap = {};
             for(i = 0; i < aCharts.length; ++i){
                 bAdd = false;
                 oChart = aCharts[i];
@@ -7382,6 +7384,9 @@ CChartSpace.prototype.getValAxisCrossType = function()
                     if(bAdd){
                         oChartsToAxesCount[oChart.Id] = nAxesCount;
                     }
+                    for(j = 0; j < oChart.axId.length; ++j) {
+                        oAxesMap[oChart.axId[j].Id] = oChart.axId[j];
+                    }
                 }
             }
             this.chartObj.preCalculateData(this);
@@ -7393,9 +7398,14 @@ CChartSpace.prototype.getValAxisCrossType = function()
                     }
                 }
             }
-            var aAxes = [].concat(oPlotArea.axId);
-            var aAllAxes = [];//array of axes sets
 
+            var aAxes = [];
+            for(var sAxId in oAxesMap) {
+                if(oAxesMap.hasOwnProperty(sAxId)) {
+                    aAxes.push(oAxesMap[sAxId]);
+                }
+            }
+            var aAllAxes = [];//array of axes sets
             while(aAxes.length > 0){
                 oCurAxis = aAxes.splice(0, 1)[0];
                 aCurAxesSet = [];
@@ -7412,8 +7422,6 @@ CChartSpace.prototype.getValAxisCrossType = function()
                     aAllAxes.push(aCurAxesSet);
                 }
             }
-
-
             var oSize = this.getChartSizes();
             var oRect = new CRect(oSize.startX, oSize.startY, oSize.w, oSize.h);
             var oBaseRect = oRect;

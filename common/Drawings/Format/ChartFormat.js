@@ -3462,6 +3462,13 @@ function CDLbl()
     };
     CSeriesBase.prototype["asc_drawPreviewRect"] = CSeriesBase.prototype.asc_drawPreviewRect;
 
+    CSeriesBase.prototype.isSecondaryAxis = function() {
+        if(this.parent) {
+            return this.parent.isSecondaryAxis();
+        }
+        return false;
+    };
+
 function CPlotArea()
 {
     this.charts = [];
@@ -4133,6 +4140,9 @@ CPlotArea.prototype =
     CChartBase.prototype.getChartType = function() {
         return Asc.c_oAscChartTypeSettings.unknown;
     };
+    CChartBase.prototype.isSecondaryAxis = function() {
+
+    };
 
 function CBarChart()
 {
@@ -4555,7 +4565,7 @@ CAreaChart.prototype.setGrouping = function(pr)
 };
     CAreaChart.prototype.getChartType = function() {
         var nType = Asc.c_oAscChartTypeSettings.unknown;
-        switch(chart_type.grouping) {
+        switch(this.grouping) {
             case AscFormat.GROUPING_PERCENT_STACKED: {
                 nType = Asc.c_oAscChartTypeSettings.areaStackedPer;
                 break;
