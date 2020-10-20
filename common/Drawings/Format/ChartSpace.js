@@ -16037,6 +16037,12 @@ CChartSpace.prototype.onDataUpdate = function() {
     this.recalculate();
     this.onUpdate(null);
 };
+
+    CChartSpace.prototype.setDLblsDeleteValue = function(bVal) {
+        if(this.chart) {
+            this.chart.setDLblsDeleteValue(bVal);
+        }
+    };
 function getNumLit(ser) {
     if(ser) {
         if(ser.val)

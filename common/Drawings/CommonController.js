@@ -4297,8 +4297,110 @@ DrawingObjectsController.prototype =
         }
     },
 
+    applyPropsToChart_: function(oProps, oChartSpace) {
+        if(!oChartSpace || !oProps) {
+            return;
+        }
+        var oApi = this.getEditorApi();
+        oChartSpace.resetSelection(true);
+        var oCurProps = this.getPropsFromChart(oChartSpace);
+
+        //Check data labels. Todo: check it
+        if(oCurProps.isEqual(oProps)) {
+            oChartSpace.setDLblsDeleteValue(false);
+            return;
+        }
+
+        //for bug http://bugzilla.onlyoffice.com/show_bug.cgi?id=35570 TODO: check it
+        var nType = oProps.getType(), nCurType = oCurProps.getType(), bEmpty;
+        if(nType === nCurType) {
+            oProps.putType(null);
+            bEmpty = oProps.isEmpty();
+            oProps.putType(nType);
+            if(bEmpty) {
+                return;
+            }
+        }
+
+        //Set the properties which was already set. It need for the fast coediting. TODO: check it
+        oChartSpace.setChart(oChartSpace.chart.createDuplicate());
+        oChartSpace.setStyle(oChartSpace.style);
+
+        //Apply chart preset TODO: remove this when chartStyle will be implemented
+        var oChart = oChartSpace.chart;
+        var oPlotArea = oChart.plotArea;
+        var nStyle = oProps.getStyle();
+        if(AscFormat.isRealNumber(nStyle)){
+            var oPreset = AscCommon.g_oChartPresets[nCurType] && AscCommon.g_oChartPresets[nCurType][nStyle - 1];
+            if(oPreset) {
+                oPlotArea.removeCharts(1, oPlotArea.charts.length - 1);
+                AscFormat.ApplyPresetToChartSpace(oChartSpace, oPreset, oProps.bCreate);
+                return;
+            }
+        }
+
+        //Set data range
+        var sRange = oProps.getRange();
+        if(typeof sRange === "string" && sRange.length > 0) {
+            var oWorkbook = oApi.wb;
+            if(oWorkbook) {
+                var oParsedFormula = parserHelp.parse3DRef(sRange);
+                if(oParsedFormula) {
+                    var ws = oWorkbook.getWorksheetByName(parsed_formula.sheet);
+                    var new_bbox;
+                    var range_object = ws.getRange2(parsed_formula.range);
+                    if(range_object)
+                    {
+                        new_bbox = range_object.bbox;
+                    }
+                    if(ws && new_bbox )
+                    {
+                        var oCommonBBox = chart_space.getCommonBBox();
+                        var b_equal_bbox = oCommonBBox && oCommonBBox.r1 === new_bbox.r1
+                            && oCommonBBox.r2 === new_bbox.r2
+                            && oCommonBBox.c1 === new_bbox.c1
+                            && oCommonBBox.c2 === new_bbox.c2;
+                        var b_equal_ws = chart_space.bbox && chart_space.bbox.worksheet === ws;
+                        var b_equal_vert = chart_space.bbox && chartSettings.getInColumns() === !chart_space.bbox.seriesBBox.bVert;
+
+                        var bLimit = (Math.abs(new_bbox.r2 - new_bbox.r1) > 4096 || Math.abs(new_bbox.c2 - new_bbox.c1) > 4096);
+                        if(!(chart_space.bbox && chart_space.bbox.seriesBBox && b_equal_ws
+                            && b_equal_bbox && b_equal_vert ) && !bLimit)
+                        {
+                            var catHeadersBBox, serHeadersBBox;
+                            if(chart_space.bbox && b_equal_bbox && b_equal_ws && !b_equal_vert)
+                            {
+                                if(chart_space.bbox.catBBox)
+                                    serHeadersBBox = {r1: chart_space.bbox.catBBox.r1, r2: chart_space.bbox.catBBox.r2,
+                                        c1: chart_space.bbox.catBBox.c1, c2: chart_space.bbox.catBBox.c2};
+                                if(chart_space.bbox.serBBox)
+                                    catHeadersBBox = {r1: chart_space.bbox.serBBox.r1, r2: chart_space.bbox.serBBox.r2,
+                                        c1: chart_space.bbox.serBBox.c1, c2: chart_space.bbox.serBBox.c2};
+                            }
+                            var chartSeries = AscFormat.getChartSeries(ws_view.model, chartSettings, catHeadersBBox, serHeadersBBox);
+                            //chart_space.clearFormatting(true);
+                            b_clear_formatting = true;
+                            chart_space.rebuildSeriesFromAsc(chartSeries);
+                            if(chart_space.pivotSource){
+                                chart_space.setPivotSource(null);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        chart_space.updateLinks();
+        var oValAx = chart_space.chart.plotArea.valAx;
+        var oCatAx = chart_space.chart.plotArea.catAx;
+    },
+
     applyPropsToChartSpace: function(chartSettings, chartSpace)
     {
+        if(!chartSpace) {
+            return;
+        }
         var chart_space = chartSpace;
         var style_index = chartSettings.getStyle();
         var sRange = chartSettings.getRange();
@@ -4306,8 +4408,6 @@ DrawingObjectsController.prototype =
         chartSpace.resetSelection(true);
         var oPr = this.getPropsFromChart(chart_space);
         if(oPr.isEqual(chartSettings)){
-
-
             var oChartType = chart_space && chart_space.chart && chart_space.chart.plotArea && chart_space.chart.plotArea.charts[0];
             if(!oChartType){
                 return;
@@ -4350,15 +4450,6 @@ DrawingObjectsController.prototype =
 
         //Title Settings
         chart_space.setChart(chart_space.chart.createDuplicate());
-
-        /*if(AscFormat.isRealNumber(style_index) && style_index > 0 && style_index < 49 && chart_space.style !== style_index)
-        {
-            if(!b_clear_formatting)
-            {
-                chart_space.clearFormatting();
-            }
-            chart_space.setStyle(style_index);
-        }*/
 
         var chart = chart_space.chart;
         var plot_area = chart.plotArea;
@@ -5091,7 +5182,6 @@ DrawingObjectsController.prototype =
             case c_oAscChartTypeSettings.areaStacked:
             case c_oAscChartTypeSettings.areaStackedPer:
             {
-
                 if(type === c_oAscChartTypeSettings.areaNormal)
                     need_groupping = GROUPING_STANDARD;
                 else if(type === c_oAscChartTypeSettings.areaStacked)
@@ -5224,7 +5314,6 @@ DrawingObjectsController.prototype =
                 break;
             }
         }
-
 
         var hor_axis = plot_area.getHorizontalAxis();
         var hor_axis_label_setting = chartSettings.getHorAxisLabel();
@@ -5721,7 +5810,6 @@ DrawingObjectsController.prototype =
                 chart_type.setScatterStyle(new_scatter_style);
             }
         }
-
     },
 
     checkDlblsPosition: function(chart, chart_type, position){

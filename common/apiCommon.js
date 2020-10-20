@@ -862,6 +862,10 @@
             return true;
 		},
 
+		isEmpty: function () {
+			return this.isEqual(new asc_ChartSettings());
+		},
+
 		putShowMarker: function (v) {
 			this.showMarker = v;
 		},
@@ -1011,15 +1015,15 @@
 		},
 
 		putType: function (v) {
-			return this.type = v;
+			this.type = v;
 		},
 
 		putShowSerName: function (v) {
-			return this.showSerName = v;
+			this.showSerName = v;
 		}, putShowCatName: function (v) {
-			return this.showCatName = v;
+			this.showCatName = v;
 		}, putShowVal: function (v) {
-			return this.showVal = v;
+			this.showVal = v;
 		},
 
 

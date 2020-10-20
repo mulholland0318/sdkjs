@@ -3256,6 +3256,11 @@ function CDLbl()
         this.parent.removeSeries(this.parent.getSeriesArrayIdx(this));
         this.parent.reindexSeries();
     };
+    CSeriesBase.prototype.setDLblsDeleteValue = function(bVal) {
+        if(this.dLbls) {
+            this.dLbls.setDeleteValue(bVal)
+        }
+    };
     CSeriesBase.prototype.asc_getName = function() {
         return AscFormat.ExecuteNoHistory(CSeriesBase.prototype.getName, this, []);
     };
@@ -3461,12 +3466,15 @@ function CDLbl()
         this.drawPreviewRect(sDivId);
     };
     CSeriesBase.prototype["asc_drawPreviewRect"] = CSeriesBase.prototype.asc_drawPreviewRect;
-
     CSeriesBase.prototype.isSecondaryAxis = function() {
         if(this.parent) {
             return this.parent.isSecondaryAxis();
         }
         return false;
+    };
+    CSeriesBase.prototype["asc_getIsSecondaryAxis"] = CSeriesBase.prototype.isSecondaryAxis;
+    CSeriesBase.prototype.canChangeType = function() {
+        
     };
 
 function CPlotArea()
@@ -3995,6 +4003,13 @@ CPlotArea.prototype =
         if(this.parent) {
             this.parent.onDataUpdate();
         }
+    },
+
+    setDLblsDeleteValue: function(bVal) {
+        var nChart, nChartsCount = this.charts.length;
+        for(nChart = 0; nChart < this.charts.length; ++nChart) {
+            this.charts[nChart].setDLblsDeleteValue(bVal);
+        }
     }
 };
 
@@ -4160,6 +4175,15 @@ CPlotArea.prototype =
             }
         }
         return true;
+    };
+    CChartBase.prototype.setDLblsDeleteValue = function(bVal) {
+        if(this.dLbls) {
+            this.dLbls.setDeleteValue(bVal)
+        }
+        var nSeries, nSeriesCount = this.series.length;;
+        for(nSeries = 0; nSeries < nSeriesCount; ++nSeries) {
+            this.series[nSeries].setDLblsDeleteValue(bVal);
+        }
     };
 
 function CBarChart()
@@ -7650,17 +7674,15 @@ function CDLbls()
     g_oTableId.Add(this, this.Id);
 }
 
-CDLbls.prototype =
-{
-    Get_Id: function()
+    CDLbls.prototype.Get_Id = function()
     {
         return this.Id;
-    },
-    Refresh_RecalcData: function()
+    };
+    CDLbls.prototype.Refresh_RecalcData = function()
     {
         this.Refresh_RecalcData2();
-    },
-    Refresh_RecalcData2: function()
+    };
+    CDLbls.prototype.Refresh_RecalcData2 = function()
     {
         if(this.parent && this.parent.parent && this.parent.parent.parent && this.parent.parent.parent.parent )
         {
@@ -7673,26 +7695,21 @@ CDLbls.prototype =
                 }
             }
         }
-    },
-
-    handleUpdateFill: function()
+    };
+    CDLbls.prototype.handleUpdateFill = function()
     {
         this.Refresh_RecalcData2();
-    },
-    handleUpdateLn: function()
+    };
+    CDLbls.prototype.handleUpdateLn = function()
     {
         this.Refresh_RecalcData2();
-    },
-
-
-    setParent: function(pr)
+    };
+    CDLbls.prototype.setParent = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_CommonChartFormat_SetParent, this.parent, pr));
         this.parent = pr;
-    },
-
-
-    createDuplicate: function()
+    };
+    CDLbls.prototype.createDuplicate = function()
     {
         var c = new CDLbls();
         c.setDelete(this.bDelete);
@@ -7726,10 +7743,8 @@ CDLbls.prototype =
             c.setTxPr(this.txPr.createDuplicate());
         }
         return c;
-    },
-
-
-    documentCreateFontMap: function(allFonts)
+    };
+    CDLbls.prototype.documentCreateFontMap = function(allFonts)
     {
         AscFormat.checkTxBodyDefFonts(allFonts, this.txPr);
         for(var i = 0; i < this.dLbl.length; ++i)
@@ -7737,13 +7752,12 @@ CDLbls.prototype =
             this.dLbl[i] && AscFormat.checkTxBodyDefFonts(allFonts, this.dLbl[i].txPr);
             this.dLbl[i].tx && this.dLbl[i].tx.rich && this.dLbl[i].tx.rich.content && this.dLbl[i].tx.rich.content.Document_Get_AllFontNames(allFonts);
         }
-    },
-    getObjectType: function()
+    };
+    CDLbls.prototype.getObjectType = function()
     {
         return AscDFH.historyitem_type_DLbls;
-    },
-
-    findDLblByIdx: function(idx)
+    };
+    CDLbls.prototype.findDLblByIdx = function(idx)
     {
         for(var i = 0; i < this.dLbl.length; ++i)
         {
@@ -7751,38 +7765,33 @@ CDLbls.prototype =
                 return this.dLbl[i];
         }
         return null;
-    },
-
-    getAllRasterImages: function(images)
+    };
+    CDLbls.prototype.getAllRasterImages = function(images)
     {
         this.spPr && this.spPr.checkBlipFillRasterImage(images);
         for(var i = 0; i < this.dLbl.length; ++i)
         {
             this.dLbl[i] && this.dLbl[i].spPr && this.dLbl[i].spPr.checkBlipFillRasterImage(images);
         }
-    },
-
-    checkSpPrRasterImages: function()
+    };
+    CDLbls.prototype.checkSpPrRasterImages = function()
     {
         checkSpPrRasterImages(this.spPr);
         for(var i = 0; i < this.dLbl.length; ++i)
         {
             this.dLbl[i] && checkSpPrRasterImages(this.dLbl[i].spPr);
         }
-    },
-
-    Write_ToBinary2: function(w)
+    };
+    CDLbls.prototype.Write_ToBinary2 = function(w)
     {
         w.WriteLong(this.getObjectType());
         w.WriteString2(this.Get_Id());
-    },
-
-    Read_FromBinary2: function(r)
+    };
+    CDLbls.prototype.Read_FromBinary2 = function(r)
     {
         this.Id = r.GetString2();
-    },
-
-    setDelete: function(pr)
+    };
+    CDLbls.prototype.setDelete = function(pr)
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_DLbls_SetDelete, this.bDelete, pr));
         this.bDelete = pr;
@@ -7790,8 +7799,8 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    addDLbl: function(pr)
+    };
+    CDLbls.prototype.addDLbl = function(pr)
     {
         History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_DLbls_SetDLbl, this.dLbl.length, [pr], true));
         this.dLbl.push(pr);
@@ -7799,17 +7808,17 @@ CDLbls.prototype =
         {
             pr.setParent(this);
         }
-    },
-    removeDLbl: function(nIndex)
+    };
+    CDLbls.prototype.removeDLbl = function(nIndex)
     {
         History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_DLbls_SetDLbl, nIndex, this.dLbl.splice(nIndex, 1), false));
-    },
-    removeAllDLbls: function(){
+    };
+    CDLbls.prototype.removeAllDLbls = function(){
         for(var i = this.dLbl.length - 1; i > -1; --i){
             this.removeDLbl(i);
         }
-    },
-    setDLblPos: function(pr)
+    };
+    CDLbls.prototype.setDLblPos = function(pr)
     {
         History.Add(new CChangesDrawingsLong(this, AscDFH.historyitem_DLbls_SetDLblPos, this.dLblPos, pr));
         this.dLblPos = pr;
@@ -7817,18 +7826,18 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    setLeaderLines: function(pr)
+    };
+    CDLbls.prototype.setLeaderLines = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DLbls_SetLeaderLines, this.leaderLines, pr));
         this.leaderLines = pr;
-    },
-    setNumFmt: function(pr)
+    };
+    CDLbls.prototype.setNumFmt = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DLbls_SetNumFmt, this.numFmt, pr));
         this.numFmt = pr;
-    },
-    setSeparator: function(pr)
+    };
+    CDLbls.prototype.setSeparator = function(pr)
     {
         History.Add(new CChangesDrawingsString(this, AscDFH.historyitem_DLbls_SetSeparator, this.separator, pr));
         this.separator = pr;
@@ -7836,13 +7845,13 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    setShowBubbleSize: function(pr)
+    };
+    CDLbls.prototype.setShowBubbleSize = function(pr)
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_DLbls_SetShowBubbleSize, this.showBubbleSize, pr));
         this.showBubbleSize = pr;
-    },
-    setShowCatName: function(pr)
+    };
+    CDLbls.prototype.setShowCatName = function(pr)
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_DLbls_SetShowCatName, this.showCatName, pr));
         this.showCatName = pr;
@@ -7850,8 +7859,8 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    setShowLeaderLines: function(pr)
+    };
+    CDLbls.prototype.setShowLeaderLines = function(pr)
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_DLbls_SetShowLeaderLines, this.showLeaderLines, pr));
         this.showLeaderLines = pr;
@@ -7859,8 +7868,8 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    setShowLegendKey: function(pr)
+    };
+    CDLbls.prototype.setShowLegendKey = function(pr)
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_DLbls_SetShowLegendKey, this.showLegendKey, pr));
         this.showLegendKey = pr;
@@ -7868,13 +7877,13 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    setShowPercent: function(pr)
+    };
+    CDLbls.prototype.setShowPercent = function(pr)
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_DLbls_SetShowPercent, this.showPercent, pr));
         this.showPercent = pr;
-    },
-    setShowSerName: function(pr)
+    };
+    CDLbls.prototype.setShowSerName = function(pr)
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_DLbls_SetShowSerName, this.showSerName, pr));
         this.showSerName = pr;
@@ -7882,8 +7891,8 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    setShowVal: function(pr)
+    };
+    CDLbls.prototype.setShowVal = function(pr)
     {
         History.Add(new CChangesDrawingsBool(this, AscDFH.historyitem_DLbls_SetShowVal, this.showVal, pr));
         this.showVal = pr;
@@ -7891,8 +7900,8 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    setSpPr: function(pr)
+    };
+    CDLbls.prototype.setSpPr = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DLbls_SetSpPr, this.spPr, pr));
         this.spPr = pr;
@@ -7904,8 +7913,8 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
-    },
-    setTxPr: function(pr)
+    };
+    CDLbls.prototype.setTxPr = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_DLbls_SetTxPr, this.txPr, pr));
         this.txPr = pr;
@@ -7917,8 +7926,18 @@ CDLbls.prototype =
         {
             this.parent.parent.parent.parent.handleUpdateDataLabels();
         }
+            };
+    CDLbls.prototype.setDeleteValue = function(bValue) {
+        if(this.bDelete !== bValue) {
+            this.setDelete(bValue);
+        }
+        for(var nLbl = 0; nLbl < this.dLbl.length; ++nLbl) {
+            var oDLbl = this.dLbl[nLbl];
+            if(oDLbl) {
+                oDLbl.setDelete(bValue);
             }
-};
+        }
+    };
 
 function CDPt()
 {
@@ -13792,6 +13811,11 @@ CChart.prototype =
     onDataUpdate: function() {
         if(this.parent) {
             this.parent.onDataUpdate();
+        }
+    },
+    setDLblsDeleteValue: function(bVal) {
+        if(this.plotArea) {
+            this.plotArea.setDLblsDeleteValue(bVal);
         }
     }
 };
