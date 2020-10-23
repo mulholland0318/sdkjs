@@ -2945,7 +2945,7 @@
 				// Проверка максимального дипазона
 				var maxSeries = 255;
 				var minStockVal = 4;
-				var maxValues = 4096;
+				var maxValues = AscFormat.MAX_CHART_RANGE_SIZE;
 
 				var intervalValues, intervalSeries;
 				if (isRows)

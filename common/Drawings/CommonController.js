@@ -103,6 +103,7 @@ var DISTANCE_TO_TEXT_LEFTRIGHT = 3.2;
     CURSOR_TYPES_BY_CARD_DIRECTION[CARD_DIRECTION_W]  = "w-resize";
     CURSOR_TYPES_BY_CARD_DIRECTION[CARD_DIRECTION_NW] = "nw-resize";
 
+    var MAX_CHART_RANGE_SIZE = 4096;
     function fillImage(image, rasterImageId, x, y, extX, extY, sVideoUrl, sAudioUrl)
     {
         image.setSpPr(new AscFormat.CSpPr());
@@ -4340,56 +4341,116 @@ DrawingObjectsController.prototype =
         }
 
         //Set data range
+        //TODO: Rework this
         var sRange = oProps.getRange();
         if(typeof sRange === "string" && sRange.length > 0) {
-            var oWorkbook = oApi.wb;
-            if(oWorkbook) {
+            var oWB = oApi.wb, oWS, oRange, oBBox, oCommonBBox, oChartBBox, oSeriesBBox;
+            var bEqualBBox = false, bEqualWS = false, bEqualVert = false, bLimit = false;
+            var oCatHeadersBBox, oSerHeadersBBox, oCatBBox, oSerBBox;
+            var aSeries;
+            if(oWB) {
                 var oParsedFormula = parserHelp.parse3DRef(sRange);
                 if(oParsedFormula) {
-                    var ws = oWorkbook.getWorksheetByName(parsed_formula.sheet);
-                    var new_bbox;
-                    var range_object = ws.getRange2(parsed_formula.range);
-                    if(range_object)
-                    {
-                        new_bbox = range_object.bbox;
-                    }
-                    if(ws && new_bbox )
-                    {
-                        var oCommonBBox = chart_space.getCommonBBox();
-                        var b_equal_bbox = oCommonBBox && oCommonBBox.r1 === new_bbox.r1
-                            && oCommonBBox.r2 === new_bbox.r2
-                            && oCommonBBox.c1 === new_bbox.c1
-                            && oCommonBBox.c2 === new_bbox.c2;
-                        var b_equal_ws = chart_space.bbox && chart_space.bbox.worksheet === ws;
-                        var b_equal_vert = chart_space.bbox && chartSettings.getInColumns() === !chart_space.bbox.seriesBBox.bVert;
-
-                        var bLimit = (Math.abs(new_bbox.r2 - new_bbox.r1) > 4096 || Math.abs(new_bbox.c2 - new_bbox.c1) > 4096);
-                        if(!(chart_space.bbox && chart_space.bbox.seriesBBox && b_equal_ws
-                            && b_equal_bbox && b_equal_vert ) && !bLimit)
-                        {
-                            var catHeadersBBox, serHeadersBBox;
-                            if(chart_space.bbox && b_equal_bbox && b_equal_ws && !b_equal_vert)
-                            {
-                                if(chart_space.bbox.catBBox)
-                                    serHeadersBBox = {r1: chart_space.bbox.catBBox.r1, r2: chart_space.bbox.catBBox.r2,
-                                        c1: chart_space.bbox.catBBox.c1, c2: chart_space.bbox.catBBox.c2};
-                                if(chart_space.bbox.serBBox)
-                                    catHeadersBBox = {r1: chart_space.bbox.serBBox.r1, r2: chart_space.bbox.serBBox.r2,
-                                        c1: chart_space.bbox.serBBox.c1, c2: chart_space.bbox.serBBox.c2};
-                            }
-                            var chartSeries = AscFormat.getChartSeries(ws_view.model, chartSettings, catHeadersBBox, serHeadersBBox);
-                            //chart_space.clearFormatting(true);
-                            b_clear_formatting = true;
-                            chart_space.rebuildSeriesFromAsc(chartSeries);
-                            if(chart_space.pivotSource){
-                                chart_space.setPivotSource(null);
+                    oWS = oWB.getWorksheetByName(oParsedFormula.sheet);
+                    if(oWS) {
+                        oRange = oWS.getRange2(oParsedFormula.range);
+                        if(oRange) {
+                            oBBox = oRange.bbox;
+                            if(oBBox) {
+                                oCommonBBox = oChartSpace.getCommonBBox();
+                                oChartBBox = oChartSpace.bbox;
+                                bEqualBBox = oBBox.isEqual(oCommonBBox);
+                                if(oChartBBox) {
+                                    bEqualWS = oChartBBox.worksheet === oWS;
+                                    oSeriesBBox = oChartBBox.seriesBBox;
+                                    if(oSeriesBBox) {
+                                        bEqualVert =  oProps.getInColumns() === !oSeriesBBox.bVert;
+                                    }
+                                }
+                                bLimit = (oBBox.getHeight() > MAX_CHART_RANGE_SIZE || oBBox.getWidth() > MAX_CHART_RANGE_SIZE);
+                                if(!bLimit && (!bEqualWS || !bEqualBBox || !bEqualVert)) {
+                                    if(oChartBBox && bEqualBBox && bEqualWS && !bEqualVert) {
+                                        oCatBBox = oChartBBox.catBBox;
+                                        if(oCatBBox) {
+                                            oSerHeadersBBox = {
+                                                r1: oCatBBox.r1,
+                                                r2: oCatBBox.r2,
+                                                c1: oCatBBox.c1,
+                                                c2: oCatBBox.c2
+                                            };
+                                        }
+                                        oSerBBox = oChartBBox.serBBox;
+                                        if(oSerBBox)
+                                            oCatHeadersBBox = {
+                                                r1: oSerBBox.r1,
+                                                r2: oSerBBox.r2,
+                                                c1: oSerBBox.c1,
+                                                c2: oSerBBox.c2
+                                            };
+                                    }
+                                    aSeries = AscFormat.getChartSeries(oWS, oProps, oCatHeadersBBox, oSerHeadersBBox);
+                                    oChartSpace.rebuildSeriesFromAsc(aSeries);
+                                    if(oChartSpace.pivotSource){
+                                        oChartSpace.setPivotSource(null);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        //Title
+        var nTitle = oProps.getTitle(), oTitle, bOverlay;
+        if(nTitle === c_oAscChartTitleShowSettings.none) {
+            if(oChart.title) {
+                oChart.setTitle(null);
+            }
+        }
+        else if(nTitle === c_oAscChartTitleShowSettings.noOverlay
+            || nTitle === c_oAscChartTitleShowSettings.overlay) {
+            oTitle = oChart.title;
+            if(!oTitle) {
+                oTitle = new AscFormat.CTitle();
+                oChart.setTitle(oTitle);
+            }
+            bOverlay = (nTitle === c_oAscChartTitleShowSettings.overlay);
+            if(oTitle.overlay !== bOverlay) {
+                oTitle.setOverlay(bOverlay);
+            }
+        }
 
+        //Legend
+        var nLegend = oProps.getLegendPos(), oLegend;
+        bOverlay = (c_oAscChartLegendShowSettings.leftOverlay === nLegend || nLegend === c_oAscChartLegendShowSettings.rightOverlay);
+        if(bOverlay) {
+            if(c_oAscChartLegendShowSettings.leftOverlay === nLegend) {
+                nLegend = c_oAscChartLegendShowSettings.left;
+            }
+            if(c_oAscChartLegendShowSettings.rightOverlay === nLegend) {
+                nLegend = c_oAscChartLegendShowSettings.right;
+            }
+        }
+        if(nLegend !== null) {
+            if(nLegend === c_oAscChartLegendShowSettings.none) {
+                if(oChart.legend) {
+                    oChart.setLegend(null);
+                }
+            }
+            else {
+                oLegend = oChart.legend;
+                if(!oLegend) {
+                    oLegend = new AscFormat.CLegend();
+                    oChart.setLegend(oLegend);
+                }
+                if(oLegend.legendPos !== nLegend && nLegend !== c_oAscChartLegendShowSettings.layout) {
+                    oLegend.setLegendPos(nLegend);
+                }
+                if(oLegend.overlay !== bOverlay) {
+                    oLegend.setOverlay(bOverlay);
+                }
+            }
+        }
 
         chart_space.updateLinks();
         var oValAx = chart_space.chart.plotArea.valAx;
@@ -13509,4 +13570,5 @@ function ApplyPresetToChartSpace(oChartSpace, aPreset, bCreate){
 	window['AscFormat'].getAbsoluteRectBoundsArr = getAbsoluteRectBoundsArr;
 	window['AscFormat'].fCheckObjectHyperlink = fCheckObjectHyperlink;
 	window['AscFormat'].getNumberingType = getNumberingType;
+	window['AscFormat'].MAX_CHART_RANGE_SIZE = MAX_CHART_RANGE_SIZE;
 })(window);
