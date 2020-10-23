@@ -2575,11 +2575,98 @@ $( function () {
 		testArrayFormula2("MROUND", 2, 2, true);
     } );
 
-    test( "Test: \"T(\"HELLO\")\"", function () {
-        oParser = new parserFormula( "T(\"HELLO\")", "A1", ws );
-        ok( oParser.parse() );
-        strictEqual( oParser.calculate().getValue(), "HELLO" );
-    } );
+	test( "Test: \"T(\"HELLO\")\"", function () {
+		oParser = new parserFormula( "T(\"HELLO\")", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getValue(), "HELLO" );
+	} );
+
+	test( "Test: \"MMULT\"", function () {
+		ws.getRange2( "AAA102" ).setValue( "4" );
+		ws.getRange2( "AAA103" ).setValue( "5" );
+		ws.getRange2( "AAA104" ).setValue( "6" );
+		ws.getRange2( "AAA105" ).setValue( "7" );
+		ws.getRange2( "AAB102" ).setValue( "1" );
+		ws.getRange2( "AAB103" ).setValue( "2" );
+		ws.getRange2( "AAB104" ).setValue( "3" );
+		ws.getRange2( "AAB105" ).setValue( "2" );
+		ws.getRange2( "AAC102" ).setValue( "4" );
+		ws.getRange2( "AAC103" ).setValue( "5" );
+		ws.getRange2( "AAC104" ).setValue( "6" );
+		ws.getRange2( "AAC105" ).setValue( "3" );
+		ws.getRange2( "AAD102" ).setValue( "7" );
+		ws.getRange2( "AAD103" ).setValue( "8" );
+		ws.getRange2( "AAD104" ).setValue( "9" );
+		ws.getRange2( "AAD105" ).setValue( "4" );
+
+		ws.getRange2( "AAF102" ).setValue( "1" );
+		ws.getRange2( "AAF103" ).setValue( "2" );
+		ws.getRange2( "AAF104" ).setValue( "3" );
+		ws.getRange2( "AAF105" ).setValue( "6" );
+
+		ws.getRange2( "AAG102" ).setValue( "2" );
+		ws.getRange2( "AAG103" ).setValue( "3" );
+		ws.getRange2( "AAG104" ).setValue( "4" );
+		ws.getRange2( "AAG105" ).setValue( "5" );
+
+		oParser = new parserFormula( "MMULT(AAC102,AAF104)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue(), 12 );
+
+		oParser = new parserFormula( "MMULT(AAA102:AAD105,AAF104)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getValue(), "#VALUE!" );
+
+		oParser = new parserFormula( "MMULT(AAC102,AAF104)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue(), 12 );
+
+		oParser = new parserFormula( "MMULT(AAA102:AAD105,AAF102:AAG105)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue(), 60 );
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue(), 62 );
+		strictEqual( oParser.calculate().getElementRowCol(1,0).getValue(), 72 );
+		strictEqual( oParser.calculate().getElementRowCol(1,1).getValue(), 76 );
+
+		oParser = new parserFormula( "MMULT(AAA102:AAD105,AAF102:AAF105)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue(), 60 );
+		strictEqual( oParser.calculate().getElementRowCol(1,0).getValue(), 72 );
+
+		oParser = new parserFormula( "MMULT(AAA102:AAD105,AAF102:AAF105)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue(), 60 );
+		strictEqual( oParser.calculate().getElementRowCol(1,0).getValue(), 72 );
+
+		oParser = new parserFormula( "MMULT(AAA102:AAD105,AAF102:AAF104)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getValue(), "#VALUE!" );
+
+		oParser = new parserFormula( "MMULT(AAA102:AAD105,AAK110:AAN110)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getValue(), "#VALUE!" );
+
+		oParser = new parserFormula( "MMULT(AAA102:AAD105,AAA102:AAD105)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue(), 94 );
+		strictEqual( oParser.calculate().getElementRowCol(1,0).getValue(), 116 );
+		strictEqual( oParser.calculate().getElementRowCol(2,0).getValue(), 138 );
+
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue(), 32 );
+		strictEqual( oParser.calculate().getElementRowCol(1,1).getValue(), 40 );
+		strictEqual( oParser.calculate().getElementRowCol(2,1).getValue(), 48 );
+
+		oParser = new parserFormula( "MMULT(AAF102:AAF105,AAG102:AAG105)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getValue(), "#VALUE!" );
+
+		oParser = new parserFormula( "MMULT(AAF102:AAF105,AAA102:AAD102)", "A1", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue(), 4 );
+		strictEqual( oParser.calculate().getElementRowCol(1,0).getValue(), 8 );
+		strictEqual( oParser.calculate().getElementRowCol(2,0).getValue(), 12 );
+
+	} );
 
     test( "Test: \"T(123)\"", function () {
         oParser = new parserFormula( "T(123)", "A1", ws );
@@ -12550,7 +12637,7 @@ $( function () {
 		testArrayFormula2("UPPER", 1, 1);
 	});
 
-	/*test( "Test: \"GROWTH\"", function () {
+	test( "Test: \"GROWTH\"", function () {
 
 		ws.getRange2( "A102" ).setValue( "11" );
 		ws.getRange2( "A103" ).setValue( "12" );
@@ -12603,6 +12690,8 @@ $( function () {
 		oParser = new parserFormula( "GROWTH(A103:C103,A104:C105,A106:C107,0)", "A2", ws );
 		ok( oParser.parse() );
 		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.0017632);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(3) - 0, 12047829814.167);
+		strictEqual( oParser.calculate().getElementRowCol(0,2).getValue().toFixed(3) - 0, 10705900594.962);
 
 		oParser = new parserFormula( "GROWTH({1,2,3},A104:C105,A106:C107,1)", "A2", ws );
 		ok( oParser.parse() );
@@ -12611,9 +12700,16 @@ $( function () {
 		oParser = new parserFormula( "GROWTH({1,2,3},A104:C105,A106:C107,A106:C107)", "A2", ws );
 		ok( oParser.parse() );
 		strictEqual( oParser.calculate().getValue(), "#VALUE!");
-	} );*/
 
-	/*test( "Test: \"TREND\"", function () {
+		oParser = new parserFormula( "GROWTH(A103:C103,A104:C105,A106:C107,1)", "A2", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 12.00187209);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(3) - 0, 676231620.297);
+		strictEqual( oParser.calculate().getElementRowCol(0,2).getValue().toFixed(3) - 0, 612512904.254)
+	} );
+
+
+	test( "Test: \"LOGEST\"", function () {
 
 		ws.getRange2( "A101" ).setValue( "1" );
 		ws.getRange2( "A102" ).setValue( "2" );
@@ -12648,14 +12744,64 @@ $( function () {
 		ws.getRange2( "A118" ).setValue( "16" );
 		ws.getRange2( "A119" ).setValue( "17" );
 
-		oParser = new parserFormula( "TREND(A101:A112,B101:B112)", "A2", ws );
+		oParser = new parserFormula( "LOGEST(B101:B112,A101:A112)", "A2", ws );
 		ok( oParser.parse() );
-		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(9) - 0, 0.947729865);
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.00732561);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 133044.8167);
 
-		oParser = new parserFormula( "TREND(B101:B112,A101:A112,A115:A119)", "A2", ws );
+		oParser = new parserFormula( "LOGEST(B101:B112,A101:A112,,false)", "A2", ws );
 		ok( oParser.parse() );
-		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(4) - 0, 146171.5152);
-	} );*/
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.00732561);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 133044.8167);
+
+		//todo необходимо перепроверить остальные значения в данном случае
+		oParser = new parserFormula( "LOGEST(B101:B112,A101:A112,,true)", "A2", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.00732561);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 133044.8167);
+
+		oParser = new parserFormula( "LOGEST(B101:B112,A101:A112,true,true)", "A2", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.00732561);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 133044.8167);
+
+		//todo необходимо перепроверить остальные значения в данном случае
+		oParser = new parserFormula( "LOGEST(B101:B112,A101:A112,false,true)", "A2", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 4.15001464);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 1);
+
+		oParser = new parserFormula( "LOGEST(A101:B105,A106:B110,FALSE,TRUE)", "A2", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.0000838);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 1);
+		strictEqual( oParser.calculate().getElementRowCol(1,0).getValue().toFixed(8) - 0, 0.00000264);
+		strictEqual( oParser.calculate().getElementRowCol(2,0).getValue().toFixed(4) - 0, 0.9911);
+		strictEqual( oParser.calculate().getElementRowCol(3,0).getValue().toFixed(4) - 0, 1005.3131);
+		strictEqual( oParser.calculate().getElementRowCol(4,0).getValue().toFixed(4) - 0, 698.5684);
+
+		oParser = new parserFormula( "LOGEST(A101:B105,A106:B110,,)", "A2", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.00007701);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 2.6063);
+
+		oParser = new parserFormula( "LOGEST(A101:B105,A106:B110,false,false)", "A2", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.0000838);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 1);
+
+		//todo необходимо перепроверить остальные значения в данном случае
+		oParser = new parserFormula( "LOGEST(A101:B105,A106:B110,true,true)", "A2", ws );
+		ok( oParser.parse() );
+		strictEqual( oParser.calculate().getElementRowCol(0,0).getValue().toFixed(8) - 0, 1.00007701);
+		strictEqual( oParser.calculate().getElementRowCol(0,1).getValue().toFixed(4) - 0, 2.6063);
+		strictEqual( oParser.calculate().getElementRowCol(1,0).getValue().toFixed(8) - 0, 0.00000205);
+		strictEqual( oParser.calculate().getElementRowCol(2,0).getValue().toFixed(4) - 0, 0.9944);
+		strictEqual( oParser.calculate().getElementRowCol(3,0).getValue().toFixed(4) - 0, 1416.4887);
+		strictEqual( oParser.calculate().getElementRowCol(4,0).getValue().toFixed(4) - 0, 294.9627);
+
+	} );
+
 
 	test( "Test: \"PDURATION\"", function () {
 		oParser = new parserFormula( "PDURATION(2.5%,2000,2200)", "A2", ws );

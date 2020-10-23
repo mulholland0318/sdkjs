@@ -773,6 +773,16 @@ CInlineLevelSdt.prototype.private_FillPlaceholderContent = function()
 			{
 				this.AddToContent(0, oFirstParagraph.Content[nPos].Copy());
 			}
+
+			if (this.IsTextForm() && this.GetTextFormPr().MaxCharacters > 0 && this.Content[0] instanceof ParaRun)
+			{
+				// В такой ситуации у нас должен быть всего 1 ран в параграфе
+				var oRun = this.Content[0];
+				if (oRun.Content.length > this.GetTextFormPr().MaxCharacters)
+				{
+					oRun.RemoveFromContent(this.GetTextFormPr().MaxCharacters, oRun.Content.length - this.GetTextFormPr().MaxCharacters, true);
+				}
+			}
 		}
 	}
 	else
@@ -1259,7 +1269,10 @@ CInlineLevelSdt.prototype.private_UpdatePictureContent = function()
 		return;
 
 	if (this.IsPlaceHolder())
+	{
 		this.ReplacePlaceHolderWithContent();
+		this.SetShowingPlcHdr(true);
+	}
 
 	var arrDrawings = this.GetAllDrawingObjects();
 
@@ -1301,7 +1314,6 @@ CInlineLevelSdt.prototype.private_UpdatePictureContent = function()
 CInlineLevelSdt.prototype.ApplyPicturePr = function(isPicture)
 {
 	this.SetPicturePr(isPicture);
-	this.SetPlaceholder(undefined);
 	this.private_UpdatePictureContent();
 };
 /**

@@ -1309,6 +1309,10 @@ CBlockLevelSdt.prototype.GetInnerTableOfContents = function()
 
 	return oTOC;
 };
+CBlockLevelSdt.prototype.GetTablesOfFigures = function(arrComplexFields)
+{
+	this.Content.GetTablesOfFigures(arrComplexFields);
+};
 CBlockLevelSdt.prototype.IsBlockLevelSdtFirstOnNewPage = function()
 {
 	if ((null != this.Get_DocumentPrev() && !this.Parent.IsElementStartOnNewPage(this.GetIndex()))
@@ -1892,7 +1896,10 @@ CBlockLevelSdt.prototype.private_UpdatePictureContent = function()
 	var arrDrawings = this.GetAllDrawingObjects();
 
 	if (this.IsPlaceHolder())
+	{
 		this.ReplacePlaceHolderWithContent();
+		this.SetShowingPlcHdr(true);
+	}
 
 	var oDrawing;
 	for (var nIndex = 0, nCount = arrDrawings.length; nIndex < nCount; ++nIndex)

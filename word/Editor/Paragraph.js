@@ -2829,6 +2829,7 @@ Paragraph.prototype.Internal_Draw_5 = function(CurPage, pGraphics, Pr, BgColor)
 		var aRunReview  = PDSL.RunReview;
 		var aCollChange = PDSL.CollChange;
 		var aDUnderline = PDSL.DUnderline;
+		var aCombForms  = PDSL.CombForms;
 
 		// Рисуем зачеркивание
 		var Element = aStrikeout.Get_Next();
@@ -2940,6 +2941,26 @@ Paragraph.prototype.Internal_Draw_5 = function(CurPage, pGraphics, Pr, BgColor)
                     Element = aSpelling.Get_Next();
                 }
             }
+		}
+
+		Element = aCombForms.Get_Next(true);
+		while (Element)
+		{
+			var nFormY0 = Page.Y + Line.Y - Line.Metrics.Ascent;
+			var nFormY1 = Page.Y + Line.Y + Line.Metrics.Descent;
+
+			pGraphics.p_color(Element.r, Element.g, Element.b, 255);
+			pGraphics.drawHorLineExt(c_oAscLineDrawingRule.Bottom, nFormY0, Element.x0, Element.x1, Element.w, -Element.w / 2, Element.w / 2);
+			pGraphics.drawHorLineExt(c_oAscLineDrawingRule.Top, nFormY1, Element.x0, Element.x1, Element.w, -Element.w / 2, Element.w / 2);
+			pGraphics.drawVerLine(c_oAscLineDrawingRule.Center, Element.x0, nFormY0, nFormY1, Element.w);
+			pGraphics.drawVerLine(c_oAscLineDrawingRule.Center, Element.x1, nFormY0, nFormY1, Element.w);
+
+			for (var nInterIndex = 0, nIntersCount = Element.Intermediate.length; nInterIndex < nIntersCount; ++nInterIndex)
+			{
+				pGraphics.drawVerLine(c_oAscLineDrawingRule.Center, Element.Intermediate[nInterIndex], nFormY0, nFormY1, Element.w);
+			}
+
+			Element = aCombForms.Get_Next(true);
 		}
 
 		if (pGraphics.End_Command)
@@ -14512,30 +14533,35 @@ Paragraph.prototype.GetOutlineParagraphs = function(arrOutline, oPr)
 	var nOutlineLvl = this.GetOutlineLvl();
 	if (undefined !== nOutlineLvl
 		&& (!oPr
-		|| -1 === oPr.OutlineStart
-		|| -1 === oPr.OutlineEnd
-		|| undefined === oPr.OutlineStart
-		|| undefined === oPr.OutlineEnd
-		|| (nOutlineLvl >= oPr.OutlineStart - 1 && nOutlineLvl <= oPr.OutlineEnd - 1)))
+			|| (-1 !== oPr.OutlineStart
+				&& -1 !== oPr.OutlineEnd
+				&& undefined !== oPr.OutlineStart
+				&& undefined !== oPr.OutlineEnd
+				&& nOutlineLvl >= oPr.OutlineStart - 1
+				&& nOutlineLvl <= oPr.OutlineEnd - 1)))
 	{
 		arrOutline.push({Paragraph : this, Lvl : nOutlineLvl});
 	}
 	else if (oPr && oPr.Styles && oPr.Styles.length > 0)
 	{
-		if(!this.LogicDocument)
-		{
+		if (!this.LogicDocument)
 			return;
-		}
-		var oStyle = this.LogicDocument.Get_Styles().Get(this.Style_Get());
+
+		var oStyles = this.LogicDocument.GetStyles();
+
+		var sStyleId = this.Style_Get();
+		if (!sStyleId)
+			sStyleId = oStyles.GetDefaultParagraph();
+
+		var oStyle = oStyles.Get(sStyleId);
 		if (!oStyle)
 			return;
 
-		var sStyleName = oStyle.Get_Name();
-
+		var sStyleName = oStyle.GetName();
 		for (var nIndex = 0, nCount = oPr.Styles.length; nIndex < nCount; ++nIndex)
 		{
 			if (oPr.Styles[nIndex].Name === sStyleName)
-				return arrOutline.push({Paragraph : this, Lvl : oPr.Styles[nIndex].Lvl - 1});
+				return arrOutline.push({Paragraph : this, Lvl : !oPr.Styles[nIndex].Lvl ? 0 : oPr.Styles[nIndex].Lvl - 1});
 		}
 	}
 
@@ -14594,10 +14620,31 @@ Paragraph.prototype.GetTableOfContents = function(isUnique, isCheckFields)
 	{
 		var oResult = this.Content[nIndex].GetComplexField(fieldtype_TOC);
 		if (oResult)
-			return oResult;
+		{
+			var oInstruction = oResult.GetInstruction();
+			if(oInstruction && oInstruction.IsTableOfContents())//TOC field can be table of contents or table or figures depending on flags
+			{
+				return oResult;
+			}
+		}
 	}
 
 	return null;
+};
+Paragraph.prototype.GetTablesOfFigures = function(arrComplexFields)
+{
+	for (var nIndex = 0, nCount = this.Content.length; nIndex < nCount; ++nIndex)
+	{
+		var oResult = this.Content[nIndex].GetComplexField(fieldtype_TOC);
+		if (oResult)
+		{
+			var oInstruction = oResult.GetInstruction();
+			if(oInstruction && oInstruction.IsTableOfFigures())//TOC field can be table of contents or table or figures depending on flags
+			{
+				arrComplexFields.push(oResult);
+			}
+		}
+	}
 };
 Paragraph.prototype.GetComplexFieldsArrayByType = function(nType)
 {
@@ -16173,8 +16220,9 @@ function CParaDrawingRangeLinesElement(y0, y1, x0, x1, w, r, g, b, Additional, A
     this.g  = g;
     this.b  = b;
 
-    this.Additional = Additional;
-    this.Additional2 = Additional2;
+    this.Additional   = Additional;
+    this.Additional2  = Additional2;
+    this.Intermediate = [];
 }
 
 
@@ -16195,7 +16243,7 @@ CParaDrawingRangeLines.prototype =
         this.Elements.push( new CParaDrawingRangeLinesElement(y0, y1, x0, x1, w, r, g, b, Additional, Additional2) );
     },
 
-    Get_Next : function()
+    Get_Next : function(isSaveIntermediate)
     {
         var Count = this.Elements.length;
         if ( Count <= 0 )
@@ -16211,11 +16259,16 @@ CParaDrawingRangeLines.prototype =
 
             if (this.private_CanUnionElements(PrevEl, Element))
             {
+				if (isSaveIntermediate)
+					Element.Intermediate.push(Element.x0);
+
                 Element.x0 = PrevEl.x0;
                 Count--;
             }
             else
-                break;
+			{
+				break;
+			}
         }
 
         this.Elements.length = Count;
@@ -17020,6 +17073,7 @@ function CParagraphDrawStateLines()
     this.RunReview  = new CParaDrawingRangeLines();
     this.CollChange = new CParaDrawingRangeLines();
     this.DUnderline = new CParaDrawingRangeLines();
+    this.CombForms  = new CParaDrawingRangeLines();
 
     this.Page  = 0;
     this.Line  = 0;
@@ -17060,6 +17114,10 @@ CParagraphDrawStateLines.prototype =
         this.DStrikeout.Clear();
         this.Underline.Clear();
         this.Spelling.Clear();
+		this.RunReview.Clear();
+		this.CollChange.Clear();
+		this.DUnderline.Clear();
+		this.CombForms.Clear();
     },
 
     Reset_Range : function(Range, X, Spaces)
