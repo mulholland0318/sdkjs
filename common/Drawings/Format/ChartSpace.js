@@ -13657,19 +13657,11 @@ CChartSpace.prototype.getChartSizes = function(bNotRecalculate)
     };
 CChartSpace.prototype.getAllSeries =  function()
 {
-    var _ret = [];
     if(this.chart && this.chart.plotArea)
     {
-        var aCharts = this.chart.plotArea.charts;
-        for(var i = 0; i < aCharts.length; ++i)
-        {
-            _ret = _ret.concat(aCharts[i].series);
-        }
+        return this.chart.plotArea.getAllSeries();
     }
-    _ret.sort(function(a, b){
-        return a.idx - b.idx;
-    });
-    return _ret;
+    return [];
 };
 
 CChartSpace.prototype.recalculatePlotAreaChartBrush = function()
@@ -16041,6 +16033,17 @@ CChartSpace.prototype.onDataUpdate = function() {
     CChartSpace.prototype.setDLblsDeleteValue = function(bVal) {
         if(this.chart) {
             this.chart.setDLblsDeleteValue(bVal);
+        }
+    };
+    CChartSpace.prototype.getChartType = function() {
+        if(this.chart) {
+            return this.chart.getChartType();
+        }
+        return Asc.c_oAscChartTypeSettings.unknown;
+    };
+    CChartSpace.prototype.changeChartType = function(nType) {
+        if(this.chart) {
+            this.chart.changeChartType(nType);
         }
     };
 function getNumLit(ser) {

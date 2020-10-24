@@ -4411,6 +4411,7 @@ DrawingObjectsController.prototype =
                 }
             }
         }
+
         //Title
         var nTitle = oProps.getTitle(), oTitle, bOverlay;
         if(nTitle === c_oAscChartTitleShowSettings.none) {
@@ -4463,9 +4464,26 @@ DrawingObjectsController.prototype =
             }
         }
 
-        chart_space.updateLinks();
-        var oValAx = chart_space.chart.plotArea.valAx;
-        var oCatAx = chart_space.chart.plotArea.catAx;
+        switch (nType) {
+            case c_oAscChartTypeSettings.barNormal:
+            case c_oAscChartTypeSettings.barStacked:
+            case c_oAscChartTypeSettings.barStackedPer:
+            case c_oAscChartTypeSettings.barNormal3d:
+            case c_oAscChartTypeSettings.barStacked3d:
+            case c_oAscChartTypeSettings.barStackedPer3d:
+            case c_oAscChartTypeSettings.barNormal3dPerspective:
+            case c_oAscChartTypeSettings.hBarNormal:
+            case c_oAscChartTypeSettings.hBarStacked:
+            case c_oAscChartTypeSettings.hBarStackedPer:
+            case c_oAscChartTypeSettings.hBarNormal3d:
+            case c_oAscChartTypeSettings.hBarStacked3d:
+            case c_oAscChartTypeSettings.hBarStackedPer3d: {
+
+                break;
+            }
+        }
+
+
     },
 
     applyPropsToChartSpace: function(chartSettings, chartSpace)
@@ -6112,22 +6130,7 @@ DrawingObjectsController.prototype =
         }
 
 
-        var calc_chart_type;
-        if(plot_area.charts[0].length > 1)
-        {
-            calc_chart_type = c_oAscChartTypeSettings.multichart;
-        }
-        else
-        {
-            if(chart_type)
-            {
-                calc_chart_type = chart_type.getChartType();
-            }
-            else
-            {
-                calc_chart_type = c_oAscChartTypeSettings.unknown;
-            }
-        }
+        var calc_chart_type = chart_space.getChartType();
 
         if(chart_type_object_type === AscDFH.historyitem_type_LineChart)
         {
