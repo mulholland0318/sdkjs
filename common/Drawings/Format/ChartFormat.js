@@ -10947,10 +10947,10 @@ function CPieChart()
     CPieChart.prototype.getChartType = function() {
         var oCS = this.getChartSpace();
         if(oCS && AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(oCS)) {
-            return c_oAscChartTypeSettings.pie3d;
+            return Asc.c_oAscChartTypeSettings.pie3d;
         }
         else {
-            return c_oAscChartTypeSettings.pie;
+            return Asc.c_oAscChartTypeSettings.pie;
         }
     };
 
