@@ -7479,7 +7479,7 @@ CDocument.prototype.Get_PageSizesByDrawingObjects = function()
 	return this.DrawingObjects.getPageSizesByDrawingObjects();
 };
 /**
- * Выставояем поля документа
+ * Выставляем поля документа
  * @param oMargins {{Left : number, Top : number, Right : number, Bottom : number}}
  * @param isFromRuler {boolean} пришло ли изменение из линейки
  */
@@ -7513,6 +7513,9 @@ CDocument.prototype.SetDocumentMargin = function(oMargins, isFromRuler)
 			else
 				L = Math.max(0, L - nGutter);
 		}
+
+		if (oSectPr.GetPageMarginTop() < 0 && T > 0)
+			T = -T;
 	}
 
 	oSectPr.SetPageMargins(L, T, R, B);
@@ -16806,10 +16809,10 @@ CDocument.prototype.Begin_CompositeInput = function()
 			var oRun = oPara.Get_ElementByPos(oPara.Get_ParaContentPos(false, false));
 			if (oRun instanceof ParaRun)
 			{
-				var oTrackRun = oRun.CheckTrackRevisionsBeforeAdd();
-				if (oTrackRun)
+				var oNewRun = oRun.CheckRunBeforeAdd();
+				if (oNewRun)
 				{
-					oRun = oTrackRun;
+					oRun = oNewRun;
 					oRun.Make_ThisElementCurrent();
 				}
 

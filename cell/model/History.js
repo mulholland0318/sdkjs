@@ -206,9 +206,12 @@ function (window, undefined) {
 	window['AscCH'].historyitem_PivotTable_CacheField = 45;
 	window['AscCH'].historyitem_PivotTable_PivotField = 46;
 	window['AscCH'].historyitem_PivotTable_PivotFilter = 47;
-	window['AscCH'].historyitem_PivotTable_PageFilter = 48;
-	window['AscCH'].historyitem_PivotTable_SetGridDropZones = 49;
-	window['AscCH'].historyitem_PivotTable_WorksheetSource = 50;
+	window['AscCH'].historyitem_PivotTable_PivotFilterDataField = 48;
+	window['AscCH'].historyitem_PivotTable_PivotFilterMeasureFld = 49;
+	window['AscCH'].historyitem_PivotTable_PageFilter = 50;
+	window['AscCH'].historyitem_PivotTable_SetGridDropZones = 51;
+	window['AscCH'].historyitem_PivotTable_WorksheetSource = 52;
+	window['AscCH'].historyitem_PivotTable_PivotCacheId = 51;
 
 	window['AscCH'].historyitem_SharedFormula_ChangeFormula = 1;
 	window['AscCH'].historyitem_SharedFormula_ChangeShared = 2;
@@ -259,6 +262,9 @@ function (window, undefined) {
 	window['AscCH'].historyitem_Slicer_SetCacheCustomListSort = 15;
 	window['AscCH'].historyitem_Slicer_SetCacheCrossFilter = 16;
 	window['AscCH'].historyitem_Slicer_SetCacheHideItemsWithNoData = 17;
+	window['AscCH'].historyitem_Slicer_SetCacheData = 18;
+	window['AscCH'].historyitem_Slicer_SetCacheMovePivot = 19;
+	window['AscCH'].historyitem_Slicer_SetCacheCopySheet = 20;
 	
 	window['AscCH'].historyitem_NamedSheetView_SetName = 1;
 	window['AscCH'].historyitem_NamedSheetView_DeleteFilter = 2;

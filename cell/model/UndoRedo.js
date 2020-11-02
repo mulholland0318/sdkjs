@@ -3536,10 +3536,12 @@ function (window, undefined) {
 				}
 				break;
 			case AscCH.historyitem_PivotTable_RemoveDataField:
-				for (var i = Data.to.length - 1; i >= 0; --i) {
-					if (bUndo) {
+				if (bUndo) {
+					for (var i = Data.to.length - 1; i >= 0; --i) {
 						pivotTable.addDataField(Data.from, Data.to[i]);
-					} else {
+					}
+				} else {
+					for (var i = 0; i < Data.to.length; ++i) {
 						pivotTable.removeDataField(Data.from, Data.to[i]);
 					}
 				}
@@ -3590,11 +3592,26 @@ function (window, undefined) {
 					}
 				}
 				break;
+			case AscCH.historyitem_PivotTable_PivotFilterDataField:
+				var pivotFilters = pivotTable.asc_getPivotFilters();
+				if (pivotFilters && Data.index < pivotFilters.length) {
+					pivotFilters[Data.index].dataField = value;
+				}
+				break;
+			case AscCH.historyitem_PivotTable_PivotFilterMeasureFld:
+				var pivotFilters = pivotTable.asc_getPivotFilters();
+				if (pivotFilters && Data.index < pivotFilters.length) {
+					pivotFilters[Data.index].setMeasureFld(value);
+				}
+				break;
 			case AscCH.historyitem_PivotTable_PageFilter:
 				var pageField = pivotTable.getPageFieldByFieldIndex(Data.index);
 				if (pageField) {
 					pageField.item = value;
 				}
+				break;
+			case AscCH.historyitem_PivotTable_PivotCacheId:
+				pivotTable.setPivotCacheId(value);
 				break;
 		}
 	};
@@ -3823,6 +3840,38 @@ function (window, undefined) {
 				slicerCache = oModel.getSlicerCacheByName(Data.name);
 				if (slicerCache) {
 					slicerCache.setHideItemsWithNoData(bUndo ? Data.from : Data.to);
+					updateByCacheName = Data.name;
+				}
+				break;
+			}
+			case AscCH.historyitem_Slicer_SetCacheData: {
+				slicerCache = oModel.getSlicerCacheByName(Data.name);
+				if (slicerCache) {
+					var wrapper = bUndo ? Data.from : Data.to;
+					var cache = new Asc.CT_slicerCacheDefinition();
+					wrapper.initObject(cache);
+					cache.initAfterSerialize(this.wb);
+					slicerCache.copyFrom(cache);
+					updateByCacheName = Data.name;
+				}
+				break;
+			}
+			case AscCH.historyitem_Slicer_SetCacheMovePivot: {
+				slicerCache = oModel.getSlicerCacheByName(Data.name);
+				if (slicerCache) {
+					var from = bUndo ? Data.to : Data.from;
+					var to = bUndo ? Data.from : Data.to;
+					slicerCache.movePivotTable(from.value, from.style, to.value, to.style);
+					updateByCacheName = Data.name;
+				}
+				break;
+			}
+			case AscCH.historyitem_Slicer_SetCacheCopySheet: {
+				slicerCache = oModel.getSlicerCacheByName(Data.name);
+				if (slicerCache) {
+					var from = bUndo ? Data.to : Data.from;
+					var to = bUndo ? Data.from : Data.to;
+					slicerCache.forCopySheet(from, to);
 					updateByCacheName = Data.name;
 				}
 				break;

@@ -1222,14 +1222,12 @@ background-repeat: no-repeat;\
 									<div id=\"id_panel_right\" class=\"block_elem\" style=\"touch-action:none;margin-right:1px;background-color:" + AscCommonWord.GlobalSkin.BackgroundScroll + ";\">\
 									<div id=\"id_buttonRulers\" class=\"block_elem buttonRuler\"></div>\
 									<div id=\"id_vertical_scroll\" style=\"left:0;top:0px;width:14px;overflow:hidden;position:absolute;\">\
-									<div id=\"panel_right_scroll\" class=\"block_elem\" style=\"left:0;top:0;width:1px;height:6000px;\"></div>\
 									</div>\
 									<div id=\"id_buttonPrevPage\" class=\"block_elem buttonPrevPage\"></div>\
 									<div id=\"id_buttonNextPage\" class=\"block_elem buttonNextPage\"></div>\
 								</div>\
 									<div id=\"id_horscrollpanel\" class=\"block_elem\" style=\"touch-action:none;margin-bottom:1px;background-color:" + AscCommonWord.GlobalSkin.BackgroundScroll + ";\">\
 									<div id=\"id_horizontal_scroll\" style=\"left:0px;top:0;height:14px;overflow:hidden;position:absolute;width:100%;\">\
-										<div id=\"panel_hor_scroll\" class=\"block_elem\" style=\"left:0;top:0;width:6000px;height:1px;\"></div>\
 									</div>\
 									</div>" + this.HtmlElement.innerHTML);
 	};
@@ -7732,18 +7730,7 @@ background-repeat: no-repeat;\
 	{
 		if (!this.WordControl.m_oLogicDocument)
 			return;
-
-		var _pageNum = this.GetCurrentVisiblePage();
-		// получаем размеры страницы
-		var _sectionPr = this.WordControl.m_oLogicDocument.Get_PageLimits(_pageNum);
-
-		var _min = Math.min(_sectionPr.XLimit / 2, _sectionPr.YLimit / 2);
-
-		this.WordControl.m_oLogicDocument.DrawingObjects.addShapeOnPage(_type, _pageNum,
-			_sectionPr.X + _sectionPr.XLimit / 4,
-			_sectionPr.Y + _sectionPr.YLimit / 4,
-			_min,
-			_min);
+		this.WordControl.m_oLogicDocument.DrawingObjects.addShapeOnPage(_type, this.GetCurrentVisiblePage());
 	};
 
 
@@ -9358,6 +9345,22 @@ background-repeat: no-repeat;\
 			return;
 
 		oLogicDocument.SetPerformContentControlActionByClick(isPerform);
+	};
+	asc_docs_api.prototype.asc_GetTextFormAutoWidth = function(sId)
+	{
+		var oLogicDocument = this.private_GetLogicDocument();
+		if (!oLogicDocument)
+			return;
+
+		var oContentControl = oLogicDocument.GetContentControl(sId);
+		if (!oContentControl || !oContentControl.IsTextForm() || !(oContentControl instanceof CInlineLevelSdt))
+			return null;
+
+		var oRun = oContentControl.GetFirstRun();
+		if (!oRun)
+			return null;
+
+		return oRun.GetTextFormAutoWidth();
 	};
 
 	asc_docs_api.prototype.asc_UncheckContentControlButtons = function()
@@ -11315,6 +11318,7 @@ background-repeat: no-repeat;\
 	asc_docs_api.prototype['asc_SetSpecialFormsHighlightColor']         = asc_docs_api.prototype.asc_SetSpecialFormsHighlightColor;
 	asc_docs_api.prototype['asc_GetSpecialFormsHighlightColor']         = asc_docs_api.prototype.asc_GetSpecialFormsHighlightColor;
 	asc_docs_api.prototype['asc_SetPerformContentControlActionByClick'] = asc_docs_api.prototype.asc_SetPerformContentControlActionByClick;
+	asc_docs_api.prototype['asc_GetTextFormAutoWidth']                  = asc_docs_api.prototype.asc_GetTextFormAutoWidth;
 
 	asc_docs_api.prototype['asc_BeginViewModeInReview']                 = asc_docs_api.prototype.asc_BeginViewModeInReview;
 	asc_docs_api.prototype['asc_EndViewModeInReview']                   = asc_docs_api.prototype.asc_EndViewModeInReview;
