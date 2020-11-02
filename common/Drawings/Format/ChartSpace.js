@@ -16050,6 +16050,10 @@ CChartSpace.prototype.onDataUpdate = function() {
         var b3D = AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(this);
         this.chart.checkDlblsPosition(b3D);
     };
+    CChartSpace.prototype.getPossibleDLblsPosition = function() {
+        var b3D = AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(this);
+        this.chart.getPossibleDLblsPosition(b3D);
+    };
 function getNumLit(ser) {
     if(ser) {
         if(ser.val)

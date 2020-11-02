@@ -4101,6 +4101,36 @@ function CPlotArea()
             aCharts[nChart].checkDlblsPosition(b3D);
         }
     };
+    CPlotArea.prototype.getPossibleDLblsPosition = function(b3D) {
+        var aCharts = this.charts;
+        if(aCharts.length === 0) {
+            return [];
+        }
+        var aPositions = aCharts[0].getPossibleDLblsPosition(b3D), aCurPositions, nLblPos;
+        if(aPositions.length > 0) {
+            for(var nChart = 1; nChart < aCharts.length; ++nChart) {
+                aCurPositions = aCharts[nChart].getPossibleDLblsPosition(b3D);
+                if(aCurPositions.length === 0) {
+                    return [];
+                }
+                for(var nPos = aPositions.length - 1; nPos > -1; --nPos) {
+                    nLblPos = aPositions[nPos];
+                    for(var nCurPos = 0; nCurPos < aCurPositions.length; ++nCurPos) {
+                        if(nLblPos === aCurPositions[nCurPos]) {
+                            break;
+                        }
+                    }
+                    if(nCurPos === aCurPositions.length) {
+                        aPositions.splice(nPos, 1);
+                    }
+                }
+                if(aPositions.length === 0) {
+                    return aPositions;
+                }
+            }
+        }
+        return aPositions;
+    };
 
     function CChartBase() {
         AscFormat.CBaseObject.call(this);
@@ -14188,6 +14218,9 @@ function CChart()
     };
     CChart.prototype.checkDlblsPosition = function(b3D) {
         this.plotArea.checkDlblsPosition(b3D);
+    };
+    CChart.prototype.getPossibleDLblsPosition = function(b3D) {
+        this.plotArea.getPossibleDLblsPosition(b3D);
     };
 
 function CChartWall()
