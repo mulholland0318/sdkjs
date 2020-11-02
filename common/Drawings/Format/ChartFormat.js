@@ -3473,8 +3473,13 @@ function CDLbl()
         return false;
     };
     CSeriesBase.prototype["asc_getIsSecondaryAxis"] = CSeriesBase.prototype.isSecondaryAxis;
-    CSeriesBase.prototype.canChangeType = function() {
-        
+    CSeriesBase.prototype.getFirstPointFormatCode = function() {
+        var sDefaultValAxFormatCode = null;
+        var aPoints = AscFormat.getPtsFromSeries(this);
+        if(aPoints[0] && typeof aPoints[0].formatCode === "string" && aPoints[0].formatCode.length > 0){
+            sDefaultValAxFormatCode = aPoints[0].formatCode;
+        }
+        return sDefaultValAxFormatCode;
     };
 
 function CPlotArea()
@@ -3512,15 +3517,11 @@ function CPlotArea()
     g_oTableId.Add(this, this.Id);
 }
 
-CPlotArea.prototype =
-{
-    Get_Id: function()
+    CPlotArea.prototype.Get_Id = function()
     {
         return this.Id;
-    },
-
-
-    Refresh_RecalcData: function(data)
+    };
+    CPlotArea.prototype.Refresh_RecalcData = function(data)
     {
         switch (data.Type)
         {
@@ -3575,25 +3576,21 @@ CPlotArea.prototype =
                 break;
             }
         }
-    },
-
-
-    Refresh_RecalcData2: function(data)
+    };
+    CPlotArea.prototype.Refresh_RecalcData2 = function(data)
     {
         if(this.parent && this.parent.Refresh_RecalcData2)
         {
             this.parent.Refresh_RecalcData2(data);
         }
-    },
-
-    checkShapeChildTransform: function(t)
+    };
+    CPlotArea.prototype.checkShapeChildTransform = function(t)
     {
         this.transform = this.localTransform.CreateDublicate();
         global_MatrixTransformer.MultiplyAppend(this.transform, t);
         this.invertTransform = global_MatrixTransformer.Invert(this.transform);
-    },
-
-    updatePosition: function(x, y)
+    };
+    CPlotArea.prototype.updatePosition = function(x, y)
     {
         this.posX = x;
         this.posY = y;
@@ -3601,14 +3598,12 @@ CPlotArea.prototype =
         global_MatrixTransformer.TranslateAppend(this.transform, x, y);
 
         this.invertTransform = global_MatrixTransformer.Invert(this.transform);
-    },
-
-    getObjectType: function()
+    };
+    CPlotArea.prototype.getObjectType = function()
     {
         return AscDFH.historyitem_type_PlotArea;
-    },
-
-    createDuplicate: function()
+    };
+    CPlotArea.prototype.createDuplicate = function()
     {
         var c = new CPlotArea(), i, j, k;
 
@@ -3669,10 +3664,8 @@ CPlotArea.prototype =
             }
         }
         return c;
-    },
-
-
-    getSeriesWithSmallestIndexForAxis: function(oAxis){
+    };
+    CPlotArea.prototype.getSeriesWithSmallestIndexForAxis = function(oAxis){
         var aCharts = this.charts;
         var oRet = null;
         var oChart, aSeries;
@@ -3696,9 +3689,8 @@ CPlotArea.prototype =
             }
         }
         return oRet;
-    },
-
-    getChartsForAxis: function(oAxis){
+    };
+    CPlotArea.prototype.getChartsForAxis = function(oAxis){
         var aCharts = this.charts;
         var oRet = null;
         var oChart, aSeries;
@@ -3717,21 +3709,17 @@ CPlotArea.prototype =
             }
         }
         return aRet;
-    },
-
-    Write_ToBinary2: function(w)
+    };
+    CPlotArea.prototype.Write_ToBinary2 = function(w)
     {
         w.WriteLong(this.getObjectType());
         w.WriteString2(this.Get_Id());
-    },
-
-    Read_FromBinary2: function(r)
+    };
+    CPlotArea.prototype.Read_FromBinary2 = function(r)
     {
         this.Id = r.GetString2();
-    },
-
-
-    addAxis: function(axis)
+    };
+    CPlotArea.prototype.addAxis = function(axis)
     {
         //сначала проверим не лежит ли ось уже в plotArea
         if(!axis)
@@ -3746,9 +3734,8 @@ CPlotArea.prototype =
         History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_PlotArea_AddAxis, this.axId.length, [axis], true));
         this.axId.push(axis);
         axis.setParent(this);
-    },
-
-    addChart: function(pr, idx)
+    };
+    CPlotArea.prototype.addChart = function(pr, idx)
     {
         var pos;
         if(AscFormat.isRealNumber(idx))
@@ -3760,10 +3747,8 @@ CPlotArea.prototype =
         pr.setParent(this);
         if(this.parent && this.parent.parent)
             this.parent.parent.handleUpdateType();
-    },
-
-
-    removeChartByPos: function(pos)
+    };
+    CPlotArea.prototype.removeChartByPos = function(pos)
     {
         if(this.charts[pos])
         {
@@ -3795,17 +3780,15 @@ CPlotArea.prototype =
                 }
             }
         }
-    },
-
-    removeCharts: function(startPos, endPos)
+    };
+    CPlotArea.prototype.removeCharts = function(startPos, endPos)
     {
         for(var i = endPos; i >= startPos; --i)
         {
             this.removeChartByPos(i);
         }
-    },
-
-    removeAxis: function(axis)
+    };
+    CPlotArea.prototype.removeAxis = function(axis)
     {
         for(var i = this.axId.length - 1; i > -1; --i)
         {
@@ -3815,15 +3798,13 @@ CPlotArea.prototype =
                 this.axId.splice(i, 1);
             }
         }
-    },
-
-    setDTable: function(pr)
+    };
+    CPlotArea.prototype.setDTable = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_PlotArea_SetDTable, this.dTable, pr));
         this.dTable = pr;
-    },
-
-    setLayout: function(pr)
+    };
+    CPlotArea.prototype.setLayout = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_PlotArea_SetLayout, this.layout, pr));
         this.layout = pr;
@@ -3831,9 +3812,8 @@ CPlotArea.prototype =
         {
             this.layout.setParent(this);
         }
-    },
-
-    setSpPr: function(pr)
+    };
+    CPlotArea.prototype.setSpPr = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_PlotArea_SetSpPr, this.spPr, pr));
         this.spPr = pr;
@@ -3841,9 +3821,8 @@ CPlotArea.prototype =
         {
             pr.setParent(this);
         }
-    },
-
-    getHorizontalAxis: function()
+    };
+    CPlotArea.prototype.getHorizontalAxis = function()
     {
         if(this.charts[0])
         {
@@ -3858,9 +3837,8 @@ CPlotArea.prototype =
             }
         }
         return null;
-    },
-
-    getVerticalAxis: function()
+    };
+    CPlotArea.prototype.getVerticalAxis = function()
     {
         if(this.charts[0])
         {
@@ -3875,9 +3853,8 @@ CPlotArea.prototype =
             }
         }
         return null;
-    },
-
-    getAxisByTypes: function()
+    };
+    CPlotArea.prototype.getAxisByTypes = function()
     {
         var  ret = {valAx:[], catAx: [], dateAx: [], serAx: []};
         for(var i = 0; i < this.axId.length; ++i)
@@ -3904,110 +3881,98 @@ CPlotArea.prototype =
             }
         }
         return ret;
-    },
-
-    setParent: function(pr)
+    };
+    CPlotArea.prototype.setParent = function(pr)
     {
         History.Add(new CChangesDrawingsObject(this, AscDFH.historyitem_CommonChartFormat_SetParent, this.parent, pr));
         this.parent = pr;
-            },
-
-    handleUpdateFill: function()
+    };
+    CPlotArea.prototype.handleUpdateFill = function()
     {
         if(this.parent && this.parent.handleUpdateFill)
         {
             this.parent.handleUpdateFill();
         }
-    },
-    handleUpdateLn: function()
+    };
+    CPlotArea.prototype.handleUpdateLn = function()
     {
         if(this.parent && this.parent.handleUpdateLn)
         {
             this.parent.handleUpdateLn();
         }
-    },
+    };
+    CPlotArea.prototype.getCompiledLine = CShape.prototype.getCompiledLine;
+    CPlotArea.prototype.getCompiledFill = CShape.prototype.getCompiledFill;
+    CPlotArea.prototype.getCompiledTransparent = CShape.prototype.getCompiledTransparent;
+    CPlotArea.prototype.check_bounds = CShape.prototype.check_bounds;
+    CPlotArea.prototype.getCardDirectionByNum = CShape.prototype.getCardDirectionByNum;
+    CPlotArea.prototype.getNumByCardDirection = CShape.prototype.getNumByCardDirection;
+    CPlotArea.prototype.getResizeCoefficients = CShape.prototype.getResizeCoefficients;
+    CPlotArea.prototype.getInvertTransform = CShape.prototype.getInvertTransform;
+    CPlotArea.prototype.getTransformMatrix = CShape.prototype.getTransformMatrix;
+    CPlotArea.prototype.hitToHandles = CShape.prototype.hitToHandles;
+    CPlotArea.prototype.getFullFlipH = CShape.prototype.getFullFlipH;
+    CPlotArea.prototype.getFullFlipV = CShape.prototype.getFullFlipV;
+    CPlotArea.prototype.getAspect = CShape.prototype.getAspect;
+    CPlotArea.prototype.getGeom = CShape.prototype.getGeom;
 
-
-    getCompiledLine: CShape.prototype.getCompiledLine,
-    getCompiledFill: CShape.prototype.getCompiledFill,
-    getCompiledTransparent: CShape.prototype.getCompiledTransparent,
-    check_bounds: CShape.prototype.check_bounds,
-    getCardDirectionByNum: CShape.prototype.getCardDirectionByNum,
-    getNumByCardDirection: CShape.prototype.getNumByCardDirection,
-    getResizeCoefficients: CShape.prototype.getResizeCoefficients,
-    getInvertTransform: CShape.prototype.getInvertTransform,
-    getTransformMatrix: CShape.prototype.getTransformMatrix,
-    hitToHandles: CShape.prototype.hitToHandles,
-    getFullFlipH: CShape.prototype.getFullFlipH,
-    getFullFlipV: CShape.prototype.getFullFlipV,
-    getAspect: CShape.prototype.getAspect,
-    getGeom: CShape.prototype.getGeom,
-
-    convertPixToMM: function(pix)
+        CPlotArea.prototype.convertPixToMM = function(pix)
     {
         return this.parent && this.parent.parent && this.parent.parent.convertPixToMM(pix);
-    },
-    hitInBoundingRect: CShape.prototype.hitInBoundingRect,
-    hitInInnerArea: CShape.prototype.hitInInnerArea,
-    hitInPath: CShape.prototype.hitInPath,
-    checkHitToBounds: function (x, y)
+    };
+    CPlotArea.prototype.hitInBoundingRect = CShape.prototype.hitInBoundingRect;
+    CPlotArea.prototype.hitInInnerArea = CShape.prototype.hitInInnerArea;
+    CPlotArea.prototype.hitInPath = CShape.prototype.hitInPath;
+        CPlotArea.prototype.checkHitToBounds = function (x, y)
     {
         CDLbl.prototype.checkHitToBounds.call(this, x, y);
-    },
-    getCanvasContext: function()
+    };
+    CPlotArea.prototype.getCanvasContext = function()
     {
         return this.parent && this.parent.parent && this.parent.parent.getCanvasContext();
-    },
-
-    canRotate: function()
+    };
+    CPlotArea.prototype.canRotate = function()
     {
         return false;
-    },
-
-    getNoChangeAspect: function () {
+    };
+    CPlotArea.prototype.getNoChangeAspect = function () {
         return false;
-    },
-    isChart: function()
+    };
+    CPlotArea.prototype.isChart = function()
     {
         return false;
-    },
-
-
-    canMove: function()
+    };
+    CPlotArea.prototype.canMove = function()
     {
         return true;
-    },
-
-    reindexSeries: function() {
+    };
+    CPlotArea.prototype.reindexSeries = function() {
         if(this.parent) {
             this.parent.reindexSeries();
         }
-    },
-    moveSeriesUp: function(oSeries) {
+    };
+    CPlotArea.prototype.moveSeriesUp = function(oSeries) {
         if(this.parent) {
             this.parent.moveSeriesUp(oSeries);
         }
-    },
-    moveSeriesDown: function(oSeries) {
+    };
+    CPlotArea.prototype.moveSeriesDown = function(oSeries) {
         if(this.parent) {
             this.parent.moveSeriesDown(oSeries);
         }
-    },
-
-    onDataUpdate: function() {
+    };
+    CPlotArea.prototype.onDataUpdate = function() {
         if(this.parent) {
             this.parent.onDataUpdate();
         }
-    },
-
-    setDLblsDeleteValue: function(bVal) {
+    };
+    CPlotArea.prototype.setDLblsDeleteValue = function(bVal) {
         var nChart, nChartsCount = this.charts.length;
-        for(nChart = 0; nChart < this.charts.length; ++nChart) {
+        for(nChart = 0; nChart < nChartsCount; ++nChart) {
             this.charts[nChart].setDLblsDeleteValue(bVal);
         }
-    },
-
-    getChartType: function() {
+    };
+    CPlotArea.prototype.getChartType = function() {
         if(this.charts.length > 0) {
             if(this.charts.length > 1) {
                 return Asc.c_oAscChartTypeSettings.multichart;
@@ -4015,10 +3980,12 @@ CPlotArea.prototype =
             return this.charts[0].getChartType();
         }
         return Asc.c_oAscChartTypeSettings.unknown;
-    },
-
-    changeChartType: function(nType) {
+    };
+    CPlotArea.prototype.changeChartType = function(nType) {
         if(nType === Asc.c_oAscChartTypeSettings.unknown) {
+            return;
+        }
+        if(this.charts.length < 1) {
             return;
         }
         var nCurType = this.getChartType();
@@ -4030,16 +3997,45 @@ CPlotArea.prototype =
             if(aSeries.length < 2) {
                 return;
             }
+            //create axes
+            var sFirstPointFormatCode = aSeries[0].getFirstPointFormatCode();
+            var oAxes = AscFormat.CreateDefaultAxes(sFirstPointFormatCode ? sFirstPointFormatCode : "General");
+            var oNewValAx = oAxes.valAx;
+            var oNewCatAx = oAxes.catAx;
+            //merge settings from current axes
             oTypedChart = this.chart[0];
-            if(!oTypedChart) {
-                return;
+            var oValMergeAx = null, oCatMergeAx = null;
+            var aVertAxes, aHorAxes;
+            aVertAxes = oTypedChart.getVertAxes();
+            aHorAxes = oTypedChart.getHorAxes();
+            if(oTypedChart.getObjectType() === AscDFH.historyitem_type_BarChart &&
+                oTypedChart.barDir === AscFormat.BAR_DIR_BAR) {
+                //HBar
+                if(aVertAxes.length > 0) {
+                    oCatMergeAx = aVertAxes[0];
+                }
+                if(aHorAxes.length > 0) {
+                    oValMergeAx = aHorAxes[0];
+                }
             }
-
+            else {
+                if(aVertAxes.length > 0) {
+                    oValMergeAx = aVertAxes[0];
+                }
+                if(aHorAxes.length > 0) {
+                    oCatMergeAx = aHorAxes[0];
+                }
+            }
+            if(oCatMergeAx) {
+                oNewCatAx.merge(oCatMergeAx);
+            }
+            if(oValMergeAx) {
+                oNewValAx.merge(oValMergeAx);
+            }
         }
 
-    },
-
-    getAllSeries: function() {
+    };
+    CPlotArea.prototype.getAllSeries = function() {
         var _ret = [];
         var aCharts = this.charts;
         for(var i = 0; i < aCharts.length; ++i) {
@@ -4049,9 +4045,7 @@ CPlotArea.prototype =
             return a.idx - b.idx;
         });
         return _ret;
-    }
-};
-
+    };
 
     function CChartBase() {
         AscFormat.CBaseObject.call(this);
@@ -4065,7 +4059,6 @@ CPlotArea.prototype =
             this.Id = AscCommon.g_oIdCounter.Get_NewId();
         }
     }
-
     CChartBase.prototype = Object.create(AscFormat.CBaseObject.prototype);
     CChartBase.prototype.constructor = CChartBase;
     CChartBase.prototype.removeSeries = function(idx) {
@@ -4219,10 +4212,36 @@ CPlotArea.prototype =
         if(this.dLbls) {
             this.dLbls.setDeleteValue(bVal)
         }
-        var nSeries, nSeriesCount = this.series.length;;
+        var nSeries, nSeriesCount = this.series.length;
         for(nSeries = 0; nSeries < nSeriesCount; ++nSeries) {
             this.series[nSeries].setDLblsDeleteValue(bVal);
         }
+    };
+    CChartBase.prototype.getHorAxes = function() {
+        var aAxes = this.axId;
+        var aResult = [];
+        for(var nAx = 0; nAx < aAxes.length; ++nAx) {
+            var oAxis = this.axId;
+            if(oAxis.getObjectType() !== AscDFH.historyitem_type_SerAx) {
+                if(oAxis.axPos === AX_POS_B || oAxis.axPos === AX_POS_T) {
+                    aResult.push(oAxis);
+                }
+            }
+        }
+        return aResult;
+    };
+    CChartBase.prototype.getVertAxes = function() {
+        var aAxes = this.axId;
+        var aResult = [];
+        for(var nAx = 0; nAx < aAxes.length; ++nAx) {
+            var oAxis = this.axId;
+            if(oAxis.getObjectType() !== AscDFH.historyitem_type_SerAx) {
+                if(oAxis.axPos === AX_POS_L || oAxis.axPos === AX_POS_R) {
+                    aResult.push(oAxis);
+                }
+            }
+        }
+        return aResult;
     };
 
 function CBarChart()

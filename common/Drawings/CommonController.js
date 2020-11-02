@@ -4334,7 +4334,7 @@ DrawingObjectsController.prototype =
             }
         }
 
-        //Set the properties which was already set. It need for the fast coediting. TODO: check it
+        //Set the properties which was already set. It needs for the fast coediting. TODO: check it
         oChartSpace.setChart(oChartSpace.chart.createDuplicate());
         oChartSpace.setStyle(oChartSpace.style);
 
@@ -4351,7 +4351,7 @@ DrawingObjectsController.prototype =
             }
         }
 
-        //Set data range
+        //Set the data range
         //TODO: Rework this
         var sRange = oProps.getRange();
         if(typeof sRange === "string" && sRange.length > 0) {
@@ -4673,10 +4673,7 @@ DrawingObjectsController.prototype =
         object_type = chart_type.getObjectType();
         var sDefaultValAxFormatCode = null;
         if(chart_type && chart_type.series[0]){
-            var aPoints = AscFormat.getPtsFromSeries(chart_type.series[0]);
-            if(aPoints[0] && typeof aPoints[0].formatCode === "string" && aPoints[0].formatCode.length > 0){
-                sDefaultValAxFormatCode = aPoints[0].formatCode;
-            }
+            sDefaultValAxFormatCode = chart_type.series[0].getFirstPointFormatCode();
         }
         need_num_fmt = sDefaultValAxFormatCode;
 
@@ -4693,7 +4690,7 @@ DrawingObjectsController.prototype =
             }
             if(!val_ax || !cat_ax)
             {
-                var axis_obj = AscFormat.CreateDefaultAxises(need_num_fmt ? need_num_fmt : "General");
+                var axis_obj = AscFormat.CreateDefaultAxes(need_num_fmt ? need_num_fmt : "General");
                 cat_ax = axis_obj.catAx;
                 val_ax = axis_obj.valAx;
 

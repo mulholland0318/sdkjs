@@ -18021,7 +18021,7 @@ function CreateStockChart(chartSeries, bUseCache, oOptions)
     }
 
 
-function CreateDefaultAxises(valFormatCode)
+function CreateDefaultAxes(valFormatCode)
 {
     var cat_ax = new AscFormat.CCatAx();
     var val_ax = new AscFormat.CValAx();
@@ -19015,7 +19015,7 @@ function checkBlipFillRasterImages(sp)
     window['AscFormat'].CreatePieChart = CreatePieChart;
     window['AscFormat'].CreateScatterChart = CreateScatterChart;
     window['AscFormat'].CreateStockChart = CreateStockChart;
-    window['AscFormat'].CreateDefaultAxises = CreateDefaultAxises;
+    window['AscFormat'].CreateDefaultAxes = CreateDefaultAxes;
     window['AscFormat'].CreateScatterAxis = CreateScatterAxis;
     window['AscFormat'].getChartSeries = getChartSeries;
     window['AscFormat'].parseSeriesHeaders = parseSeriesHeaders;
