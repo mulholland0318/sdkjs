@@ -5694,36 +5694,7 @@ DrawingObjectsController.prototype =
                 {
                     chartSettings.bLine = true;
                 }
-
-                if(chartSettings.showMarker)
-                {
-                    if(!chart_type.marker)
-                    {
-                        chart_type.setMarker(true);
-                    }
-                    for(var j = 0; j < chart_type.series.length; ++j)
-                    {
-                        if(chart_type.series[j].marker && chart_type.series[j].marker.symbol === AscFormat.SYMBOL_NONE)
-                        {
-                            chart_type.series[j].setMarker(null);
-                        }
-                    }
-                }
-                else
-                {
-                    for(var j = 0; j < chart_type.series.length; ++j)
-                    {
-                        if(!chart_type.series[j].marker)
-                        {
-                            chart_type.series[j].setMarker(new AscFormat.CMarker());
-                        }
-                        if(chart_type.series[j].marker.symbol !== AscFormat.SYMBOL_NONE)
-                        {
-                            chart_type.series[j].marker.setSymbol(AscFormat.SYMBOL_NONE);
-                        }
-                    }
-                }
-
+                chart_type.setMarkerValue(chartSettings.showMarker);
                 if(!chartSettings.bLine)
                 {
                     for(var j = 0; j < chart_type.series.length; ++j)

@@ -16879,6 +16879,15 @@ function FillCatAxNumFormat(oCatAxis, aAscSeries){
     }
 }
 
+
+    function CreateTypedLineChart(type) {
+        var oLineChart = new AscFormat.CLineChart();
+        oLineChart.setGrouping(type);
+        oLineChart.setVaryColors(false);
+        oLineChart.setMarker(true);
+        oLineChart.setSmooth(false);
+        return oLineChart;
+    }
 function CreateLineChart(chartSeries, type, bUseCache, oOptions, b3D)
 {
     var asc_series = chartSeries.series;
@@ -16910,7 +16919,7 @@ function CreateLineChart(chartSeries, type, bUseCache, oOptions, b3D)
     chart.setShowDLblsOverMax(false);
     var plot_area = chart.plotArea;
     plot_area.setLayout(new AscFormat.CLayout());
-    plot_area.addChart(new AscFormat.CLineChart());
+    plot_area.addChart(CreateTypedLineChart(type));
 
     var cat_ax = new AscFormat.CCatAx();
     var val_ax = new AscFormat.CValAx();
@@ -16923,23 +16932,9 @@ function CreateLineChart(chartSeries, type, bUseCache, oOptions, b3D)
     plot_area.addAxis(val_ax);
 
     var line_chart = plot_area.charts[0];
-    line_chart.setGrouping(type);
-    line_chart.setVaryColors(false);
-    line_chart.setMarker(true);
-    line_chart.setSmooth(false);
     line_chart.addAxId(cat_ax);
     line_chart.addAxId(val_ax);
     val_ax.setCrosses(2);
-    var parsedHeaders = chartSeries.parsedHeaders;
-    var bInCols;
-    if(isRealObject(oOptions))
-    {
-        bInCols = oOptions.inColumns === true;
-    }
-    else
-    {
-        bInCols = false;
-    }
     for(var i = 0; i < asc_series.length; ++i)
     {
         var series = new AscFormat.CLineSeries();
@@ -17025,6 +17020,26 @@ function CreateLineChart(chartSeries, type, bUseCache, oOptions, b3D)
     return chart_space;
 }
 
+    function CreateTypedBarChart(type, b3D) {
+        var oBarChart = new AscFormat.CBarChart();
+        if(b3D)
+        {
+            oBarChart.set3D(true);
+        }
+        oBarChart.setBarDir(AscFormat.BAR_DIR_COL);
+        oBarChart.setGrouping(type);
+        oBarChart.setVaryColors(false);
+        oBarChart.setGapWidth(150);
+        if(AscFormat.BAR_GROUPING_PERCENT_STACKED === type || AscFormat.BAR_GROUPING_STACKED === type) {
+            oBarChart.setOverlap(100);
+        }
+        if(b3D)
+        {
+            oBarChart.setShape(BAR_SHAPE_BOX);
+        }
+        return oBarChart;
+    }
+
 function CreateBarChart(chartSeries, type, bUseCache, oOptions, b3D, bDepth)
 {
     var asc_series = chartSeries.series;
@@ -17047,18 +17062,7 @@ function CreateBarChart(chartSeries, type, bUseCache, oOptions, b3D, bDepth)
     chart.setShowDLblsOverMax(false);
     var plot_area = chart.plotArea;
     plot_area.setLayout(new AscFormat.CLayout());
-    plot_area.addChart(new AscFormat.CBarChart());
-
-    var bInCols;
-    if(isRealObject(oOptions))
-    {
-        bInCols = oOptions.inColumns === true;
-    }
-    else
-    {
-        bInCols = false;
-    }
-
+    plot_area.addChart(CreateTypedBarChart(type, b3D));
 
     var cat_ax = new AscFormat.CCatAx();
     var val_ax = new AscFormat.CValAx();
@@ -17071,14 +17075,6 @@ function CreateBarChart(chartSeries, type, bUseCache, oOptions, b3D, bDepth)
     plot_area.addAxis(val_ax);
 
     var bar_chart = plot_area.charts[0];
-    if(b3D)
-    {
-        bar_chart.set3D(true);
-    }
-    bar_chart.setBarDir(AscFormat.BAR_DIR_COL);
-    bar_chart.setGrouping(type);
-    bar_chart.setVaryColors(false);
-    var parsedHeaders = chartSeries.parsedHeaders;
     for(var i = 0; i < asc_series.length; ++i)
     {
         var series = new AscFormat.CBarSeries();
@@ -17097,13 +17093,6 @@ function CreateBarChart(chartSeries, type, bUseCache, oOptions, b3D, bDepth)
             FillSeriesTx(series, asc_series[i].TxCache, bUseCache);
         }
         bar_chart.addSer(series);
-    }
-    bar_chart.setGapWidth(150);
-    if(AscFormat.BAR_GROUPING_PERCENT_STACKED === type || AscFormat.BAR_GROUPING_STACKED === type)
-        bar_chart.setOverlap(100);
-    if(b3D)
-    {
-        bar_chart.setShape(BAR_SHAPE_BOX);
     }
     bar_chart.addAxId(cat_ax);
     bar_chart.addAxId(val_ax);
@@ -19036,4 +19025,6 @@ function checkBlipFillRasterImages(sp)
     window['AscFormat'].CreateSurfaceChart = CreateSurfaceChart;
     window['AscFormat'].getStringPointsFromCat = getStringPointsFromCat;
     window['AscFormat'].CPathMemory = CPathMemory;
+    window['AscFormat'].CreateTypedBarChart = CreateTypedBarChart;
+    window['AscFormat'].CreateTypedLineChart = CreateTypedLineChart;
 })(window);

@@ -3788,14 +3788,19 @@ function CPlotArea()
             this.removeChartByPos(i);
         }
     };
+    CPlotArea.prototype.removeAxisByPos = function(nPos) {
+        if(nPos > -1 && nPos < this.axId.length) {
+            History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_PlotArea_RemoveAxis, nPos, [this.axId[nPos]], false));
+            this.axId.splice(nPos, 1);
+        }
+    };
     CPlotArea.prototype.removeAxis = function(axis)
     {
         for(var i = this.axId.length - 1; i > -1; --i)
         {
             if(this.axId[i] === axis)
             {
-                History.Add(new CChangesDrawingsContent(this, AscDFH.historyitem_PlotArea_RemoveAxis, i, [axis], false));
-                this.axId.splice(i, 1);
+                this.removeAxisByPos(i);
             }
         }
     };
@@ -3975,7 +3980,7 @@ function CPlotArea()
     CPlotArea.prototype.getChartType = function() {
         if(this.charts.length > 0) {
             if(this.charts.length > 1) {
-                return Asc.c_oAscChartTypeSettings.multichart;
+                return Asc.c_oAscChartTypeSettings.combo;
             }
             return this.charts[0].getChartType();
         }
@@ -3993,7 +3998,8 @@ function CPlotArea()
             return;
         }
         var aSeries = this.getAllSeries(), oTypedChart;
-        if(nType === Asc.c_oAscChartTypeSettings.multichart) {
+        var nSeries;
+        if(nType === Asc.c_oAscChartTypeSettings.combo) {
             if(aSeries.length < 2) {
                 return;
             }
@@ -4003,7 +4009,7 @@ function CPlotArea()
             var oNewValAx = oAxes.valAx;
             var oNewCatAx = oAxes.catAx;
             //merge settings from current axes
-            oTypedChart = this.chart[0];
+            oTypedChart = this.charts[0];
             var oValMergeAx = null, oCatMergeAx = null;
             var aVertAxes, aHorAxes;
             aVertAxes = oTypedChart.getVertAxes();
@@ -4032,8 +4038,41 @@ function CPlotArea()
             if(oValMergeAx) {
                 oNewValAx.merge(oValMergeAx);
             }
+            if(oNewCatAx.axPos !== AX_POS_B && oNewCatAx.axPos !== AX_POS_T) {
+                oNewCatAx.setAxPos(AX_POS_B);
+            }
+            if(oNewValAx.axPos !== AX_POS_L && oNewValAx.axPos !== AX_POS_R) {
+                oNewValAx.setAxPos(AX_POS_L);
+            }
+            //create a bar clustered chart and a line chart
+            var oBarChart = AscFormat.CreateTypedBarChart(AscFormat.BAR_GROUPING_CLUSTERED, false);
+            if(oTypedChart.dLbls) {
+                oBarChart.setDLbls(oTypedChart.dLbls.createDuplicate());
+            }
+            var nLength = (aSeries.length / 2 + 0.5) >> 0, oSeries;
+            for(nSeries = 0; nSeries < nLength; ++nSeries) {
+                oSeries = new AscFormat.CBarSeries();
+                oSeries.setFromOtherSeries(aSeries[nSeries]);
+                oBarChart.addSer(oSeries);
+            }
+            var oLineChart = AscFormat.CreateTypedLineChart(AscFormat.GROUPING_STANDARD);
+            for(nSeries = nLength; nSeries < oTypedChart.series.length; ++nSeries) {
+                oSeries = new AscFormat.CLineSeries();
+                oSeries.setFromOtherSeries(aSeries[nSeries]);
+                oLineChart.addSer(oSeries);
+            }
+            oLineChart.setMarkerValue(false);
+            this.removeAllCharts();
+            this.removeAllAxes();
+            this.addChart(oBarChart, 0);
+            this.addChart(oLineChart, 1);
+            this.addAxis(oNewCatAx);
+            this.addAxis(oNewValAx);
+            oBarChart.addAxId(oNewCatAx);
+            oBarChart.addAxId(oNewValAx);
+            oLineChart.addAxId(oNewCatAx);
+            oLineChart.addAxId(oNewValAx);
         }
-
     };
     CPlotArea.prototype.getAllSeries = function() {
         var _ret = [];
@@ -4045,6 +4084,16 @@ function CPlotArea()
             return a.idx - b.idx;
         });
         return _ret;
+    };
+    CPlotArea.prototype.removeAllCharts = function() {
+        this.removeCharts(0, this.charts.length);
+    };
+    CPlotArea.prototype.removeAllAxes = function() {
+        var nStart = this.axId.length - 1;
+        var nEnd = 0;
+        for(var nAxIdx = nStart; nAxIdx >= nEnd; --nAxIdx) {
+            this.removeAxisByPos(nAxIdx);
+        }
     };
 
     function CChartBase() {
@@ -4221,7 +4270,7 @@ function CPlotArea()
         var aAxes = this.axId;
         var aResult = [];
         for(var nAx = 0; nAx < aAxes.length; ++nAx) {
-            var oAxis = this.axId;
+            var oAxis = this.axId[nAx];
             if(oAxis.getObjectType() !== AscDFH.historyitem_type_SerAx) {
                 if(oAxis.axPos === AX_POS_B || oAxis.axPos === AX_POS_T) {
                     aResult.push(oAxis);
@@ -4234,7 +4283,7 @@ function CPlotArea()
         var aAxes = this.axId;
         var aResult = [];
         for(var nAx = 0; nAx < aAxes.length; ++nAx) {
-            var oAxis = this.axId;
+            var oAxis = this.axId[nAx];
             if(oAxis.getObjectType() !== AscDFH.historyitem_type_SerAx) {
                 if(oAxis.axPos === AX_POS_L || oAxis.axPos === AX_POS_R) {
                     aResult.push(oAxis);
@@ -9575,6 +9624,34 @@ CLineChart.prototype = Object.create(CChartBase.prototype);
             }
         }
         return nType;
+    };
+    CLineChart.prototype.setMarkerValue = function(bVal) {
+        var aSeries = this.series, nSeries, oSeries;
+        if(bVal) {
+            if(!this.marker) {
+                this.setMarker(true);
+            }
+            for(nSeries = 0; nSeries < aSeries.length; ++nSeries) {
+                oSeries = aSeries[nSeries];
+                if(oSeries.marker && oSeries.marker.symbol === AscFormat.SYMBOL_NONE) {
+                    oSeries.setMarker(null);
+                }
+            }
+        }
+        else {
+            if(this.marker) {
+                this.setMarker(false);
+            }
+            for(nSeries = 0; nSeries < aSeries.length; ++nSeries) {
+                oSeries = aSeries[nSeries];
+                if(!oSeries.marker) {
+                    oSeries.setMarker(new AscFormat.CMarker());
+                }
+                if(oSeries.marker.symbol !== AscFormat.SYMBOL_NONE) {
+                    oSeries.marker.setSymbol(AscFormat.SYMBOL_NONE);
+                }
+            }
+        }
     };
 
 function CLineSeries()

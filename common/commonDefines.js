@@ -544,7 +544,7 @@
 		surfaceWireframe       : 35,
 		contourNormal          : 36,
 		contourWireframe       : 37,
-		multichart             : 38,
+		combo                  : 38,
 		unknown                : 39
 	};
 
@@ -2465,7 +2465,7 @@
 	prot['surfaceWireframe']           = prot.surfaceWireframe;
 	prot['contourNormal']              = prot.contourNormal;
 	prot['contourWireframe']           = prot.contourWireframe;
-	prot['multichart']                 = prot.multichart;
+	prot['combo']                      = prot.combo;
 	prot['unknown']                    = prot.unknown;
 
 	window['Asc']['c_oAscValAxisRule'] = window['Asc'].c_oAscValAxisRule = c_oAscValAxisRule;
