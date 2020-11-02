@@ -495,7 +495,8 @@
 		l       : 6,
 		outEnd  : 7,
 		r       : 8,
-		t       : 9
+		t       : 9,
+		show    : 10
 	};
 
 	var c_oAscGridLinesSettings = {
@@ -2419,6 +2420,7 @@
 	prot['outEnd']                           = prot.outEnd;
 	prot['r']                                = prot.r;
 	prot['t']                                = prot.t;
+	prot['show']                             = prot.show;
 	window['Asc']['c_oAscGridLinesSettings'] = window['Asc'].c_oAscGridLinesSettings = c_oAscGridLinesSettings;
 	prot                                     = c_oAscGridLinesSettings;
 	prot['none']                             = prot.none;
