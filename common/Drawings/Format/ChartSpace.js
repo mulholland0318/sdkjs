@@ -16044,6 +16044,7 @@ CChartSpace.prototype.onDataUpdate = function() {
     CChartSpace.prototype.changeChartType = function(nType) {
         if(this.chart) {
             this.chart.changeChartType(nType);
+            this.checkDlblsPosition();
         }
     };
     CChartSpace.prototype.checkDlblsPosition = function() {
@@ -17867,6 +17868,55 @@ function CreateStockChart(chartSeries, bUseCache, oOptions)
     return chart_space;
 }
 
+    function CreateSurfaceAxes(sNumFormat) {
+        var oCatAx = new AscFormat.CCatAx();
+        oCatAx.setAxId(++AscFormat.Ax_Counter.GLOBAL_AX_ID_COUNTER);
+        var oScaling = new AscFormat.CScaling();
+        oScaling.setOrientation(AscFormat.ORIENTATION_MIN_MAX);
+        oCatAx.setScaling(oScaling);
+        oCatAx.setDelete(false);
+        oCatAx.setAxPos(AscFormat.AX_POS_B);
+        oCatAx.setMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
+        oCatAx.setMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
+        oCatAx.setTickLblPos(c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
+        oCatAx.setCrosses(AscFormat.CROSSES_AUTO_ZERO);
+        oCatAx.setAuto(true);
+        oCatAx.setLblAlgn(AscFormat.LBL_ALG_CTR);
+        oCatAx.setLblOffset(100);
+        oCatAx.setNoMultiLvlLbl(false);
+        var oValAx = new AscFormat.CValAx();
+        oValAx.setAxId(++AscFormat.Ax_Counter.GLOBAL_AX_ID_COUNTER);
+        var oValScaling = new AscFormat.CScaling();
+        oValScaling.setOrientation(AscFormat.ORIENTATION_MIN_MAX);
+        oValAx.setScaling(oValScaling);
+        oValAx.setDelete(false);
+        oValAx.setAxPos(AscFormat.AX_POS_L);
+        oValAx.setMajorGridlines(new AscFormat.CSpPr());
+        var oNumFmt = new AscFormat.CNumFmt();
+        oNumFmt.setFormatCode(sNumFormat);
+        oNumFmt.setSourceLinked(true);
+        oValAx.setNumFmt(oNumFmt);
+        oValAx.setMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
+        oValAx.setMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
+        oValAx.setTickLblPos(c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
+        oCatAx.setCrossAx(oValAx);
+        oValAx.setCrossAx(oCatAx);
+        oValAx.setCrosses(AscFormat.CROSSES_AUTO_ZERO);
+        oValAx.setCrossBetween(AscFormat.CROSS_BETWEEN_MID_CAT);
+        var oSerAx =  new AscFormat.CSerAx();
+        oSerAx.setAxId(++AscFormat.Ax_Counter.GLOBAL_AX_ID_COUNTER);
+        var oSerScaling = new AscFormat.CScaling();
+        oSerScaling.setOrientation(AscFormat.ORIENTATION_MIN_MAX);
+        oSerAx.setScaling(oSerScaling);
+        oSerAx.setDelete(false);
+        oSerAx.setAxPos(AscFormat.AX_POS_B);
+        oSerAx.setMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
+        oSerAx.setMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
+        oSerAx.setTickLblPos(c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
+        oSerAx.setCrossAx(oCatAx);
+        oSerAx.setCrosses(AscFormat.CROSSES_AUTO_ZERO);
+        return {valAx: oValAx, catAx: oCatAx, serAx: oSerAx};
+    }
 
     function CreateSurfaceChart(chartSeries, bUseCache, oOptions, bContour, bWireFrame){
         var asc_series = chartSeries.series;
@@ -17941,52 +17991,8 @@ function CreateStockChart(chartSeries, bUseCache, oOptions)
             }
             oSurfaceChart.addSer(series);
         }
-        var oCatAx = new AscFormat.CCatAx();
-        oCatAx.setAxId(++AscFormat.Ax_Counter.GLOBAL_AX_ID_COUNTER);
-        var oScaling = new AscFormat.CScaling();
-        oScaling.setOrientation(AscFormat.ORIENTATION_MIN_MAX);
-        oCatAx.setScaling(oScaling);
-        oCatAx.setDelete(false);
-        oCatAx.setAxPos(AscFormat.AX_POS_B);
-        oCatAx.setMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
-        oCatAx.setMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
-        oCatAx.setTickLblPos(c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
-        oCatAx.setCrosses(AscFormat.CROSSES_AUTO_ZERO);
-        oCatAx.setAuto(true);
-        oCatAx.setLblAlgn(AscFormat.LBL_ALG_CTR);
-        oCatAx.setLblOffset(100);
-        oCatAx.setNoMultiLvlLbl(false);
-        var oValAx = new AscFormat.CValAx();
-        oValAx.setAxId(++AscFormat.Ax_Counter.GLOBAL_AX_ID_COUNTER);
-        var oValScaling = new AscFormat.CScaling();
-        oValScaling.setOrientation(AscFormat.ORIENTATION_MIN_MAX);
-        oValAx.setScaling(oValScaling);
-        oValAx.setDelete(false);
-        oValAx.setAxPos(AscFormat.AX_POS_L);
-        oValAx.setMajorGridlines(new AscFormat.CSpPr());
-        var oNumFmt = new AscFormat.CNumFmt();
-        oNumFmt.setFormatCode(GetNumFormatFromSeries(asc_series));
-        oNumFmt.setSourceLinked(true);
-        oValAx.setNumFmt(oNumFmt);
-        oValAx.setMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
-        oValAx.setMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
-        oValAx.setTickLblPos(c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
-        oCatAx.setCrossAx(oValAx);
-        oValAx.setCrossAx(oCatAx);
-        oValAx.setCrosses(AscFormat.CROSSES_AUTO_ZERO);
-        oValAx.setCrossBetween(AscFormat.CROSS_BETWEEN_MID_CAT);
-        var oSerAx =  new AscFormat.CSerAx();
-        oSerAx.setAxId(++AscFormat.Ax_Counter.GLOBAL_AX_ID_COUNTER);
-        var oSerScaling = new AscFormat.CScaling();
-        oSerScaling.setOrientation(AscFormat.ORIENTATION_MIN_MAX);
-        oSerAx.setScaling(oSerScaling);
-        oSerAx.setDelete(false);
-        oSerAx.setAxPos(AscFormat.AX_POS_B);
-        oSerAx.setMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
-        oSerAx.setMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
-        oSerAx.setTickLblPos(c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
-        oSerAx.setCrossAx(oCatAx);
-        oSerAx.setCrosses(AscFormat.CROSSES_AUTO_ZERO);
+        var oAxes = CreateSurfaceAxes(GetNumFormatFromSeries(asc_series));
+        var oCatAx = oAxes.catAx, oValAx = oAxes.valAx, oSerAx = oAxes.serAx;
         oChart.plotArea.addAxis(oCatAx);
         oChart.plotArea.addAxis(oValAx);
         oChart.plotArea.addAxis(oSerAx);
@@ -19035,4 +19041,5 @@ function checkBlipFillRasterImages(sp)
     window['AscFormat'].CPathMemory = CPathMemory;
     window['AscFormat'].CreateTypedBarChart = CreateTypedBarChart;
     window['AscFormat'].CreateTypedLineChart = CreateTypedLineChart;
+    window['AscFormat'].CreateSurfaceAxes = CreateSurfaceAxes;
 })(window);
