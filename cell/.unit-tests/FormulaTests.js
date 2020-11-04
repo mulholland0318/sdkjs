@@ -3776,7 +3776,7 @@ $( function () {
 
         oParser = new parserFormula( "TEXT(123,\"основной\")", "A2", ws );
         ok( oParser.parse() );
-        strictEqual( oParser.calculate().getValue(), "General" );
+        strictEqual( oParser.calculate().getValue(), "123" );
 
         AscCommon.setCurrentCultureInfo(culturelciddefault);
 //____________________________________en_____________________________________________
@@ -3791,7 +3791,7 @@ $( function () {
 
         oParser = new parserFormula( "TEXT(123,\"general\")", "A2", ws );
         ok( oParser.parse() );
-        strictEqual( oParser.calculate().getValue(), "General" );
+        strictEqual( oParser.calculate().getValue(), "123" );
         AscCommon.setCurrentCultureInfo(culturelciddefault);
 //__________________________________es________________________________________________
         AscCommon.setCurrentCultureInfo(3082);
@@ -3803,9 +3803,9 @@ $( function () {
         ok( oParser.parse() );
         strictEqual( oParser.calculate().getValue(), "00:00:00" );
 
-        oParser = new parserFormula( "TEXT(123,\"estándar\")", "A2", ws );
+        oParser = new parserFormula( "TEXT(127,\"Estándar\")", "A2", ws );
         ok( oParser.parse() );
-        strictEqual( oParser.calculate().getValue(), "General" );
+        strictEqual( oParser.calculate().getValue(), "127" );
 
         AscCommon.setCurrentCultureInfo(culturelciddefault);
 //__________________________________fi________________________________________________
@@ -3820,7 +3820,7 @@ $( function () {
 
         oParser = new parserFormula( "TEXT(123,\"yleinen\")", "A2", ws );
         ok( oParser.parse() );
-        strictEqual( oParser.calculate().getValue(), "General" );
+        strictEqual( oParser.calculate().getValue(), "123" );
 
         oParser = new parserFormula( "TEXT(123,\"\")", "A2", ws );
         ok( oParser.parse() );
@@ -3894,9 +3894,9 @@ $( function () {
         AscCommon.setCurrentCultureInfo(culturelciddefault);
 
         AscCommon.setCurrentCultureInfo(1041);
-        oParser = new parserFormula( "TEXT(123,\"G/標準\")", "A2", ws );
+        oParser = new parserFormula( "TEXT(124,\"G/標準\")", "A2", ws );
         ok( oParser.parse() );
-        strictEqual( oParser.calculate().getValue(), "General" );
+        strictEqual( oParser.calculate().getValue(), "124" );
 
         AscCommon.setCurrentCultureInfo(culturelciddefault);
     } );
