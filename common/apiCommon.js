@@ -420,158 +420,358 @@
 		this.show = true;
 	}
 
-	asc_ValAxisSettings.prototype = {
-		isEqual: function(oPr){
-			if(!oPr){
-				return false;
-			}
-            if(this.minValRule !== oPr.minValRule){
-				return false;
-			}
-            if(this.minVal !== oPr.minVal){
-            	return false;
-			}
-            if(this.maxValRule !== oPr.maxValRule){
-            	return false;
-			}
-            if(this.maxVal !== oPr.maxVal){
-            	return false;
-			}
-            if(this.invertValOrder !== oPr.invertValOrder){
-            	return false;
-			}
-            if(this.logScale !== oPr.logScale){
-            	return false;
-			}
-            if(this.logBase !== oPr.logBase){
-            	return false;
-			}
-            if(this.dispUnitsRule !== oPr.dispUnitsRule){
-            	return false;
-			}
-            if(this.units !== oPr.units){
-            	return false;
-			}
-            if(this.showUnitsOnChart !== oPr.showUnitsOnChart){
-            	return false;
-			}
-            if(this.majorTickMark !== oPr.majorTickMark){
-            	return false;
-			}
-            if(this.minorTickMark !== oPr.minorTickMark){
-            	return false;
-			}
-            if(this.tickLabelsPos !== oPr.tickLabelsPos){
-            	return false;
-			}
-            if(this.crossesRule !== oPr.crossesRule){
-            	return false;
-			}
-            if(this.crosses !== oPr.crosses){
-            	return false;
-			}
-            if(this.axisType !== oPr.axisType){
-            	return false;
-			}
-			if(this.show !== oPr.show) {
-				return false;
-			}
+	asc_ValAxisSettings.prototype.isEqual = function(oPr){
+		if(!oPr){
+			return false;
+		}
+		if(this.minValRule !== oPr.minValRule){
+			return false;
+		}
+		if(this.minVal !== oPr.minVal){
+			return false;
+		}
+		if(this.maxValRule !== oPr.maxValRule){
+			return false;
+		}
+		if(this.maxVal !== oPr.maxVal){
+			return false;
+		}
+		if(this.invertValOrder !== oPr.invertValOrder){
+			return false;
+		}
+		if(this.logScale !== oPr.logScale){
+			return false;
+		}
+		if(this.logBase !== oPr.logBase){
+			return false;
+		}
+		if(this.dispUnitsRule !== oPr.dispUnitsRule){
+			return false;
+		}
+		if(this.units !== oPr.units){
+			return false;
+		}
+		if(this.showUnitsOnChart !== oPr.showUnitsOnChart){
+			return false;
+		}
+		if(this.majorTickMark !== oPr.majorTickMark){
+			return false;
+		}
+		if(this.minorTickMark !== oPr.minorTickMark){
+			return false;
+		}
+		if(this.tickLabelsPos !== oPr.tickLabelsPos){
+			return false;
+		}
+		if(this.crossesRule !== oPr.crossesRule){
+			return false;
+		}
+		if(this.crosses !== oPr.crosses){
+			return false;
+		}
+		if(this.axisType !== oPr.axisType){
+			return false;
+		}
+		if(this.show !== oPr.show) {
+			return false;
+		}
 
-			return true;
-		},
-		putAxisType: function (v) {
-			this.axisType = v;
-		},
-		putMinValRule: function (v) {
-			this.minValRule = v;
-		}, putMinVal: function (v) {
-			this.minVal = v;
-		}, putMaxValRule: function (v) {
-			this.maxValRule = v;
-		}, putMaxVal: function (v) {
-			this.maxVal = v;
-		}, putInvertValOrder: function (v) {
-			this.invertValOrder = v;
-		}, putLogScale: function (v) {
-			this.logScale = v;
-		}, putLogBase: function (v) {
-			this.logBase = v;
-		}, putUnits: function (v) {
-			this.units = v;
-		}, putShowUnitsOnChart: function (v) {
-			this.showUnitsOnChart = v;
-		}, putMajorTickMark: function (v) {
-			this.majorTickMark = v;
-		}, putMinorTickMark: function (v) {
-			this.minorTickMark = v;
-		}, putTickLabelsPos: function (v) {
-			this.tickLabelsPos = v;
-		}, putCrossesRule: function (v) {
-			this.crossesRule = v;
-		}, putCrosses: function (v) {
-			this.crosses = v;
-		},
-
-
-		putDispUnitsRule: function (v) {
-			this.dispUnitsRule = v;
-		},
-
-		getAxisType: function () {
-			return this.axisType;
-		},
-
-		getDispUnitsRule: function () {
-			return this.dispUnitsRule;
-		},
-
-		getMinValRule: function () {
-			return this.minValRule;
-		}, getMinVal: function () {
-			return this.minVal;
-		}, getMaxValRule: function () {
-			return this.maxValRule;
-		}, getMaxVal: function () {
-			return this.maxVal;
-		}, getInvertValOrder: function () {
-			return this.invertValOrder;
-		}, getLogScale: function () {
-			return this.logScale;
-		}, getLogBase: function () {
-			return this.logBase;
-		}, getUnits: function () {
-			return this.units;
-		}, getShowUnitsOnChart: function () {
-			return this.showUnitsOnChart;
-		}, getMajorTickMark: function () {
-			return this.majorTickMark;
-		}, getMinorTickMark: function () {
-			return this.minorTickMark;
-		}, getTickLabelsPos: function () {
-			return this.tickLabelsPos;
-		}, getCrossesRule: function () {
-			return this.crossesRule;
-		}, getCrosses: function () {
-			return this.crosses;
-		}, setDefault: function () {
-			this.putMinValRule(Asc.c_oAscValAxisRule.auto);
-			this.putMaxValRule(Asc.c_oAscValAxisRule.auto);
-			this.putTickLabelsPos(Asc.c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
-			this.putInvertValOrder(false);
-			this.putDispUnitsRule(Asc.c_oAscValAxUnits.none);
-			this.putMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
-			this.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
-			this.putCrossesRule(Asc.c_oAscCrossesRule.auto);
-		},
-
-		getShow: function() {
-			return this.show;
-		},
-		putShow: function(val) {
-			this.show = val;
+		return true;
+	};
+	asc_ValAxisSettings.prototype.putAxisType = function(v) {
+		this.axisType = v;
+	};
+	asc_ValAxisSettings.prototype.putMinValRule = function(v) {
+		this.minValRule = v;
+	};
+	asc_ValAxisSettings.prototype.putMinVal = function(v) {
+		this.minVal = v;
+	};
+	asc_ValAxisSettings.prototype.putMaxValRule = function(v) {
+		this.maxValRule = v;
+	};
+	asc_ValAxisSettings.prototype.putMaxVal = function(v) {
+		this.maxVal = v;
+	};
+	asc_ValAxisSettings.prototype.putInvertValOrder = function(v) {
+		this.invertValOrder = v;
+	};
+	asc_ValAxisSettings.prototype.putLogScale = function(v) {
+		this.logScale = v;
+	};
+	asc_ValAxisSettings.prototype.putLogBase = function(v) {
+		this.logBase = v;
+	};
+	asc_ValAxisSettings.prototype.putUnits = function(v) {
+		this.units = v;
+	};
+	asc_ValAxisSettings.prototype.putShowUnitsOnChart = function(v) {
+		this.showUnitsOnChart = v;
+	};
+	asc_ValAxisSettings.prototype.putMajorTickMark = function(v) {
+		this.majorTickMark = v;
+	};
+	asc_ValAxisSettings.prototype.putMinorTickMark = function(v) {
+		this.minorTickMark = v;
+	};
+	asc_ValAxisSettings.prototype.putTickLabelsPos = function(v) {
+		this.tickLabelsPos = v;
+	};
+	asc_ValAxisSettings.prototype.putCrossesRule = function(v) {
+		this.crossesRule = v;
+	};
+	asc_ValAxisSettings.prototype.putCrosses = function(v) {
+		this.crosses = v;
+	};
+	asc_ValAxisSettings.prototype.putDispUnitsRule = function(v) {
+		this.dispUnitsRule = v;
+	};
+	asc_ValAxisSettings.prototype.getAxisType = function() {
+		return this.axisType;
+	};
+	asc_ValAxisSettings.prototype.getDispUnitsRule = function() {
+		return this.dispUnitsRule;
+	};
+	asc_ValAxisSettings.prototype.getMinValRule = function() {
+		return this.minValRule;
+	};
+	asc_ValAxisSettings.prototype.getMinVal = function() {
+		return this.minVal;
+	};
+	asc_ValAxisSettings.prototype.getMaxValRule = function() {
+		return this.maxValRule;
+	};
+	asc_ValAxisSettings.prototype.getMaxVal = function() {
+		return this.maxVal;
+	};
+	asc_ValAxisSettings.prototype.getInvertValOrder = function() {
+		return this.invertValOrder;
+	};
+	asc_ValAxisSettings.prototype.getLogScale = function() {
+		return this.logScale;
+	};
+	asc_ValAxisSettings.prototype.getLogBase = function() {
+		return this.logBase;
+	};
+	asc_ValAxisSettings.prototype.getUnits = function() {
+		return this.units;
+	};
+	asc_ValAxisSettings.prototype.getShowUnitsOnChart = function() {
+		return this.showUnitsOnChart;
+	};
+	asc_ValAxisSettings.prototype.getMajorTickMark = function() {
+		return this.majorTickMark;
+	};
+	asc_ValAxisSettings.prototype.getMinorTickMark = function() {
+		return this.minorTickMark;
+	};
+	asc_ValAxisSettings.prototype.getTickLabelsPos = function() {
+		return this.tickLabelsPos;
+	};
+	asc_ValAxisSettings.prototype.getCrossesRule = function() {
+		return this.crossesRule;
+	};
+	asc_ValAxisSettings.prototype.getCrosses = function() {
+		return this.crosses;
+	};
+	asc_ValAxisSettings.prototype.setDefault = function() {
+		this.putMinValRule(Asc.c_oAscValAxisRule.auto);
+		this.putMaxValRule(Asc.c_oAscValAxisRule.auto);
+		this.putTickLabelsPos(Asc.c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
+		this.putInvertValOrder(false);
+		this.putDispUnitsRule(Asc.c_oAscValAxUnits.none);
+		this.putMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
+		this.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
+		this.putCrossesRule(Asc.c_oAscCrossesRule.auto);
+	};
+	asc_ValAxisSettings.prototype.getShow = function() {
+		return this.show;
+	};
+	asc_ValAxisSettings.prototype.putShow = function(val) {
+		this.show = val;
+	};
+	asc_ValAxisSettings.prototype.read = function(_params, _cursor){
+		var _continue = true;
+		while (_continue)
+		{
+			var _attr = _params[_cursor.pos++];
+			switch (_attr)
+			{
+				case 0:
+				{
+					this.putMinValRule(_params[_cursor.pos++]);
+					break;
+				}
+				case 1:
+				{
+					this.putMinVal(_params[_cursor.pos++]);
+					break;
+				}
+				case 2:
+				{
+					this.putMaxValRule(_params[_cursor.pos++]);
+					break;
+				}
+				case 3:
+				{
+					this.putMaxVal(_params[_cursor.pos++]);
+					break;
+				}
+				case 4:
+				{
+					this.putInvertValOrder(_params[_cursor.pos++]);
+					break;
+				}
+				case 5:
+				{
+					this.putLogScale(_params[_cursor.pos++]);
+					break;
+				}
+				case 6:
+				{
+					this.putLogBase(_params[_cursor.pos++]);
+					break;
+				}
+				case 7:
+				{
+					this.putDispUnitsRule(_params[_cursor.pos++]);
+					break;
+				}
+				case 8:
+				{
+					this.putUnits(_params[_cursor.pos++]);
+					break;
+				}
+				case 9:
+				{
+					this.putShowUnitsOnChart(_params[_cursor.pos++]);
+					break;
+				}
+				case 10:
+				{
+					this.putMajorTickMark(_params[_cursor.pos++]);
+					break;
+				}
+				case 11:
+				{
+					this.putMinorTickMark(_params[_cursor.pos++]);
+					break;
+				}
+				case 12:
+				{
+					this.putTickLabelsPos(_params[_cursor.pos++]);
+					break;
+				}
+				case 13:
+				{
+					this.putCrossesRule(_params[_cursor.pos++]);
+					break;
+				}
+				case 14:
+				{
+					this.putCrosses(_params[_cursor.pos++]);
+					break;
+				}
+				case 15:
+				{
+					this.putAxisType(_params[_cursor.pos++]);
+					break;
+				}
+				case 255:
+				default:
+				{
+					_continue = false;
+					break;
+				}
+			}
 		}
 	};
+	asc_ValAxisSettings.prototype.write = function(_type, _stream) {
+		_stream["WriteByte"](_type);
 
+		if (this.minValRule !== undefined && this.minValRule !== null)
+		{
+			_stream["WriteByte"](0);
+			_stream["WriteLong"](this.minValRule);
+		}
+		if (this.minVal !== undefined && this.minVal !== null)
+		{
+			_stream["WriteByte"](1);
+			_stream["WriteLong"](this.minVal);
+		}
+		if (this.maxValRule !== undefined && this.maxValRule !== null)
+		{
+			_stream["WriteByte"](2);
+			_stream["WriteLong"](this.maxValRule);
+		}
+		if (this.maxVal !== undefined && this.maxVal !== null)
+		{
+			_stream["WriteByte"](3);
+			_stream["WriteLong"](this.maxVal);
+		}
+		if (this.invertValOrder !== undefined && this.invertValOrder !== null)
+		{
+			_stream["WriteByte"](4);
+			_stream["WriteBool"](this.invertValOrder);
+		}
+		if (this.logScale !== undefined && this.logScale !== null)
+		{
+			_stream["WriteByte"](5);
+			_stream["WriteBool"](this.logScale);
+		}
+		if (this.logBase !== undefined && this.logBase !== null)
+		{
+			_stream["WriteByte"](6);
+			_stream["WriteLong"](this.logBase);
+		}
+		if (this.dispUnitsRule !== undefined && this.dispUnitsRule !== null)
+		{
+			_stream["WriteByte"](7);
+			_stream["WriteLong"](this.dispUnitsRule);
+		}
+		if (this.units !== undefined && this.units !== null)
+		{
+			_stream["WriteByte"](8);
+			_stream["WriteLong"](this.units);
+		}
+		if (this.showUnitsOnChart !== undefined && this.showUnitsOnChart !== null)
+		{
+			_stream["WriteByte"](9);
+			_stream["WriteBool"](this.showUnitsOnChart);
+		}
+		if (this.majorTickMark !== undefined && this.majorTickMark !== null)
+		{
+			_stream["WriteByte"](10);
+			_stream["WriteLong"](this.majorTickMark);
+		}
+		if (this.minorTickMark !== undefined && this.minorTickMark !== null)
+		{
+			_stream["WriteByte"](11);
+			_stream["WriteLong"](this.minorTickMark);
+		}
+		if (this.tickLabelsPos !== undefined && this.tickLabelsPos !== null)
+		{
+			_stream["WriteByte"](12);
+			_stream["WriteLong"](this.tickLabelsPos);
+		}
+		if (this.crossesRule !== undefined && this.crossesRule !== null)
+		{
+			_stream["WriteByte"](13);
+			_stream["WriteLong"](this.crossesRule);
+		}
+		if (this.crosses !== undefined && this.crosses !== null)
+		{
+			_stream["WriteByte"](14);
+			_stream["WriteLong"](this.crosses);
+		}
+		if (this.axisType !== undefined && this.axisType !== null)
+		{
+			_stream["WriteByte"](15);
+			_stream["WriteLong"](this.axisType);
+		}
+
+		_stream["WriteByte"](255);
+	}
 	/** @constructor */
 	function asc_CatAxisSettings() {
 		this.intervalBetweenTick = null;
@@ -591,158 +791,319 @@
 		this.show = true;
 	}
 
-	asc_CatAxisSettings.prototype = {
-
-		isEqual: function(oPr){
-			if(!oPr){
-				return false;
+	asc_CatAxisSettings.prototype.isEqual = function(oPr){
+		if(!oPr){
+			return false;
+		}
+		if(this.intervalBetweenTick !== oPr.intervalBetweenTick){
+			return false;
+		}
+		if(this.intervalBetweenLabelsRule !== oPr.intervalBetweenLabelsRule){
+			return false;
+		}
+		if(this.intervalBetweenLabels !== oPr.intervalBetweenLabels){
+			return false;
+		}
+		if(this.invertCatOrder !== oPr.invertCatOrder){
+			return false;
+		}
+		if(this.labelsAxisDistance !== oPr.labelsAxisDistance){
+			return false;
+		}
+		if(this.majorTickMark !== oPr.majorTickMark){
+			return false;
+		}
+		if(this.minorTickMark !== oPr.minorTickMark){
+			return false;
+		}
+		if(this.tickLabelsPos !== oPr.tickLabelsPos){
+			return false;
+		}
+		if(this.crossesRule !== oPr.crossesRule){
+			return false;
+		}
+		if(this.crosses !== oPr.crosses){
+			return false;
+		}
+		if(this.labelsPosition !== oPr.labelsPosition){
+			return false;
+		}
+		if(this.axisType !==  oPr.axisType){
+			return false;
+		}
+		if(this.crossMinVal !== oPr.crossMinVal){
+			return false;
+		}
+		if(this.crossMaxVal !== oPr.crossMaxVal){
+			return false;
+		}
+		if(this.show !== oPr.show) {
+			return false;
+		}
+		return true;
+	};
+	asc_CatAxisSettings.prototype.putIntervalBetweenTick = function(v) {
+		this.intervalBetweenTick = v;
+	};
+	asc_CatAxisSettings.prototype.putIntervalBetweenLabelsRule = function(v) {
+		this.intervalBetweenLabelsRule = v;
+	};
+	asc_CatAxisSettings.prototype.putIntervalBetweenLabels = function(v) {
+		this.intervalBetweenLabels = v;
+	};
+	asc_CatAxisSettings.prototype.putInvertCatOrder = function(v) {
+		this.invertCatOrder = v;
+	};
+	asc_CatAxisSettings.prototype.putLabelsAxisDistance = function(v) {
+		this.labelsAxisDistance = v;
+	};
+	asc_CatAxisSettings.prototype.putMajorTickMark = function(v) {
+		this.majorTickMark = v;
+	};
+	asc_CatAxisSettings.prototype.putMinorTickMark = function(v) {
+		this.minorTickMark = v;
+	};
+	asc_CatAxisSettings.prototype.putTickLabelsPos = function(v) {
+		this.tickLabelsPos = v;
+	};
+	asc_CatAxisSettings.prototype.putCrossesRule = function(v) {
+		this.crossesRule = v;
+	};
+	asc_CatAxisSettings.prototype.putCrosses = function(v) {
+		this.crosses = v;
+	};
+	asc_CatAxisSettings.prototype.putAxisType = function(v) {
+		this.axisType = v;
+	};
+	asc_CatAxisSettings.prototype.putLabelsPosition = function(v) {
+		this.labelsPosition = v;
+	};
+	asc_CatAxisSettings.prototype.getIntervalBetweenTick = function(v) {
+		return this.intervalBetweenTick;
+	};
+	asc_CatAxisSettings.prototype.getIntervalBetweenLabelsRule = function() {
+		return this.intervalBetweenLabelsRule;
+	};
+	asc_CatAxisSettings.prototype.getIntervalBetweenLabels = function() {
+		return this.intervalBetweenLabels;
+	};
+	asc_CatAxisSettings.prototype.getInvertCatOrder = function() {
+		return this.invertCatOrder;
+	};
+	asc_CatAxisSettings.prototype.getLabelsAxisDistance = function() {
+		return this.labelsAxisDistance;
+	};
+	asc_CatAxisSettings.prototype.getMajorTickMark = function() {
+		return this.majorTickMark;
+	};
+	asc_CatAxisSettings.prototype.getMinorTickMark = function() {
+		return this.minorTickMark;
+	};
+	asc_CatAxisSettings.prototype.getTickLabelsPos = function() {
+		return this.tickLabelsPos;
+	};
+	asc_CatAxisSettings.prototype.getCrossesRule = function() {
+		return this.crossesRule;
+	};
+	asc_CatAxisSettings.prototype.getCrosses = function() {
+		return this.crosses;
+	};
+	asc_CatAxisSettings.prototype.getAxisType = function() {
+		return this.axisType;
+	};
+	asc_CatAxisSettings.prototype.getLabelsPosition = function() {
+		return this.labelsPosition;
+	};
+	asc_CatAxisSettings.prototype.getCrossMinVal = function() {
+		return this.crossMinVal;
+	};
+	asc_CatAxisSettings.prototype.getCrossMaxVal = function() {
+		return this.crossMaxVal;
+	};
+	asc_CatAxisSettings.prototype.putCrossMinVal = function(val) {
+		this.crossMinVal = val;
+	};
+	asc_CatAxisSettings.prototype.putCrossMaxVal = function(val) {
+		this.crossMaxVal = val;
+	};
+	asc_CatAxisSettings.prototype.setDefault = function() {
+		this.putIntervalBetweenLabelsRule(Asc.c_oAscBetweenLabelsRule.auto);
+		this.putLabelsPosition(Asc.c_oAscLabelsPosition.betweenDivisions);
+		this.putTickLabelsPos(Asc.c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
+		this.putLabelsAxisDistance(100);
+		this.putMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
+		this.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
+		this.putIntervalBetweenTick(1);
+		this.putCrossesRule(Asc.c_oAscCrossesRule.auto);
+	};
+	asc_CatAxisSettings.prototype.getShow = function() {
+		return this.show;
+	};
+	asc_CatAxisSettings.prototype.putShow = function(val) {
+		this.show = val;
+	};
+	asc_CatAxisSettings.prototype.read = function(_params, _cursor){
+		var _continue = true;
+		while (_continue)
+		{
+			var _attr = _params[_cursor.pos++];
+			switch (_attr)
+			{
+				case 0:
+				{
+					this.putIntervalBetweenTick(_params[_cursor.pos++]);
+					break;
+				}
+				case 1:
+				{
+					this.putIntervalBetweenLabelsRule(_params[_cursor.pos++]);
+					break;
+				}
+				case 2:
+				{
+					this.putIntervalBetweenLabels(_params[_cursor.pos++]);
+					break;
+				}
+				case 3:
+				{
+					this.putInvertCatOrder(_params[_cursor.pos++]);
+					break;
+				}
+				case 4:
+				{
+					this.putLabelsAxisDistance(_params[_cursor.pos++]);
+					break;
+				}
+				case 5:
+				{
+					this.putLabelsPosition(_params[_cursor.pos++]);
+					break;
+				}
+				case 6:
+				{
+					this.putMajorTickMark(_params[_cursor.pos++]);
+					break;
+				}
+				case 7:
+				{
+					this.putMinorTickMark(_params[_cursor.pos++]);
+					break;
+				}
+				case 8:
+				{
+					this.putTickLabelsPos(_params[_cursor.pos++]);
+					break;
+				}
+				case 9:
+				{
+					this.putCrossesRule(_params[_cursor.pos++]);
+					break;
+				}
+				case 10:
+				{
+					this.putCrosses(_params[_cursor.pos++]);
+					break;
+				}
+				case 11:
+				{
+					this.putAxisType(_params[_cursor.pos++]);
+					break;
+				}
+				case 12:
+				{
+					this.putCrossMinVal(_params[_cursor.pos++]);
+					break;
+				}
+				case 13:
+				{
+					this.putCrossMaxVal(_params[_cursor.pos++]);
+					break;
+				}
+				case 255:
+				default:
+				{
+					_continue = false;
+					break;
+				}
 			}
-            if(this.intervalBetweenTick !== oPr.intervalBetweenTick){
-            	return false;
-			}
-            if(this.intervalBetweenLabelsRule !== oPr.intervalBetweenLabelsRule){
-            	return false;
-			}
-            if(this.intervalBetweenLabels !== oPr.intervalBetweenLabels){
-            	return false;
-			}
-            if(this.invertCatOrder !== oPr.invertCatOrder){
-            	return false;
-			}
-            if(this.labelsAxisDistance !== oPr.labelsAxisDistance){
-            	return false;
-			}
-            if(this.majorTickMark !== oPr.majorTickMark){
-            	return false;
-			}
-            if(this.minorTickMark !== oPr.minorTickMark){
-            	return false;
-			}
-            if(this.tickLabelsPos !== oPr.tickLabelsPos){
-            	return false;
-			}
-            if(this.crossesRule !== oPr.crossesRule){
-            	return false;
-			}
-            if(this.crosses !== oPr.crosses){
-            	return false;
-			}
-            if(this.labelsPosition !== oPr.labelsPosition){
-            	return false;
-			}
-            if(this.axisType !==  oPr.axisType){
-            	return false;
-			}
-            if(this.crossMinVal !== oPr.crossMinVal){
-            	return false;
-			}
-            if(this.crossMaxVal !== oPr.crossMaxVal){
-            	return false;
-			}
-			if(this.show !== oPr.show) {
-				return false;
-			}
-			return true;
-		},
-		putIntervalBetweenTick: function (v) {
-			this.intervalBetweenTick = v;
-		}, putIntervalBetweenLabelsRule: function (v) {
-			this.intervalBetweenLabelsRule = v;
-		}, putIntervalBetweenLabels: function (v) {
-			this.intervalBetweenLabels = v;
-		}, putInvertCatOrder: function (v) {
-			this.invertCatOrder = v;
-		}, putLabelsAxisDistance: function (v) {
-			this.labelsAxisDistance = v;
-		}, putMajorTickMark: function (v) {
-			this.majorTickMark = v;
-		}, putMinorTickMark: function (v) {
-			this.minorTickMark = v;
-		}, putTickLabelsPos: function (v) {
-			this.tickLabelsPos = v;
-		}, putCrossesRule: function (v) {
-			this.crossesRule = v;
-		}, putCrosses: function (v) {
-			this.crosses = v;
-		},
-
-		putAxisType: function (v) {
-			this.axisType = v;
-		},
-
-		putLabelsPosition: function (v) {
-			this.labelsPosition = v;
-		},
-
-		getIntervalBetweenTick: function (v) {
-			return this.intervalBetweenTick;
-		},
-
-		getIntervalBetweenLabelsRule: function () {
-			return this.intervalBetweenLabelsRule;
-		}, getIntervalBetweenLabels: function () {
-			return this.intervalBetweenLabels;
-		}, getInvertCatOrder: function () {
-			return this.invertCatOrder;
-		}, getLabelsAxisDistance: function () {
-			return this.labelsAxisDistance;
-		}, getMajorTickMark: function () {
-			return this.majorTickMark;
-		}, getMinorTickMark: function () {
-			return this.minorTickMark;
-		}, getTickLabelsPos: function () {
-			return this.tickLabelsPos;
-		}, getCrossesRule: function () {
-			return this.crossesRule;
-		}, getCrosses: function () {
-			return this.crosses;
-		},
-
-		getAxisType: function () {
-			return this.axisType;
-		},
-
-		getLabelsPosition: function () {
-			return this.labelsPosition;
-		},
-
-		getCrossMinVal: function () {
-			return this.crossMinVal;
-		},
-
-		getCrossMaxVal: function () {
-			return this.crossMaxVal;
-		},
-
-
-		putCrossMinVal: function (val) {
-			this.crossMinVal = val;
-		},
-
-		putCrossMaxVal: function (val) {
-			this.crossMaxVal = val;
-		},
-
-		setDefault: function () {
-			this.putIntervalBetweenLabelsRule(Asc.c_oAscBetweenLabelsRule.auto);
-			this.putLabelsPosition(Asc.c_oAscLabelsPosition.betweenDivisions);
-			this.putTickLabelsPos(Asc.c_oAscTickLabelsPos.TICK_LABEL_POSITION_NEXT_TO);
-			this.putLabelsAxisDistance(100);
-			this.putMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
-			this.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
-			this.putIntervalBetweenTick(1);
-			this.putCrossesRule(Asc.c_oAscCrossesRule.auto);
-		},
-
-		getShow: function() {
-			return this.show;
-		},
-
-		putShow: function(val) {
-			this.show = val;
 		}
 	};
+	asc_CatAxisSettings.prototype.write = function(_type, _stream) {
+		_stream["WriteByte"](_type);
 
+		if (this.getIntervalBetweenTick() !== undefined && this.getIntervalBetweenTick() !== null)
+		{
+			_stream["WriteByte"](0);
+			_stream["WriteDouble2"](this.getIntervalBetweenTick());
+		}
+		if (this.getIntervalBetweenLabelsRule() !== undefined && this.getIntervalBetweenLabelsRule() !== null)
+		{
+			_stream["WriteByte"](1);
+			_stream["WriteLong"](this.getIntervalBetweenLabelsRule());
+		}
+		if (this.getIntervalBetweenLabels() !== undefined && this.getIntervalBetweenLabels() !== null)
+		{
+			_stream["WriteByte"](2);
+			_stream["WriteDouble2"](this.getIntervalBetweenLabels());
+		}
+		if (this.getInvertCatOrder() !== undefined && this.getInvertCatOrder() !== null)
+		{
+			_stream["WriteByte"](3);
+			_stream["WriteBool"](this.getInvertCatOrder());
+		}
+		if (this.getLabelsAxisDistance() !== undefined && this.getLabelsAxisDistance() !== null)
+		{
+			_stream["WriteByte"](4);
+			_stream["WriteDouble2"](this.getLabelsAxisDistance());
+		}
+		if (this.getTickLabelsPos() !== undefined && this.getTickLabelsPos() !== null)
+		{
+			_stream["WriteByte"](5);
+			_stream["WriteLong"](this.getTickLabelsPos());
+		}
+		if (this.getMajorTickMark() !== undefined && this.getMajorTickMark() !== null)
+		{
+			_stream["WriteByte"](6);
+			_stream["WriteLong"](this.getMajorTickMark());
+		}
+		if (this.getMinorTickMark() !== undefined && this.getMinorTickMark() !== null)
+		{
+			_stream["WriteByte"](7);
+			_stream["WriteLong"](this.getMinorTickMark());
+		}
+		if (this.getTickLabelsPos() !== undefined && this.getTickLabelsPos() !== null)
+		{
+			_stream["WriteByte"](8);
+			_stream["WriteLong"](this.getTickLabelsPos());
+		}
+		if (this.getCrossesRule() !== undefined && this.getCrossesRule() !== null)
+		{
+			_stream["WriteByte"](9);
+			_stream["WriteLong"](this.getCrossesRule());
+		}
+		if (this.getCrosses() !== undefined && this.getCrosses() !== null)
+		{
+			_stream["WriteByte"](10);
+			_stream["WriteLong"](this.getCrosses());
+		}
+		if (this.getAxisType() !== undefined && this.getAxisType() !== null)
+		{
+			_stream["WriteByte"](11);
+			_stream["WriteLong"](this.getAxisType());
+		}
+		if (this.getCrossMinVal() !== undefined && this.getCrossMinVal() !== null)
+		{
+			_stream["WriteByte"](12);
+			_stream["WriteLong"](this.getCrossMinVal());
+		}
+		if (this.getCrossMaxVal() !== undefined && this.getCrossMaxVal() !== null)
+		{
+			_stream["WriteByte"](13);
+			_stream["WriteLong"](this.getCrossMaxVal());
+		}
+
+		_stream["WriteByte"](255);
+	};
 	/** @constructor */
 	function asc_ChartSettings() {
 		this.style = null;
@@ -1152,7 +1513,290 @@
 			this.chartSpace.onDataUpdate();
 		}
 	};
+	asc_ChartSettings.prototype.read = function(_params, _cursor) {
+		var _continue = true;
+		var oAxPr;
+		while (_continue)
+		{
+			var _attr = _params[_cursor.pos++];
+			switch (_attr)
+			{
+				case 0:
+				{
+					this.putStyle(_params[_cursor.pos++]);
+					break;
+				}
+				case 1:
+				{
+					this.putTitle(_params[_cursor.pos++]);
+					break;
+				}
+				case 2:
+				{
+					this.putRowCols(_params[_cursor.pos++]);
+					break;
+				}
+				case 3:
+				{
+					this.putHorAxisLabel(_params[_cursor.pos++]);
+					break;
+				}
+				case 4:
+				{
+					this.putVertAxisLabel(_params[_cursor.pos++]);
+					break;
+				}
+				case 5:
+				{
+					this.putLegendPos(_params[_cursor.pos++]);
+					break;
+				}
+				case 6:
+				{
+					this.putDataLabelsPos(_params[_cursor.pos++]);
+					break;
+				}
+				case 7:
+				{
+					_cursor.pos++;
+					break;
+				}
+				case 8:
+				{
+					_cursor.pos++;
+					break;
+				}
+				case 9:
+				{
+					this.putHorGridLines(_params[_cursor.pos++]);
+					break;
+				}
+				case 10:
+				{
+					this.putVertGridLines(_params[_cursor.pos++]);
+					break;
+				}
+				case 11:
+				{
+					this.putType(_params[_cursor.pos++]);
+					break;
+				}
+				case 12:
+				{
+					this.putShowSerName(_params[_cursor.pos++]);
+					break;
+				}
+				case 13:
+				{
+					this.putShowCatName(_params[_cursor.pos++]);
+					break;
+				}
+				case 14:
+				{
+					this.putShowVal(_params[_cursor.pos++]);
+					break;
+				}
+				case 15:
+				{
+					this.putSeparator(_params[_cursor.pos++]);
+					break;
+				}
+				case 16:
+				{
+					oAxPr = new asc_ValAxisSettings();
+					oAxPr.read(_params, _cursor);
+					this.putHorAxisProps(oAxPr);
+					break;
+				}
+				case 17:
+				{
+					oAxPr = new asc_ValAxisSettings();
+					oAxPr.read(_params, _cursor);
+					this.putVertAxisProps(oAxPr);
+					break;
+				}
+				case 18:
+				{
+					this.putRange(_params[_cursor.pos++]);
+					break;
+				}
+				case 19:
+				{
+					this.putInColumns(_params[_cursor.pos++]);
+					break;
+				}
+				case 20:
+				{
+					this.putShowMarker(_params[_cursor.pos++]);
+					break;
+				}
+				case 21:
+				{
+					this.putLine(_params[_cursor.pos++]);
+					break;
+				}
+				case 22:
+				{
+					this.putSmooth(_params[_cursor.pos++]);
+					break;
+				}
+				case 23:
+				{
+					oAxPr = new asc_CatAxisSettings();
+					oAxPr.read(_params, _cursor)
+					this.putHorAxisProps(oAxPr);
+					break;
+				}
+				case 24:
+				{
+					oAxPr = new asc_CatAxisSettings();
+					oAxPr.read(_params, _cursor)
+					this.putVertAxisProps(oAxPr);
+					break;
+				}
 
+				case 255:
+				default:
+				{
+					_continue = false;
+					break;
+				}
+			}
+		}
+
+	};
+	asc_ChartSettings.prototype.write = function(_type, _stream) {
+		_stream["WriteByte"](_type);
+
+		if (this.style !== undefined && this.style !== null)
+		{
+			_stream["WriteByte"](0);
+			_stream["WriteLong"](this.style);
+		}
+		if (this.title !== undefined && this.title !== null)
+		{
+			_stream["WriteByte"](1);
+			_stream["WriteLong"](this.title);
+		}
+		if (this.rowCols !== undefined && this.rowCols !== null)
+		{
+			_stream["WriteByte"](2);
+			_stream["WriteLong"](this.rowCols);
+		}
+		if (this.horAxisLabel !== undefined && this.horAxisLabel !== null)
+		{
+			_stream["WriteByte"](3);
+			_stream["WriteLong"](this.horAxisLabel);
+		}
+		if (this.vertAxisLabel !== undefined && this.vertAxisLabel !== null)
+		{
+			_stream["WriteByte"](4);
+			_stream["WriteLong"](this.vertAxisLabel);
+		}
+		if (this.legendPos !== undefined && this.legendPos !== null)
+		{
+			_stream["WriteByte"](5);
+			_stream["WriteLong"](this.legendPos);
+		}
+		if (this.dataLabelsPos !== undefined && this.dataLabelsPos !== null)
+		{
+			_stream["WriteByte"](6);
+			_stream["WriteLong"](this.dataLabelsPos);
+		}
+		if (this.horGridLines !== undefined && this.horGridLines !== null)
+		{
+			_stream["WriteByte"](9);
+			_stream["WriteLong"](this.horGridLines);
+		}
+		if (this.vertGridLines !== undefined && this.vertGridLines !== null)
+		{
+			_stream["WriteByte"](10);
+			_stream["WriteLong"](this.vertGridLines);
+		}
+		if (this.type !== undefined && this.type !== null)
+		{
+			_stream["WriteByte"](11);
+			_stream["WriteLong"](this.type);
+		}
+
+		if (this.showSerName !== undefined && this.showSerName !== null)
+		{
+			_stream["WriteByte"](12);
+			_stream["WriteBool"](this.showSerName);
+		}
+		if (this.showCatName !== undefined && this.showCatName !== null)
+		{
+			_stream["WriteByte"](13);
+			_stream["WriteBool"](this.showCatName);
+		}
+		if (this.showVal !== undefined && this.showVal !== null)
+		{
+			_stream["WriteByte"](14);
+			_stream["WriteBool"](this.showVal);
+		}
+
+		if (this.separator !== undefined && this.separator !== null)
+		{
+			_stream["WriteByte"](15);
+			_stream["WriteString2"](this.separator);
+		}
+
+
+		var oHorAx = this.getHorAxisProps();
+		var oVertAx = this.getVertAxisProps();
+		if (undefined != oHorAx
+			&& null != oHorAx
+			&& oHorAx.getAxisType() == Asc.c_oAscAxisType.val) {
+			oHorAx.write(16, _stream);
+		}
+
+		if (undefined != oVertAx
+			&& null != oVertAx
+			&& oVertAx.getAxisType() == Asc.c_oAscAxisType.val) {
+			oVertAx.write(17, _stream);
+		}
+		var sRange = this.getRange();
+		if (sRange !== undefined && sRange !== null)
+		{
+			_stream["WriteByte"](18);
+			_stream["WriteString2"](sRange);
+		}
+
+		if (this.inColumns !== undefined && this.inColumns !== null)
+		{
+			_stream["WriteByte"](19);
+			_stream["WriteBool"](this.inColumns);
+		}
+		if (this.showMarker !== undefined && this.showMarker !== null)
+		{
+			_stream["WriteByte"](20);
+			_stream["WriteBool"](this.showMarker);
+		}
+		if (this.bLine !== undefined && this.bLine !== null)
+		{
+			_stream["WriteByte"](21);
+			_stream["WriteBool"](this.bLine);
+		}
+		if (this.smooth !== undefined && this.smooth !== null)
+		{
+			_stream["WriteByte"](22);
+			_stream["WriteBool"](this.showVal);
+		}
+
+		if (undefined != oHorAx
+			&& null != oHorAx
+			&& oHorAx.getAxisType() == Asc.c_oAscAxisType.cat) {
+			oHorAx.write(23, _stream);
+		}
+
+		if (undefined != oVertAx
+			&& null != oVertAx
+			&& oVertAx.getAxisType() == Asc.c_oAscAxisType.cat) {
+			oVertAx.write(24, _stream);
+		}
+
+		_stream["WriteByte"](255);
+	};
 	/** @constructor */
 	function asc_CRect(x, y, width, height) {
 		// private members
@@ -4692,8 +5336,6 @@
 	prot["getVertAxisLabel"] = prot.getVertAxisLabel;
 	prot["getLegendPos"] = prot.getLegendPos;
 	prot["getDataLabelsPos"] = prot.getDataLabelsPos;
-	prot["getHorAx"] = prot.getHorAx;
-	prot["getVertAx"] = prot.getVertAx;
 	prot["getHorGridLines"] = prot.getHorGridLines;
 	prot["putHorGridLines"] = prot.putHorGridLines;
 	prot["getVertGridLines"] = prot.getVertGridLines;
