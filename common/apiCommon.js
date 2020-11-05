@@ -417,11 +417,10 @@
 		this.crossesRule = null;
 		this.crosses = null;
 		this.axisType = c_oAscAxisType.val;
+		this.show = true;
 	}
 
 	asc_ValAxisSettings.prototype = {
-
-
 		isEqual: function(oPr){
 			if(!oPr){
 				return false;
@@ -474,14 +473,15 @@
             if(this.axisType !== oPr.axisType){
             	return false;
 			}
+			if(this.show !== oPr.show) {
+				return false;
+			}
 
 			return true;
 		},
-
 		putAxisType: function (v) {
 			this.axisType = v;
 		},
-
 		putMinValRule: function (v) {
 			this.minValRule = v;
 		}, putMinVal: function (v) {
@@ -562,6 +562,13 @@
 			this.putMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
 			this.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
 			this.putCrossesRule(Asc.c_oAscCrossesRule.auto);
+		},
+
+		getShow: function() {
+			return this.show;
+		},
+		putShow: function(val) {
+			this.show = val;
 		}
 	};
 
@@ -581,6 +588,7 @@
 		this.axisType = c_oAscAxisType.cat;
 		this.crossMinVal = null;
 		this.crossMaxVal = null;
+		this.show = true;
 	}
 
 	asc_CatAxisSettings.prototype = {
@@ -630,6 +638,9 @@
 			}
             if(this.crossMaxVal !== oPr.crossMaxVal){
             	return false;
+			}
+			if(this.show !== oPr.show) {
+				return false;
 			}
 			return true;
 		},
@@ -721,6 +732,14 @@
 			this.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
 			this.putIntervalBetweenTick(1);
 			this.putCrossesRule(Asc.c_oAscCrossesRule.auto);
+		},
+
+		getShow: function() {
+			return this.show;
+		},
+
+		putShow: function(val) {
+			this.show = val;
 		}
 	};
 
@@ -751,8 +770,6 @@
 		this.depthAxes = [];
 
 
-		this.showHorAxis = null;
-		this.showVerAxis = null;
 		this.horAxisLabel = null;
 		this.vertAxisLabel = null;
 		this.horGridLines = null;
@@ -761,674 +778,378 @@
 		this.vertAxisProps = null;
 	}
 
-	asc_ChartSettings.prototype = {
+		//TODO:remove this---------------------
+	asc_ChartSettings.prototype.putShowHorAxis = function(v) {
+		var oAx = this.horizontalAxes[0];
+		if(oAx) {
+			oAx.putShow(v);
+		}
+	};
+	asc_ChartSettings.prototype.getShowHorAxis = function() {
+		var oAx = this.horizontalAxes[0];
+		if(oAx) {
+			return oAx.getShow();
+		}
+		return false;
+	};
+	asc_ChartSettings.prototype.putShowVerAxis = function(v) {
+		var oAx = this.verticalAxes[0];
+		if(oAx) {
+			oAx.putShow(v);
+		}
+	};
+	asc_ChartSettings.prototype.getShowVerAxis = function() {
+		var oAx = this.verticalAxes[0];
+		if(oAx) {
+			return oAx.getShow();
+		}
+		return false;
+	};
+	//------------------------------
 
-		equalBool: function(a, b){
-			return ((!!a) === (!!b));
-		},
 
-		isEqual: function(oPr){
-			if(!oPr){
+	asc_ChartSettings.prototype.equalBool = function(a, b){
+		return ((!!a) === (!!b));
+	};
+	asc_ChartSettings.prototype.isEqual = function(oPr){
+		if(!oPr){
+			return false;
+		}
+		if(this.style !== oPr.style){
+			return false;
+		}
+		if(this.title !== oPr.title){
+			return false;
+		}
+		if(this.rowCols !== oPr.rowCols){
+			return false;
+		}
+		if(this.horAxisLabel !== oPr.horAxisLabel){
+			return false;
+		}
+		if(this.vertAxisLabel !== oPr.vertAxisLabel){
+			return false;
+		}
+		if(this.legendPos !== oPr.legendPos){
+			return false;
+		}
+		if(this.dataLabelsPos !== oPr.dataLabelsPos){
+			return false;
+		}
+		if(this.horGridLines !== oPr.horGridLines){
+			return false;
+		}
+		if(this.vertGridLines !== oPr.vertGridLines){
+			return false;
+		}
+		if(this.type !== oPr.type){
+			return false;
+		}
+		if(!this.equalBool(this.showSerName, oPr.showSerName)){
+			return false;
+		}
+
+		if(!this.equalBool(this.showCatName, oPr.showCatName)){
+			return false;
+		}
+		if(!this.equalBool(this.showVal, oPr.showVal)){
+			return false;
+		}
+
+		if(this.separator !== oPr.separator &&
+		!(this.separator === ' ' && oPr.separator == null || oPr.separator === ' ' && this.separator == null)){
+			return false;
+		}
+		if(!this.horAxisProps){
+			if(oPr.horAxisProps){
 				return false;
 			}
-			if(this.style !== oPr.style){
+		}
+		else{
+			if(!this.horAxisProps.isEqual(oPr.horAxisProps)){
 				return false;
 			}
-            if(this.title !== oPr.title){
+		}
+		if(!this.vertAxisProps){
+			if(oPr.vertAxisProps){
 				return false;
 			}
-			if(this.rowCols !== oPr.rowCols){
-            	return false;
-			}
-			if(this.horAxisLabel !== oPr.horAxisLabel){
+		}
+		else{
+			if(!this.vertAxisProps.isEqual(oPr.vertAxisProps)){
 				return false;
 			}
-            if(this.vertAxisLabel !== oPr.vertAxisLabel){
+		}
+		if(this.aRanges.length !== oPr.aRanges.length){
+			return false;
+		}
+		for(var i = 0; i < this.aRanges.length; ++i) {
+			if(this.aRanges[i] !== oPr.aRanges[i]) {
 				return false;
 			}
-			if(this.legendPos !== oPr.legendPos){
-           		return false;
-			}
-			if(this.dataLabelsPos !== oPr.dataLabelsPos){
-				return false;
-			}
-            if(this.horGridLines !== oPr.horGridLines){
-            	return false;
-			}
-            if(this.vertGridLines !== oPr.vertGridLines){
-            	return false;
-			}
-            if(this.type !== oPr.type){
-            	return false;
-			}
-            if(!this.equalBool(this.showSerName, oPr.showSerName)){
-            	return false;
-			}
+		}
+		if(!this.equalBool(this.inColumns, oPr.inColumns)){
+			return false;
+		}
 
-            if(!this.equalBool(this.showCatName, oPr.showCatName)){
-            	return false;
-			}
-            if(!this.equalBool(this.showVal, oPr.showVal)){
-            	return false;
-			}
-
-            if(this.separator !== oPr.separator &&
-			!(this.separator === ' ' && oPr.separator == null || oPr.separator === ' ' && this.separator == null)){
-            	return false;
-			}
-			if(!this.horAxisProps){
-            	if(oPr.horAxisProps){
-            		return false;
-				}
-			}
-			else{
-				if(!this.horAxisProps.isEqual(oPr.horAxisProps)){
-					return false;
-				}
-			}
-            if(!this.vertAxisProps){
-                if(oPr.vertAxisProps){
-                    return false;
-                }
-            }
-            else{
-                if(!this.vertAxisProps.isEqual(oPr.vertAxisProps)){
-                    return false;
-                }
-            }
-            if(this.aRanges.length !== oPr.aRanges.length){
-                return false;
-            }
-			for(var i = 0; i < this.aRanges.length; ++i) {
-				if(this.aRanges[i] !== oPr.aRanges[i]) {
-					return false;
-				}
-			}
-            if(!this.equalBool(this.inColumns, oPr.inColumns)){
-                return false;
-            }
-
-            if(!this.equalBool(this.showMarker, oPr.showMarker)){
-                return false;
-            }
-            if(!this.equalBool(this.bLine, oPr.bLine)){
-                return false;
-            }
-            if(!this.equalBool(this.smooth, oPr.smooth)){
-                return false;
-            }
-            if(!this.equalBool(this.showHorAxis, oPr.showHorAxis)){
-                return false;
-            }
-
-            if(!this.equalBool(this.showVerAxis, oPr.showVerAxis)){
-                return false;
-            }
-            return true;
-		},
-
-		isEmpty: function () {
-			return this.isEqual(new asc_ChartSettings());
-		},
-
-		putShowMarker: function (v) {
-			this.showMarker = v;
-		},
-
-		getShowMarker: function () {
-			return this.showMarker;
-		},
-
-		putLine: function (v) {
-			this.bLine = v;
-		},
-
-		getLine: function () {
-			return this.bLine;
-		},
-
-		putRanges: function(aRanges) {
-			if(Array.isArray(aRanges)) {
-				this.aRanges = aRanges;
-			}
-			else {
-				this.aRanges.length = 0;
-			}
-		},
-
-		getRanges: function() {
-			return this.aRanges;
-		},
-
-		putSmooth: function (v) {
-			this.smooth = v;
-		},
-
-		getSmooth: function () {
-			return this.smooth;
-		},
-
-		putStyle: function (index) {
-			this.style = parseInt(index, 10);
-		},
-
-		getStyle: function () {
-			return this.style;
-		},
-
-		putRange: function (range) {
+		if(!this.equalBool(this.showMarker, oPr.showMarker)){
+			return false;
+		}
+		if(!this.equalBool(this.bLine, oPr.bLine)){
+			return false;
+		}
+		if(!this.equalBool(this.smooth, oPr.smooth)){
+			return false;
+		}
+		return true;
+	};
+	asc_ChartSettings.prototype.isEmpty = function() {
+		return this.isEqual(new asc_ChartSettings());
+	};
+	asc_ChartSettings.prototype.putShowMarker = function(v) {
+		this.showMarker = v;
+	};
+	asc_ChartSettings.prototype.getShowMarker = function() {
+		return this.showMarker;
+	};
+	asc_ChartSettings.prototype.putLine = function(v) {
+		this.bLine = v;
+	};
+	asc_ChartSettings.prototype.getLine = function() {
+		return this.bLine;
+	};
+	asc_ChartSettings.prototype.putRanges = function(aRanges) {
+		if(Array.isArray(aRanges)) {
+			this.aRanges = aRanges;
+		}
+		else {
 			this.aRanges.length = 0;
-			this.aRanges[0] = range;
-		},
-
-		setRange: function(sRange) {
-			if(this.chartSpace) {
-				this.chartSpace.setRange(sRange);
-				this.updateChart();
-			}
-		},
-
-		isValidRange: function(sRange) {
-			if(sRange === "") {
-				return Asc.c_oAscError.ID.No;
-			}
-			var sCheck = sRange;
-			if(sRange[0] === "=") {
-				sCheck = sRange.slice(1);
-			}
-			var aRanges = AscFormat.fParseChartFormula(sCheck);
-			return (aRanges.length !== 0) ? Asc.c_oAscError.ID.No : Asc.c_oAscError.ID.DataRangeError;
-		},
-
-		getRange: function () {
-			if(this.chartSpace) {
-				return this.chartSpace.getCommonRange();
-			}
-			return null;
-		},
-
-		putInColumns: function (inColumns) {
-			this.inColumns = inColumns;
-		},
-
-		getInColumns: function () {
-			return this.inColumns;
-		},
-
-		putTitle: function (v) {
-			this.title = v;
-		},
-
-		getTitle: function () {
-			return this.title;
-		},
-
-		putRowCols: function (v) {
-			this.rowCols = v;
-		},
-
-		getRowCols: function () {
-			return this.rowCols;
-		},
-
-		putHorAxisLabel: function (v) {
-			this.horAxisLabel = v;
-		}, putVertAxisLabel: function (v) {
-			this.vertAxisLabel = v;
-		}, putLegendPos: function (v) {
-			this.legendPos = v;
-		}, putDataLabelsPos: function (v) {
-			this.dataLabelsPos = v;
-		},
-		getHorAxisLabel: function (v) {
-			return this.horAxisLabel;
-		}, getVertAxisLabel: function (v) {
-			return this.vertAxisLabel;
-		}, getLegendPos: function (v) {
-			return this.legendPos;
-		}, getDataLabelsPos: function (v) {
-			return this.dataLabelsPos;
-		},
-
-		putHorGridLines: function (v) {
-			this.horGridLines = v;
-		},
-
-		getHorGridLines: function (v) {
-			return this.horGridLines;
-		},
-
-		putVertGridLines: function (v) {
-			this.vertGridLines = v;
-		},
-
-		getVertGridLines: function () {
-			return this.vertGridLines;
-		},
-
-		getType: function () {
-			return this.type;
-		},
-
-		putType: function (v) {
-			this.type = v;
-		},
-
-		putShowSerName: function (v) {
-			this.showSerName = v;
-		}, putShowCatName: function (v) {
-			this.showCatName = v;
-		}, putShowVal: function (v) {
-			this.showVal = v;
-		},
-
-
-		getShowSerName: function () {
-			return this.showSerName;
-		}, getShowCatName: function () {
-			return this.showCatName;
-		}, getShowVal: function () {
-			return this.showVal;
-		},
-
-		putSeparator: function (v) {
-			this.separator = v;
-		},
-
-		getSeparator: function () {
-			return this.separator;
-		},
-
-		putHorAxisProps: function (v) {
-			this.horAxisProps = v;
-		},
-
-		getHorAxisProps: function () {
-			return this.horAxisProps;
-		},
-
-
-		putVertAxisProps: function (v) {
-			this.vertAxisProps = v;
-		},
-
-		getVertAxisProps: function () {
-			return this.vertAxisProps;
-		},
-
-
-
-		checkSwapAxisProps: function(bHBar){
-            var hor_axis_settings = this.getHorAxisProps();
-            var vert_axis_settings = this.getVertAxisProps();
-			if(!bHBar){
-                if(hor_axis_settings){
-                    if(hor_axis_settings.getAxisType() !== c_oAscAxisType.cat){
-                        if(vert_axis_settings &&  vert_axis_settings.getAxisType() === c_oAscAxisType.cat){
-                            this.putHorAxisProps(vert_axis_settings);
-                        }
-                        else{
-                            var new_hor_axis_settings = new asc_CatAxisSettings();
-                            new_hor_axis_settings.setDefault();
-                            this.putHorAxisProps(new_hor_axis_settings);
-                        }
-                    }
-                }
-                else{
-                    var new_hor_axis_settings = new asc_CatAxisSettings();
-                    new_hor_axis_settings.setDefault();
-                    this.putHorAxisProps(new_hor_axis_settings);
-                }
-
-                if(vert_axis_settings){
-                    if(vert_axis_settings.getAxisType() !== c_oAscAxisType.val){
-                        if(hor_axis_settings && hor_axis_settings.getAxisType() === c_oAscAxisType.val){
-                            this.putVertAxisProps(hor_axis_settings);
-                        }
-                        else{
-                            var new_vert_axis_settings = new asc_ValAxisSettings();
-                            new_vert_axis_settings.setDefault();
-                            this.putVertAxisProps(new_vert_axis_settings);
-                        }
-                    }
-                }
-                else{
-                    var new_vert_axis_settings = new asc_ValAxisSettings();
-                    new_vert_axis_settings.setDefault();
-                    this.putVertAxisProps(new_vert_axis_settings);
-                }
-            }
-            else{
-                if(hor_axis_settings){
-                    if(hor_axis_settings.getAxisType() !== c_oAscAxisType.val){
-                        if(vert_axis_settings &&  vert_axis_settings.getAxisType() === c_oAscAxisType.val){
-                            this.putHorAxisProps(vert_axis_settings);
-                        }
-                        else{
-                            var new_hor_axis_settings = new asc_ValAxisSettings();
-                            new_hor_axis_settings.setDefault();
-                            this.putHorAxisProps(new_hor_axis_settings);
-                        }
-                    }
-                }
-                else{
-                    var new_hor_axis_settings = new asc_ValAxisSettings();
-                    new_hor_axis_settings.setDefault();
-                    this.putHorAxisProps(new_hor_axis_settings);
-                }
-
-                if(vert_axis_settings){
-                    if(vert_axis_settings.getAxisType() !== c_oAscAxisType.cat){
-                        if(hor_axis_settings && hor_axis_settings.getAxisType() === c_oAscAxisType.cat){
-                            this.putVertAxisProps(hor_axis_settings);
-                        }
-                        else{
-                            var new_vert_axis_settings = new asc_CatAxisSettings();
-                            new_vert_axis_settings.setDefault();
-                            this.putVertAxisProps(new_vert_axis_settings);
-                        }
-                    }
-                }
-                else{
-                    var new_vert_axis_settings = new asc_CatAxisSettings();
-                    new_vert_axis_settings.setDefault();
-                    this.putVertAxisProps(new_vert_axis_settings);
-                }
-			}
-		},
-
-		changeType: function (type) {
-			if(null === this.type){
-				this.putType(type);
-				return;
-			}
-			if (this.type === type) {
-				return;
-			}
-
-			var bSwapGridLines = ((this.type === c_oAscChartTypeSettings.hBarNormal ||
-			this.type === c_oAscChartTypeSettings.hBarStacked || this.type === c_oAscChartTypeSettings.hBarStackedPer
-			|| this.type === c_oAscChartTypeSettings.hBarNormal3d || this.type === c_oAscChartTypeSettings.hBarStacked3d
-			|| this.type === c_oAscChartTypeSettings.hBarStackedPer3d) !==
-			(type === c_oAscChartTypeSettings.hBarNormal || type === c_oAscChartTypeSettings.hBarStacked ||
-			type === c_oAscChartTypeSettings.hBarStackedPer || this.type === c_oAscChartTypeSettings.hBarNormal3d
-			|| this.type === c_oAscChartTypeSettings.hBarStacked3d || this.type === c_oAscChartTypeSettings.hBarStackedPer3d)   );
-			var bSwapLines = ((
-				type === c_oAscChartTypeSettings.lineNormal || type === c_oAscChartTypeSettings.lineStacked ||
-				type === c_oAscChartTypeSettings.lineStackedPer || type === c_oAscChartTypeSettings.lineNormalMarker ||
-				type === c_oAscChartTypeSettings.lineStackedMarker || type === c_oAscChartTypeSettings.lineStackedPerMarker || type === c_oAscChartTypeSettings.line3d
-
-			) !== (
-
-				this.type === c_oAscChartTypeSettings.lineNormal || this.type === c_oAscChartTypeSettings.lineStacked ||
-				this.type === c_oAscChartTypeSettings.lineStackedPer ||
-				this.type === c_oAscChartTypeSettings.lineNormalMarker ||
-				this.type === c_oAscChartTypeSettings.lineStackedMarker ||
-				this.type === c_oAscChartTypeSettings.lineStackedPerMarker ||
-				this.type === c_oAscChartTypeSettings.line3d
-			));
-			var bSwapScatter = ((this.type === c_oAscChartTypeSettings.scatter) !==
-			(type === c_oAscChartTypeSettings.scatter));
-
-
-			var nOldType = this.type;
-			this.putType(type);
-
-			var hor_axis_settings = this.getHorAxisProps();
-			var vert_axis_settings = this.getVertAxisProps();
-			var new_hor_axis_settings, new_vert_axis_settings, oTempVal;
-			if (bSwapGridLines) {
-				oTempVal = hor_axis_settings;
-				hor_axis_settings = vert_axis_settings;
-				vert_axis_settings = oTempVal;
-				this.putHorAxisProps(hor_axis_settings);
-				this.putVertAxisProps(vert_axis_settings);
-
-				oTempVal = this.horGridLines;
-				this.putHorGridLines(this.vertGridLines);
-				this.putVertGridLines(oTempVal);
-			}
-			switch (type) {
-				case c_oAscChartTypeSettings.pie                 :
-				case c_oAscChartTypeSettings.pie3d                 :
-				case c_oAscChartTypeSettings.doughnut            : {
-					this.putHorAxisProps(null);
-					this.putVertAxisProps(null);
-					this.putHorAxisLabel(null);
-					this.putVertAxisLabel(null);
-					this.putShowHorAxis(null);
-					this.putShowVerAxis(null);
-					break;
-				}
-				case c_oAscChartTypeSettings.barNormal           :
-				case c_oAscChartTypeSettings.barStacked          :
-				case c_oAscChartTypeSettings.barStackedPer       :
-				case c_oAscChartTypeSettings.barNormal3d         :
-				case c_oAscChartTypeSettings.barStacked3d        :
-				case c_oAscChartTypeSettings.barStackedPer3d     :
-				case c_oAscChartTypeSettings.barNormal3dPerspective     :
-				case c_oAscChartTypeSettings.lineNormal          :
-				case c_oAscChartTypeSettings.lineStacked         :
-				case c_oAscChartTypeSettings.lineStackedPer      :
-				case c_oAscChartTypeSettings.lineNormalMarker    :
-				case c_oAscChartTypeSettings.lineStackedMarker   :
-				case c_oAscChartTypeSettings.lineStackedPerMarker:
-				case c_oAscChartTypeSettings.line3d:
-				case c_oAscChartTypeSettings.areaNormal          :
-				case c_oAscChartTypeSettings.areaStacked         :
-				case c_oAscChartTypeSettings.areaStackedPer      :
-				case c_oAscChartTypeSettings.stock               :
-                case c_oAscChartTypeSettings.surfaceNormal       :
-                case c_oAscChartTypeSettings.surfaceWireframe    :
-                case c_oAscChartTypeSettings.contourNormal       :
-                case c_oAscChartTypeSettings.contourWireframe    :
-					{
-
-
-
-                        this.checkSwapAxisProps(false);
-					if (bSwapLines) {
-						this.putShowMarker(false);
-						this.putSmooth(null);
-						this.putLine(true);
-					}
-					if (nOldType === c_oAscChartTypeSettings.hBarNormal || nOldType === c_oAscChartTypeSettings.hBarStacked ||
-						nOldType === c_oAscChartTypeSettings.hBarStackedPer || nOldType === c_oAscChartTypeSettings.hBarNormal3d ||
-						nOldType === c_oAscChartTypeSettings.hBarStacked3d || nOldType === c_oAscChartTypeSettings.hBarStackedPer3d) {
-						var bTemp = this.showHorAxis;
-						this.putShowHorAxis(this.showVerAxis);
-						this.putShowVerAxis(bTemp);
-					} else if (nOldType === c_oAscChartTypeSettings.pie || nOldType === c_oAscChartTypeSettings.pie3d || nOldType === c_oAscChartTypeSettings.doughnut) {
-						this.putShowHorAxis(true);
-						this.putShowVerAxis(true);
-					}
-					var oHorAxisProps = this.getHorAxisProps();
-						if(oHorAxisProps && oHorAxisProps.getAxisType() === c_oAscAxisType.cat){
-							if(type === c_oAscChartTypeSettings.areaNormal ||
-							type === c_oAscChartTypeSettings.areaStacked ||
-							type === c_oAscChartTypeSettings.areaStackedPer||
-							type === c_oAscChartTypeSettings.stock ||
-							type === c_oAscChartTypeSettings.surfaceNormal ||
-							type === c_oAscChartTypeSettings.surfaceWireframe ||
-							type === c_oAscChartTypeSettings.contourNormal ||
-							type === c_oAscChartTypeSettings.contourWireframe){
-								oHorAxisProps.putLabelsPosition(Asc.c_oAscLabelsPosition.byDivisions);
-							}
-							else{
-								oHorAxisProps.putLabelsPosition(Asc.c_oAscLabelsPosition.betweenDivisions);
-							}
-						}
-					break;
-				}
-				case c_oAscChartTypeSettings.hBarNormal          :
-				case c_oAscChartTypeSettings.hBarStacked         :
-				case c_oAscChartTypeSettings.hBarStackedPer      :
-                case c_oAscChartTypeSettings.hBarNormal3d        :
-                case c_oAscChartTypeSettings.hBarStacked3d       :
-                case c_oAscChartTypeSettings.hBarStackedPer3d    :
-					{
-                        this.checkSwapAxisProps(true);
-					if (nOldType === c_oAscChartTypeSettings.pie || nOldType === c_oAscChartTypeSettings.pie3d || nOldType === c_oAscChartTypeSettings.doughnut) {
-						this.putShowHorAxis(true);
-						this.putShowVerAxis(true);
-					} else if (nOldType !== c_oAscChartTypeSettings.hBarNormal &&
-						nOldType !== c_oAscChartTypeSettings.hBarStacked && nOldType !== c_oAscChartTypeSettings.hBarStackedPer || nOldType !== c_oAscChartTypeSettings.hBarNormal3d ||
-                        nOldType !== c_oAscChartTypeSettings.hBarStacked3d || nOldType !== c_oAscChartTypeSettings.hBarStackedPer3d) {
-						var bTemp = this.showHorAxis;
-						this.putShowHorAxis(this.showVerAxis);
-						this.putShowVerAxis(bTemp);
-					}
-
-					var oVertAxisProps = this.getVertAxisProps();
-					if(oVertAxisProps && oVertAxisProps.getAxisType() === c_oAscAxisType.cat){
-						oVertAxisProps.putLabelsPosition(Asc.c_oAscLabelsPosition.betweenDivisions);
-					}
-					//this.putHorGridLines(c_oAscGridLinesSettings.none);
-					//this.putVertGridLines(c_oAscGridLinesSettings.major);
-					break;
-				}
-				case c_oAscChartTypeSettings.scatter             :
-				case c_oAscChartTypeSettings.scatterLine         :
-				case c_oAscChartTypeSettings.scatterLineMarker   :
-				case c_oAscChartTypeSettings.scatterMarker       :
-				case c_oAscChartTypeSettings.scatterNone         :
-				case c_oAscChartTypeSettings.scatterSmooth       :
-				case c_oAscChartTypeSettings.scatterSmoothMarker : {
-					if (!hor_axis_settings || hor_axis_settings.getAxisType() !== c_oAscAxisType.val) {
-						new_hor_axis_settings = new asc_ValAxisSettings();
-						new_hor_axis_settings.setDefault();
-						this.putHorAxisProps(new_hor_axis_settings);
-					}
-					if (!vert_axis_settings || vert_axis_settings.getAxisType() !== c_oAscAxisType.val) {
-						new_vert_axis_settings = new asc_ValAxisSettings();
-						new_vert_axis_settings.setDefault();
-						this.putVertAxisProps(new_vert_axis_settings);
-					}
-					//this.putHorGridLines(c_oAscGridLinesSettings.major);
-					//this.putVertGridLines(c_oAscGridLinesSettings.major);
-					if (bSwapScatter) {
-						this.putShowMarker(true);
-						this.putSmooth(null);
-						this.putLine(false);
-					}
-					if (nOldType === c_oAscChartTypeSettings.hBarNormal || nOldType === c_oAscChartTypeSettings.hBarStacked ||
-						nOldType === c_oAscChartTypeSettings.hBarStackedPer || nOldType === c_oAscChartTypeSettings.hBarNormal3d ||
-                        nOldType === c_oAscChartTypeSettings.hBarStacked3d || nOldType === c_oAscChartTypeSettings.hBarStackedPer3d) {
-						var bTemp = this.showHorAxis;
-						this.putShowHorAxis(this.showVerAxis);
-						this.putShowVerAxis(bTemp);
-					} else if (nOldType === c_oAscChartTypeSettings.pie || nOldType === c_oAscChartTypeSettings.pie3d || nOldType === c_oAscChartTypeSettings.doughnut) {
-						this.putShowHorAxis(true);
-						this.putShowVerAxis(true);
-					}
-					break;
-				}
-			}
-		},
-
-		putShowHorAxis: function (v) {
-			this.showHorAxis = v;
-		}, getShowHorAxis: function () {
-			return this.showHorAxis;
-		},
-
-		putShowVerAxis: function (v) {
-			this.showVerAxis = v;
-		}, getShowVerAxis: function () {
-			return this.showVerAxis;
-		},
-
-		getSeries: function() {
-			if(this.chartSpace) {
-				return this.chartSpace.getAllSeries();
-			}
-			return [];
-		},
-
-		getCatValues: function() {
-			if(this.chartSpace) {
-				return this.chartSpace.getCatValues();
-			}
-			return [];
-		},
-
-		getCatFormula: function() {
-			if(this.chartSpace) {
-				return this.chartSpace.getCatFormula();
-			}
-			return "";
-		},
-
-		setCatFormula: function(sFormula) {
-			if(this.chartSpace) {
-				return this.chartSpace.setCatFormula(sFormula);
-			}
+		}
+	};
+	asc_ChartSettings.prototype.getRanges = function() {
+		return this.aRanges;
+	};
+	asc_ChartSettings.prototype.putSmooth = function(v) {
+		this.smooth = v;
+	};
+	asc_ChartSettings.prototype.getSmooth = function() {
+		return this.smooth;
+	};
+	asc_ChartSettings.prototype.putStyle = function(index) {
+		this.style = parseInt(index, 10);
+	};
+	asc_ChartSettings.prototype.getStyle = function() {
+		return this.style;
+	};
+	asc_ChartSettings.prototype.putRange = function(range) {
+		this.aRanges.length = 0;
+		this.aRanges[0] = range;
+	};
+	asc_ChartSettings.prototype.setRange = function(sRange) {
+		if(this.chartSpace) {
+			this.chartSpace.setRange(sRange);
 			this.updateChart();
-		},
-
-		isValidCatFormula: function(sFormula) {
-			if(sFormula === "" || sFormula === null) {
-				return Asc.c_oAscError.ID.No;
-			}
-			return AscFormat.ExecuteNoHistory(function(){
-				var oCat = new AscFormat.CCat();
-				return oCat.setValues(sFormula).getError();
-			}, this, []);
-		},
-
-		switchRowCol: function() {
-			if(this.chartSpace) {
-				this.chartSpace.switchRowCol();
-			}
-			this.updateChart();
-		},
-
-		addSeries: function() {
-			var oRet = null;
-			if(this.chartSpace) {
-				oRet = this.chartSpace.addSeries(null, "={1}");
-			}
-			this.updateChart();
-			return oRet;
-		},
-
-		addScatterSeries: function() {
-			var oRet = null;
-			if(this.chartSpace) {
-				oRet = this.chartSpace.addScatterSeries(null, null, "={1}");
-			}
-			this.updateChart();
-			return oRet;
-		},
-
-		startEdit: function() {
-			AscCommon.History.Create_NewPoint();
-			AscCommon.History.StartTransaction();
-		},
-		endEdit: function() {
-			AscCommon.History.EndTransaction();
-			this.updateChart();
-		},
-		cancelEdit: function() {
-			AscCommon.History.EndTransaction();
-			AscCommon.History.Undo();
-			this.updateChart();
-		},
-		startEditData: function() {
-			AscCommon.History.SavePointIndex();
-		},
-		cancelEditData: function() {
-			AscCommon.History.UndoToPointIndex();
-			this.updateChart();
-		},
-		endEditData: function() {
-			AscCommon.History.ClearPointIndex();
-			this.updateChart();
-		},
-		updateChart: function() {
-			if(this.chartSpace) {
-				this.chartSpace.onDataUpdate();
-			}
+		}
+	};
+	asc_ChartSettings.prototype.isValidRange = function(sRange) {
+		if(sRange === "") {
+			return Asc.c_oAscError.ID.No;
+		}
+		var sCheck = sRange;
+		if(sRange[0] === "=") {
+			sCheck = sRange.slice(1);
+		}
+		var aRanges = AscFormat.fParseChartFormula(sCheck);
+		return (aRanges.length !== 0) ? Asc.c_oAscError.ID.No : Asc.c_oAscError.ID.DataRangeError;
+	};
+	asc_ChartSettings.prototype.getRange = function() {
+		if(this.chartSpace) {
+			return this.chartSpace.getCommonRange();
+		}
+		return null;
+	};
+	asc_ChartSettings.prototype.putInColumns = function(inColumns) {
+		this.inColumns = inColumns;
+	};
+	asc_ChartSettings.prototype.getInColumns = function() {
+		return this.inColumns;
+	};
+	asc_ChartSettings.prototype.putTitle = function(v) {
+		this.title = v;
+	};
+	asc_ChartSettings.prototype.getTitle = function() {
+		return this.title;
+	};
+	asc_ChartSettings.prototype.putRowCols = function(v) {
+		this.rowCols = v;
+	};
+	asc_ChartSettings.prototype.getRowCols = function() {
+		return this.rowCols;
+	};
+	asc_ChartSettings.prototype.putHorAxisLabel = function(v) {
+		this.horAxisLabel = v;
+	};
+	asc_ChartSettings.prototype.putVertAxisLabel = function(v) {
+		this.vertAxisLabel = v;
+	};
+	asc_ChartSettings.prototype.putLegendPos = function(v) {
+		this.legendPos = v;
+	};
+	asc_ChartSettings.prototype.putDataLabelsPos = function(v) {
+		this.dataLabelsPos = v;
+	};
+	asc_ChartSettings.prototype.getHorAxisLabel = function(v) {
+		return this.horAxisLabel;
+	};
+	asc_ChartSettings.prototype.getVertAxisLabel = function(v) {
+		return this.vertAxisLabel;
+	};
+	asc_ChartSettings.prototype.getLegendPos = function(v) {
+		return this.legendPos;
+	};
+	asc_ChartSettings.prototype.getDataLabelsPos = function(v) {
+		return this.dataLabelsPos;
+	};
+	asc_ChartSettings.prototype.putHorGridLines = function(v) {
+		this.horGridLines = v;
+	};
+	asc_ChartSettings.prototype.getHorGridLines = function(v) {
+		return this.horGridLines;
+	};
+	asc_ChartSettings.prototype.putVertGridLines = function(v) {
+		this.vertGridLines = v;
+	};
+	asc_ChartSettings.prototype.getVertGridLines = function() {
+		return this.vertGridLines;
+	};
+	asc_ChartSettings.prototype.getType = function() {
+		return this.type;
+	};
+	asc_ChartSettings.prototype.putType = function(v) {
+		this.type = v;
+	};
+	asc_ChartSettings.prototype.putShowSerName = function(v) {
+		this.showSerName = v;
+	};
+	asc_ChartSettings.prototype.putShowCatName = function(v) {
+		this.showCatName = v;
+	};
+	asc_ChartSettings.prototype.putShowVal = function(v) {
+		this.showVal = v;
+	};
+	asc_ChartSettings.prototype.getShowSerName = function() {
+		return this.showSerName;
+	};
+	asc_ChartSettings.prototype.getShowCatName = function() {
+		return this.showCatName;
+	};
+	asc_ChartSettings.prototype.getShowVal = function() {
+		return this.showVal;
+	};
+	asc_ChartSettings.prototype.putSeparator = function(v) {
+		this.separator = v;
+	};
+	asc_ChartSettings.prototype.getSeparator = function() {
+		return this.separator;
+	};
+	asc_ChartSettings.prototype.putHorAxisProps = function(v) {
+		this.horAxisProps = v;
+	};
+	asc_ChartSettings.prototype.getHorAxisProps = function() {
+		return this.horAxisProps;
+	};
+	asc_ChartSettings.prototype.putVertAxisProps = function(v) {
+		this.vertAxisProps = v;
+	};
+	asc_ChartSettings.prototype.getVertAxisProps = function() {
+		return this.vertAxisProps;
+	};
+	asc_ChartSettings.prototype.changeType = function(type) {
+		this.putType(type);
+		//TODO change chartSpace
+	};
+	asc_ChartSettings.prototype.getSeries = function() {
+		if(this.chartSpace) {
+			return this.chartSpace.getAllSeries();
+		}
+		return [];
+	};
+	asc_ChartSettings.prototype.getCatValues = function() {
+		if(this.chartSpace) {
+			return this.chartSpace.getCatValues();
+		}
+		return [];
+	};
+	asc_ChartSettings.prototype.getCatFormula = function() {
+		if(this.chartSpace) {
+			return this.chartSpace.getCatFormula();
+		}
+		return "";
+	};
+	asc_ChartSettings.prototype.setCatFormula = function(sFormula) {
+		if(this.chartSpace) {
+			return this.chartSpace.setCatFormula(sFormula);
+		}
+		this.updateChart();
+	};
+	asc_ChartSettings.prototype.isValidCatFormula = function(sFormula) {
+		if(sFormula === "" || sFormula === null) {
+			return Asc.c_oAscError.ID.No;
+		}
+		return AscFormat.ExecuteNoHistory(function(){
+			var oCat = new AscFormat.CCat();
+			return oCat.setValues(sFormula).getError();
+		}, this, []);
+	};
+	asc_ChartSettings.prototype.switchRowCol = function() {
+		if(this.chartSpace) {
+			this.chartSpace.switchRowCol();
+		}
+		this.updateChart();
+	};
+	asc_ChartSettings.prototype.addSeries = function() {
+		var oRet = null;
+		if(this.chartSpace) {
+			oRet = this.chartSpace.addSeries(null, "={1}");
+		}
+		this.updateChart();
+		return oRet;
+	};
+	asc_ChartSettings.prototype.addScatterSeries = function() {
+		var oRet = null;
+		if(this.chartSpace) {
+			oRet = this.chartSpace.addScatterSeries(null, null, "={1}");
+		}
+		this.updateChart();
+		return oRet;
+	};
+	asc_ChartSettings.prototype.startEdit = function() {
+		AscCommon.History.Create_NewPoint();
+		AscCommon.History.StartTransaction();
+	};
+	asc_ChartSettings.prototype.endEdit = function() {
+		AscCommon.History.EndTransaction();
+		this.updateChart();
+	};
+	asc_ChartSettings.prototype.cancelEdit = function() {
+		AscCommon.History.EndTransaction();
+		AscCommon.History.Undo();
+		this.updateChart();
+	};
+	asc_ChartSettings.prototype.startEditData = function() {
+		AscCommon.History.SavePointIndex();
+	};
+	asc_ChartSettings.prototype.cancelEditData = function() {
+		AscCommon.History.UndoToPointIndex();
+		this.updateChart();
+	};
+	asc_ChartSettings.prototype.endEditData = function() {
+		AscCommon.History.ClearPointIndex();
+		this.updateChart();
+	};
+	asc_ChartSettings.prototype.updateChart = function() {
+		if(this.chartSpace) {
+			this.chartSpace.onDataUpdate();
 		}
 	};
 
@@ -4916,6 +4637,8 @@
 	prot["getCrossesRule"] = prot.getCrossesRule;
 	prot["getCrosses"] = prot.getCrosses;
 	prot["setDefault"] = prot.setDefault;
+	prot["getShow"] = prot.getShow;
+	prot["putShow"] = prot.putShow;
 
 	window["AscCommon"].asc_CatAxisSettings = asc_CatAxisSettings;
 	prot = asc_CatAxisSettings.prototype;
@@ -4948,6 +4671,8 @@
 	prot["getCrossMaxVal"] = prot.getCrossMaxVal;
 	prot["getCrossMinVal"] = prot.getCrossMinVal;
 	prot["setDefault"] = prot.setDefault;
+	prot["getShow"] = prot.getShow;
+	prot["putShow"] = prot.putShow;
 
 	window["Asc"]["asc_ChartSettings"] = window["Asc"].asc_ChartSettings = asc_ChartSettings;
 	prot = asc_ChartSettings.prototype;
