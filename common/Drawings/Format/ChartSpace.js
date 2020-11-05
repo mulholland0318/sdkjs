@@ -16055,6 +16055,9 @@ CChartSpace.prototype.onDataUpdate = function() {
         var b3D = AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(this);
         this.chart.getPossibleDLblsPosition(b3D);
     };
+    CChartSpace.prototype.getOrderedAxes = function() {
+        return this.chart.getOrderedAxes();
+    };
 function getNumLit(ser) {
     if(ser) {
         if(ser.val)

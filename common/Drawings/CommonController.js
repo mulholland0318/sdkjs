@@ -4557,8 +4557,6 @@ DrawingObjectsController.prototype =
 
 
         chart_space.updateLinks();
-        var oValAx = chart_space.chart.plotArea.valAx;
-        var oCatAx = chart_space.chart.plotArea.catAx;
         chart_space.setStyle(chart_space.style);
         if(this.drawingObjects && this.drawingObjects.getWorksheet && typeof sRange === "string" && sRange.length > 0)
         {
@@ -4633,7 +4631,6 @@ DrawingObjectsController.prototype =
         }
         //horAxisLabel
 
-
         //legend
         var legend_pos_settings =  chartSettings.getLegendPos();
         if(legend_pos_settings !== null)
@@ -4663,12 +4660,8 @@ DrawingObjectsController.prototype =
 
 
         var chart_type = plot_area.charts[0];
-        plot_area.removeCharts(1, plot_area.charts.length - 1);
         //Data Labels
         var i;
-        var need_groupping, need_bar_dir;
-        var val_axis, new_chart_type, object_type, axis_obj ;
-        var axis_by_types;
         chart_space.changeChartType(type);
         var hor_axis = plot_area.getHorizontalAxis();
         var hor_axis_label_setting = chartSettings.getHorAxisLabel();

@@ -729,31 +729,36 @@
 		this.style = null;
 		this.title = null;
 		this.rowCols = null;
-		this.horAxisLabel = null;
-		this.vertAxisLabel = null;
 		this.legendPos = null;
 		this.dataLabelsPos = null;
-		this.vertAx = null;
-		this.horAx = null;
-		this.horGridLines = null;
-		this.vertGridLines = null;
 		this.type = null;
 		this.showSerName = null;
 		this.showCatName = null;
 		this.showVal = null;
 		this.separator = null;
-		this.horAxisProps = null;
-		this.vertAxisProps = null;
 		this.inColumns = null;
 
 		this.aRanges = [];
 
+
 		this.showMarker = null;
 		this.bLine = null;
 		this.smooth = null;
+		this.chartSpace = null;
+
+		this.horizontalAxes = [];
+		this.verticalAxes = [];
+		this.depthAxes = [];
+
+
 		this.showHorAxis = null;
 		this.showVerAxis = null;
-		this.chartSpace = null;
+		this.horAxisLabel = null;
+		this.vertAxisLabel = null;
+		this.horGridLines = null;
+		this.vertGridLines = null;
+		this.horAxisProps = null;
+		this.vertAxisProps = null;
 	}
 
 	asc_ChartSettings.prototype = {
@@ -785,12 +790,6 @@
            		return false;
 			}
 			if(this.dataLabelsPos !== oPr.dataLabelsPos){
-				return false;
-			}
-			if(this.vertAx !== oPr.vertAx){
-				return false;
-			}
-			if(this.horAx !== oPr.horAx){
 				return false;
 			}
             if(this.horGridLines !== oPr.horGridLines){
@@ -980,12 +979,7 @@
 			this.legendPos = v;
 		}, putDataLabelsPos: function (v) {
 			this.dataLabelsPos = v;
-		}, putCatAx: function (v) {
-			this.vertAx = v;
-		}, putValAx: function (v) {
-			this.horAx = v;
 		},
-
 		getHorAxisLabel: function (v) {
 			return this.horAxisLabel;
 		}, getVertAxisLabel: function (v) {
@@ -994,10 +988,6 @@
 			return this.legendPos;
 		}, getDataLabelsPos: function (v) {
 			return this.dataLabelsPos;
-		}, getVertAx: function (v) {
-			return this.vertAx;
-		}, getHorAx: function (v) {
-			return this.horAx;
 		},
 
 		putHorGridLines: function (v) {

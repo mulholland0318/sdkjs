@@ -4623,6 +4623,48 @@ function CPlotArea()
         oAxes.valAx.checkNumFormat(sNewNumFormat);
         return [oAxes.catAx, oAxes.valAx, oAxes.serAx];
     };
+    CPlotArea.prototype.getOrderedAxes = function() {
+        return new COrderedAxes(this);
+    };
+
+    function COrderedAxes(oPlotArea) {
+        this.verticalAxes = [];
+        this.horizontalAxes = [];
+        this.depthAxes = [];
+        var aTypedCharts = oPlotArea.charts;
+        var oCheckedAxes = {};
+        var nChart;
+        var oTypedChart;
+        var aAxes, oAxis, nAx;
+        for(nChart = 0; nChart < aTypedCharts.length; ++nChart) {
+            oTypedChart = aTypedCharts[nChart];
+            aAxes = oTypedChart.axId;
+            for(nAx = 0; nAx < aAxes.length; ++nAx) {
+                oAxis = aAxes[nAx];
+                if(!oCheckedAxes[oAxis.Id]) {
+                    if(oAxis.getObjectType() === AscDFH.historyitem_type_SerAx) {
+                        this.depthAxes.push(oAxis);
+                    }
+                    else if(oAxis.axPos === AX_POS_L || oAxis.axPos === AX_POS_R) {
+                        this.verticalAxes.push(oAxis);
+                    }
+                    else {
+                        this.horizontalAxes.push(oAxis);
+                    }
+                    oCheckedAxes[oAxis.Id] = true;
+                }
+            }
+        }
+    }
+    COrderedAxes.prototype.getVerticalAxes = function() {
+        return this.verticalAxes;
+    };
+    COrderedAxes.prototype.getHorizontalAxes = function() {
+        return this.horizontalAxes;
+    };
+    COrderedAxes.prototype.getDepthAxes = function() {
+        return this.depthAxes;
+    };
 
     function CChartBase() {
         AscFormat.CBaseObject.call(this);
@@ -14778,6 +14820,9 @@ function CChart()
             }
         }
     };
+    CChart.prototype.getOrderedAxes = function() {
+        return this.plotArea.getOrderedAxes();
+    }
 
 function CChartWall()
 {

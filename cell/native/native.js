@@ -1335,7 +1335,6 @@ function asc_menu_ReadChartPr(_params, _cursor){
             }
             case 8:
             {
-                _settings.vertAx = _params[_cursor.pos++];
                 break;
             }
             case 9:
@@ -1475,11 +1474,6 @@ function asc_menu_WriteChartPr(_type, _chartPr, _stream){
     {
         _stream["WriteByte"](7);
         _stream["WriteLong"](_chartPr.horAx);
-    }
-    if (_chartPr.vertAx !== undefined && _chartPr.vertAx !== null)
-    {
-        _stream["WriteByte"](8);
-        _stream["WriteLong"](_chartPr.vertAx);
     }
     if (_chartPr.horGridLines !== undefined && _chartPr.horGridLines !== null)
     {
