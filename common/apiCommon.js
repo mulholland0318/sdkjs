@@ -418,8 +418,8 @@
 		this.crosses = null;
 		this.axisType = c_oAscAxisType.val;
 		this.show = true;
+		this.label = null;
 	}
-
 	asc_ValAxisSettings.prototype.isEqual = function(oPr){
 		if(!oPr){
 			return false;
@@ -475,7 +475,9 @@
 		if(this.show !== oPr.show) {
 			return false;
 		}
-
+		if(this.label !== oPr.label) {
+			return false;
+		}
 		return true;
 	};
 	asc_ValAxisSettings.prototype.putAxisType = function(v) {
@@ -589,6 +591,12 @@
 	};
 	asc_ValAxisSettings.prototype.putShow = function(val) {
 		this.show = val;
+	};
+	asc_ValAxisSettings.prototype.getLabel = function() {
+		return this.label;
+	};
+	asc_ValAxisSettings.prototype.putLabel = function(v) {
+		this.label = v;
 	};
 	asc_ValAxisSettings.prototype.read = function(_params, _cursor){
 		var _continue = true;
@@ -771,7 +779,8 @@
 		}
 
 		_stream["WriteByte"](255);
-	}
+	};
+
 	/** @constructor */
 	function asc_CatAxisSettings() {
 		this.intervalBetweenTick = null;
@@ -789,8 +798,8 @@
 		this.crossMinVal = null;
 		this.crossMaxVal = null;
 		this.show = true;
+		this.label = null;
 	}
-
 	asc_CatAxisSettings.prototype.isEqual = function(oPr){
 		if(!oPr){
 			return false;
@@ -838,6 +847,9 @@
 			return false;
 		}
 		if(this.show !== oPr.show) {
+			return false;
+		}
+		if(this.label !== oPr.label) {
 			return false;
 		}
 		return true;
@@ -941,6 +953,12 @@
 	};
 	asc_CatAxisSettings.prototype.putShow = function(val) {
 		this.show = val;
+	};
+	asc_CatAxisSettings.prototype.getLabel = function() {
+		return this.label;
+	};
+	asc_CatAxisSettings.prototype.putLabel = function(v) {
+		this.label = v;
 	};
 	asc_CatAxisSettings.prototype.read = function(_params, _cursor){
 		var _continue = true;
@@ -1104,6 +1122,7 @@
 
 		_stream["WriteByte"](255);
 	};
+
 	/** @constructor */
 	function asc_ChartSettings() {
 		this.style = null;
@@ -1130,16 +1149,34 @@
 		this.verticalAxes = [];
 		this.depthAxes = [];
 
-
-		this.horAxisLabel = null;
-		this.vertAxisLabel = null;
 		this.horGridLines = null;
 		this.vertGridLines = null;
-		this.horAxisProps = null;
-		this.vertAxisProps = null;
 	}
 
 		//TODO:remove this---------------------
+
+	asc_ChartSettings.prototype.putHorAxisProps = function(v) {
+		if(!AscCommon.isRealObject(v)) {
+			this.horizontalAxes.length = 0;
+		}
+		else {
+			this.horizontalAxes[0] = v;
+		}
+	};
+	asc_ChartSettings.prototype.getHorAxisProps = function() {
+		return this.horizontalAxes[0] || null;
+	};
+	asc_ChartSettings.prototype.putVertAxisProps = function(v) {
+		if(!AscCommon.isRealObject(v)) {
+			this.verticalAxes.length = 0;
+		}
+		else {
+			this.verticalAxes[0] = v;
+		}
+	};
+	asc_ChartSettings.prototype.getVertAxisProps = function() {
+		return this.verticalAxes[0] || null;
+	};
 	asc_ChartSettings.prototype.putShowHorAxis = function(v) {
 		var oAx = this.horizontalAxes[0];
 		if(oAx) {
@@ -1166,6 +1203,33 @@
 		}
 		return false;
 	};
+	asc_ChartSettings.prototype.putHorAxisLabel = function(v) {
+		var oAx = this.horizontalAxes[0];
+		if(oAx) {
+			oAx.putLabel(v);
+		}
+	};
+	asc_ChartSettings.prototype.getHorAxisLabel = function() {
+		var oAx = this.horizontalAxes[0];
+		if(oAx) {
+			return oAx.getLabel();
+		}
+		return null;
+	};
+	asc_ChartSettings.prototype.putVertAxisLabel = function(v) {
+		var oAx = this.verticalAxes[0];
+		if(oAx) {
+			return oAx.getLabel();
+		}
+		return null;
+	};
+	asc_ChartSettings.prototype.getVertAxisLabel = function() {
+		var oAx = this.verticalAxes[0];
+		if(oAx) {
+			return oAx.getLabel();
+		}
+		return null;
+	};
 	//------------------------------
 
 
@@ -1183,12 +1247,6 @@
 			return false;
 		}
 		if(this.rowCols !== oPr.rowCols){
-			return false;
-		}
-		if(this.horAxisLabel !== oPr.horAxisLabel){
-			return false;
-		}
-		if(this.vertAxisLabel !== oPr.vertAxisLabel){
 			return false;
 		}
 		if(this.legendPos !== oPr.legendPos){
@@ -1209,7 +1267,6 @@
 		if(!this.equalBool(this.showSerName, oPr.showSerName)){
 			return false;
 		}
-
 		if(!this.equalBool(this.showCatName, oPr.showCatName)){
 			return false;
 		}
@@ -1220,26 +1277,6 @@
 		if(this.separator !== oPr.separator &&
 		!(this.separator === ' ' && oPr.separator == null || oPr.separator === ' ' && this.separator == null)){
 			return false;
-		}
-		if(!this.horAxisProps){
-			if(oPr.horAxisProps){
-				return false;
-			}
-		}
-		else{
-			if(!this.horAxisProps.isEqual(oPr.horAxisProps)){
-				return false;
-			}
-		}
-		if(!this.vertAxisProps){
-			if(oPr.vertAxisProps){
-				return false;
-			}
-		}
-		else{
-			if(!this.vertAxisProps.isEqual(oPr.vertAxisProps)){
-				return false;
-			}
 		}
 		if(this.aRanges.length !== oPr.aRanges.length){
 			return false;
@@ -1347,23 +1384,11 @@
 	asc_ChartSettings.prototype.getRowCols = function() {
 		return this.rowCols;
 	};
-	asc_ChartSettings.prototype.putHorAxisLabel = function(v) {
-		this.horAxisLabel = v;
-	};
-	asc_ChartSettings.prototype.putVertAxisLabel = function(v) {
-		this.vertAxisLabel = v;
-	};
 	asc_ChartSettings.prototype.putLegendPos = function(v) {
 		this.legendPos = v;
 	};
 	asc_ChartSettings.prototype.putDataLabelsPos = function(v) {
 		this.dataLabelsPos = v;
-	};
-	asc_ChartSettings.prototype.getHorAxisLabel = function(v) {
-		return this.horAxisLabel;
-	};
-	asc_ChartSettings.prototype.getVertAxisLabel = function(v) {
-		return this.vertAxisLabel;
 	};
 	asc_ChartSettings.prototype.getLegendPos = function(v) {
 		return this.legendPos;
@@ -1412,18 +1437,6 @@
 	};
 	asc_ChartSettings.prototype.getSeparator = function() {
 		return this.separator;
-	};
-	asc_ChartSettings.prototype.putHorAxisProps = function(v) {
-		this.horAxisProps = v;
-	};
-	asc_ChartSettings.prototype.getHorAxisProps = function() {
-		return this.horAxisProps;
-	};
-	asc_ChartSettings.prototype.putVertAxisProps = function(v) {
-		this.vertAxisProps = v;
-	};
-	asc_ChartSettings.prototype.getVertAxisProps = function() {
-		return this.vertAxisProps;
 	};
 	asc_ChartSettings.prototype.changeType = function(type) {
 		this.putType(type);
@@ -1683,15 +1696,17 @@
 			_stream["WriteByte"](2);
 			_stream["WriteLong"](this.rowCols);
 		}
-		if (this.horAxisLabel !== undefined && this.horAxisLabel !== null)
+		var nLabel = this.getHorAxisLabel();
+		if (nLabel !== undefined && nLabel !== null)
 		{
 			_stream["WriteByte"](3);
-			_stream["WriteLong"](this.horAxisLabel);
+			_stream["WriteLong"](nLabel);
 		}
-		if (this.vertAxisLabel !== undefined && this.vertAxisLabel !== null)
+		nLabel = this.getVertAxisLabel();
+		if (nLabel !== undefined && nLabel !== null)
 		{
 			_stream["WriteByte"](4);
-			_stream["WriteLong"](this.vertAxisLabel);
+			_stream["WriteLong"](nLabel);
 		}
 		if (this.legendPos !== undefined && this.legendPos !== null)
 		{
@@ -5283,6 +5298,8 @@
 	prot["setDefault"] = prot.setDefault;
 	prot["getShow"] = prot.getShow;
 	prot["putShow"] = prot.putShow;
+	prot["putLabel"] = prot.putLabel;
+	prot["getLabel"] = prot.getLabel;
 
 	window["AscCommon"].asc_CatAxisSettings = asc_CatAxisSettings;
 	prot = asc_CatAxisSettings.prototype;
@@ -5317,6 +5334,8 @@
 	prot["setDefault"] = prot.setDefault;
 	prot["getShow"] = prot.getShow;
 	prot["putShow"] = prot.putShow;
+	prot["getLabel"] = prot.getLabel;
+	prot["putLabel"] = prot.putLabel;
 
 	window["Asc"]["asc_ChartSettings"] = window["Asc"].asc_ChartSettings = asc_ChartSettings;
 	prot = asc_ChartSettings.prototype;

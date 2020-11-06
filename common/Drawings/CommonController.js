@@ -5279,9 +5279,10 @@ DrawingObjectsController.prototype =
             ret.putVertAxisProps(vert_axis.getMenuProps());
             if(chart_type.getObjectType() === AscDFH.historyitem_type_AreaChart && !AscFormat.isRealNumber(vert_axis.crossBetween))
             {
-                if(ret.horAxisProps)
+                var oHorAxProps = ret.getHorAxisProps();
+                if(oHorAxProps)
                 {
-                    ret.horAxisProps.putLabelsPosition(Asc.c_oAscLabelsPosition.byDivisions);
+                    oHorAxProps.putLabelsPosition(Asc.c_oAscLabelsPosition.byDivisions);
                 }
             }
         }
