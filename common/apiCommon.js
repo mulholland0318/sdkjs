@@ -419,6 +419,7 @@
 		this.axisType = c_oAscAxisType.val;
 		this.show = true;
 		this.label = null;
+		this.gridlines = null;
 	}
 	asc_ValAxisSettings.prototype.isEqual = function(oPr){
 		if(!oPr){
@@ -476,6 +477,9 @@
 			return false;
 		}
 		if(this.label !== oPr.label) {
+			return false;
+		}
+		if(this.gridlines !== oPr.gridlines) {
 			return false;
 		}
 		return true;
@@ -597,6 +601,12 @@
 	};
 	asc_ValAxisSettings.prototype.putLabel = function(v) {
 		this.label = v;
+	};
+	asc_ValAxisSettings.prototype.getGridlines = function() {
+		return this.gridlines;
+	};
+	asc_ValAxisSettings.prototype.putGridlines = function(v) {
+		this.gridlines = v;
 	};
 	asc_ValAxisSettings.prototype.read = function(_params, _cursor){
 		var _continue = true;
@@ -799,6 +809,7 @@
 		this.crossMaxVal = null;
 		this.show = true;
 		this.label = null;
+		this.gridlines = null;
 	}
 	asc_CatAxisSettings.prototype.isEqual = function(oPr){
 		if(!oPr){
@@ -850,6 +861,9 @@
 			return false;
 		}
 		if(this.label !== oPr.label) {
+			return false;
+		}
+		if(this.gridlines !== oPr.gridlines) {
 			return false;
 		}
 		return true;
@@ -959,6 +973,12 @@
 	};
 	asc_CatAxisSettings.prototype.putLabel = function(v) {
 		this.label = v;
+	};
+	asc_CatAxisSettings.prototype.getGridlines = function() {
+		return this.gridlines;
+	};
+	asc_CatAxisSettings.prototype.putGridlines = function(v) {
+		this.gridlines = v;
 	};
 	asc_CatAxisSettings.prototype.read = function(_params, _cursor){
 		var _continue = true;
@@ -1148,13 +1168,9 @@
 		this.horizontalAxes = [];
 		this.verticalAxes = [];
 		this.depthAxes = [];
-
-		this.horGridLines = null;
-		this.vertGridLines = null;
 	}
 
-		//TODO:remove this---------------------
-
+	//TODO:remove this---------------------
 	asc_ChartSettings.prototype.putHorAxisProps = function(v) {
 		if(!AscCommon.isRealObject(v)) {
 			this.horizontalAxes.length = 0;
@@ -1230,6 +1246,32 @@
 		}
 		return null;
 	};
+	asc_ChartSettings.prototype.putHorGridLines = function(v) {
+		var oAx = this.verticalAxes[0];
+		if(oAx) {
+			oAx.putGridlines(v);
+		}
+	};
+	asc_ChartSettings.prototype.getHorGridLines = function() {
+		var oAx = this.verticalAxes[0];
+		if(oAx) {
+			return oAx.getGridlines();
+		}
+		return null;
+	};
+	asc_ChartSettings.prototype.putVertGridLines = function(v) {
+		var oAx = this.horizontalAxes[0];
+		if(oAx) {
+			oAx.putGridlines(v);
+		}
+	};
+	asc_ChartSettings.prototype.getVertGridLines = function() {
+		var oAx = this.horizontalAxes[0];
+		if(oAx) {
+			return oAx.getGridlines();
+		}
+		return null;
+	};
 	//------------------------------
 
 
@@ -1253,12 +1295,6 @@
 			return false;
 		}
 		if(this.dataLabelsPos !== oPr.dataLabelsPos){
-			return false;
-		}
-		if(this.horGridLines !== oPr.horGridLines){
-			return false;
-		}
-		if(this.vertGridLines !== oPr.vertGridLines){
 			return false;
 		}
 		if(this.type !== oPr.type){
@@ -1298,6 +1334,23 @@
 		}
 		if(!this.equalBool(this.smooth, oPr.smooth)){
 			return false;
+		}
+		if(this.verticalAxes.length !== oPr.verticalAxes.length) {
+			return false;
+		}
+		if(this.horizontalAxes.length !== oPr.horizontalAxes.length) {
+			return false;
+		}
+		var nAx;
+		for(nAx = 0; nAx < this.verticalAxes.length; ++nAx) {
+			if(!this.verticalAxes[nAx].isEqual(oPr.verticalAxes[nAx])) {
+				return false;
+			}
+		}
+		for(nAx = 0; nAx < this.horizontalAxes.length; ++nAx) {
+			if(!this.horizontalAxes[nAx].isEqual(oPr.horizontalAxes[nAx])) {
+				return false;
+			}
 		}
 		return true;
 	};
@@ -1395,18 +1448,6 @@
 	};
 	asc_ChartSettings.prototype.getDataLabelsPos = function(v) {
 		return this.dataLabelsPos;
-	};
-	asc_ChartSettings.prototype.putHorGridLines = function(v) {
-		this.horGridLines = v;
-	};
-	asc_ChartSettings.prototype.getHorGridLines = function(v) {
-		return this.horGridLines;
-	};
-	asc_ChartSettings.prototype.putVertGridLines = function(v) {
-		this.vertGridLines = v;
-	};
-	asc_ChartSettings.prototype.getVertGridLines = function() {
-		return this.vertGridLines;
 	};
 	asc_ChartSettings.prototype.getType = function() {
 		return this.type;
@@ -1656,14 +1697,14 @@
 				case 23:
 				{
 					oAxPr = new asc_CatAxisSettings();
-					oAxPr.read(_params, _cursor)
+					oAxPr.read(_params, _cursor);
 					this.putHorAxisProps(oAxPr);
 					break;
 				}
 				case 24:
 				{
 					oAxPr = new asc_CatAxisSettings();
-					oAxPr.read(_params, _cursor)
+					oAxPr.read(_params, _cursor);
 					this.putVertAxisProps(oAxPr);
 					break;
 				}
@@ -1718,15 +1759,17 @@
 			_stream["WriteByte"](6);
 			_stream["WriteLong"](this.dataLabelsPos);
 		}
-		if (this.horGridLines !== undefined && this.horGridLines !== null)
+		var nGridlines = this.getHorGridLines();
+		if (nGridlines !== undefined && nGridlines !== null)
 		{
 			_stream["WriteByte"](9);
-			_stream["WriteLong"](this.horGridLines);
+			_stream["WriteLong"](nGridlines);
 		}
-		if (this.vertGridLines !== undefined && this.vertGridLines !== null)
+		nGridlines = this.getVertGridLines();
+		if (nGridlines !== undefined && nGridlines !== null)
 		{
 			_stream["WriteByte"](10);
-			_stream["WriteLong"](this.vertGridLines);
+			_stream["WriteLong"](nGridlines);
 		}
 		if (this.type !== undefined && this.type !== null)
 		{
@@ -5300,6 +5343,8 @@
 	prot["putShow"] = prot.putShow;
 	prot["putLabel"] = prot.putLabel;
 	prot["getLabel"] = prot.getLabel;
+	prot["putGridlines"] = prot.putGridlines;
+	prot["getGridlines"] = prot.getGridlines;
 
 	window["AscCommon"].asc_CatAxisSettings = asc_CatAxisSettings;
 	prot = asc_CatAxisSettings.prototype;
@@ -5336,6 +5381,8 @@
 	prot["putShow"] = prot.putShow;
 	prot["getLabel"] = prot.getLabel;
 	prot["putLabel"] = prot.putLabel;
+	prot["putGridlines"] = prot.putGridlines;
+	prot["getGridlines"] = prot.getGridlines;
 
 	window["Asc"]["asc_ChartSettings"] = window["Asc"].asc_ChartSettings = asc_ChartSettings;
 	prot = asc_ChartSettings.prototype;
