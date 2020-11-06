@@ -605,7 +605,8 @@
 		date : 1,
 		text : 2,
 		cat  : 3,
-		val  : 4
+		val  : 4,
+		ser  : 5
 	};
 
 	var c_oAscHAnchor = {
@@ -2519,6 +2520,7 @@
 	prot['text']                   = prot.text;
 	prot['cat']                    = prot.cat;
 	prot['val']                    = prot.val;
+	prot['ser']                    = prot.ser;
 	window['Asc']['c_oAscHAnchor'] = window['Asc'].c_oAscHAnchor = c_oAscHAnchor;
 	prot                          = c_oAscHAnchor;
 	prot['Margin']                = prot.Margin;

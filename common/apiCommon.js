@@ -1273,8 +1273,24 @@
 		return null;
 	};
 	//------------------------------
-
-
+	asc_ChartSettings.prototype.getHorAxesProps = function() {
+		return this.horizontalAxes;
+	};
+	asc_ChartSettings.prototype.getVertAxesProps = function() {
+		return this.verticalAxes;
+	};
+	asc_ChartSettings.prototype.getDepthAxesProps = function() {
+		return this.depthAxes;
+	};
+	asc_ChartSettings.prototype.addHorAxesProps = function(v) {
+		this.horizontalAxes.push(v);
+	};
+	asc_ChartSettings.prototype.addVertAxesProps = function(v) {
+		this.verticalAxes.push(v);
+	};
+	asc_ChartSettings.prototype.addDepthAxesProps = function(v) {
+		this.depthAxes.push(v);
+	};
 	asc_ChartSettings.prototype.equalBool = function(a, b){
 		return ((!!a) === (!!b));
 	};
@@ -5453,8 +5469,9 @@
 	prot["startEditData"] = prot.startEditData;
 	prot["cancelEditData"] = prot.cancelEditData;
 	prot["endEditData"] = prot.endEditData;
-
-
+	prot["getHorAxesProps"] = prot.getHorAxesProps;
+	prot["getVertAxesProps"] = prot.getVertAxesProps;
+	prot["getDepthAxesProps"] = prot.getDepthAxesProps;
 
 
 

@@ -5548,6 +5548,59 @@ var TIME_UNIT_YEARS = 2;
 var CROSS_BETWEEN_BETWEEN = 0;
 var CROSS_BETWEEN_MID_CAT = 1;
 
+    function isHorizontalAxis(oAx) {
+        return oAx.axPos === AX_POS_B || oAx.axPos === AX_POS_T;
+    }
+    function isVerticalAxis(oAx) {
+        return !isHorizontalAxis(oAx);
+    }
+
+    function getAxisGridlinesSetting(axis) {
+        if(!axis || (!axis.majorGridlines && !axis.minorGridlines))
+            return Asc.c_oAscGridLinesSettings.none;
+        if(axis.majorGridlines && !axis.minorGridlines)
+            return Asc.c_oAscGridLinesSettings.major;
+        if(axis.minorGridlines && !axis.majorGridlines)
+            return Asc.c_oAscGridLinesSettings.minor;
+        return Asc.c_oAscGridLinesSettings.majorMinor;
+    }
+    function getAxisLabelSetting(axis) {
+        if(isHorizontalAxis(axis)) {
+            if(axis.title) {
+                return Asc.c_oAscChartTitleShowSettings.noOverlay;
+            }
+            else {
+                return Asc.c_oAscChartTitleShowSettings.none;
+            }
+        }
+        else {
+            if(axis.title) {
+                var tx_body;
+                if(axis.title.tx && axis.title.tx.rich)  {
+                    tx_body  =  axis.title.tx.rich;
+                }
+                else if(axis.title.txPr) {
+                    tx_body  =  axis.title.txPr;
+                }
+                if(tx_body) {
+                    var oBodyPr = axis.title.getBodyPr();
+                    if(oBodyPr && oBodyPr.vert === AscFormat.nVertTThorz) {
+                        return Asc.c_oAscChartVertAxisLabelShowSettings.horizontal;
+                    }
+                    else {
+                        return Asc.c_oAscChartVertAxisLabelShowSettings.rotated;
+                    }
+                }
+                else {
+                    return Asc.c_oAscChartVertAxisLabelShowSettings.none;
+                }
+            }
+            else {
+                return Asc.c_oAscChartVertAxisLabelShowSettings.none;
+            }
+        }
+    }
+
 function CCatAx()
 {
     this.auto            = null;
@@ -5739,8 +5792,13 @@ function CCatAx()
             ret.putMinorTickMark(this.minorTickMark);
         else
             ret.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
+
+        ret.putShow(!this.bDelete);
+        ret.putGridlines(getAxisGridlinesSetting(this));
+        ret.putLabel(getAxisLabelSetting(this));
         return ret;
     };
+
     CCatAx.prototype.setMenuProps = function(props)
     {
         if(!(isRealObject(props)
@@ -5833,7 +5891,6 @@ function CCatAx()
             this.setTickLblPos(tickLabelsPos);
             bChanged = true;
         }
-
 
         if(AscFormat.isRealNumber(crossesRule) && isRealObject(this.crossAx))
         {
@@ -15543,4 +15600,6 @@ function CreateMarkerGeometryByType(type, src)
     window['AscFormat'].ORIENTATION_MIN_MAX = ORIENTATION_MIN_MAX;
     window['AscFormat'].fParseChartFormula = fParseChartFormula;
     window['AscFormat'].fCreateRef = fCreateRef;
+    window['AscFormat'].isHorizontalAxis = isHorizontalAxis;
+    window['AscFormat'].isVerticalAxis = isVerticalAxis;
 })(window);
