@@ -1662,7 +1662,7 @@ CMathContent.prototype.private_CorrectContent = function()
 
     var EmptyRun = null;
     var RPr      = null;
-    var CurrPos = 0;
+    var CurrPos = 1;
 
     while(CurrPos < len)
     {
@@ -8621,7 +8621,7 @@ var g_DefaultAutoCorrectMathFuncs =
 [
     'arcsin', 'asin', 'sin', 'arcsinh', 'asinh', 'sinh',
     'arcsec', 'sec', 'asec', 'arcsech', 'asech','sech',
-    'arccos', 'acos', 'cos', 'arccosh','acosh', 'cosh',
+    'arccos', 'acos', 'cos', 'arccosh', 'acosh', 'cosh',
     'arccsc', 'acsc', 'csc', 'arccsch', 'acsch', 'csch',
     'arctan', 'atan', 'tan', 'arctanh', 'atanh', 'tanh',
     'arccot', 'acot', 'cot', 'arccoth', 'acoth', 'coth',
