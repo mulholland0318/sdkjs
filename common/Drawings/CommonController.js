@@ -4782,121 +4782,51 @@ DrawingObjectsController.prototype =
                 ret.putInColumns(!range_obj.bVert);
             }
         }
-        //ret.putStyle(AscFormat.isRealNumber(chart_space.style) ? chart_space.style : null);
+
+
         ret.putTitle(isRealObject(chart.title) ? (chart.title.overlay ? c_oAscChartTitleShowSettings.overlay : c_oAscChartTitleShowSettings.noOverlay) : c_oAscChartTitleShowSettings.none);
-        var hor_axis = plot_area.getHorizontalAxis();
-        var vert_axis = plot_area.getVerticalAxis();
 
-        var calc_grid_lines = function(axis)
-        {
-            if(!axis || (!axis.majorGridlines && !axis.minorGridlines))
-                return c_oAscGridLinesSettings.none;
-            if(axis.majorGridlines && !axis.minorGridlines)
-                return c_oAscGridLinesSettings.major;
-            if(axis.minorGridlines && !axis.majorGridlines)
-                return c_oAscGridLinesSettings.minor;
-            return c_oAscGridLinesSettings.majorMinor;
-        };
-
-        var chart_type = plot_area.charts[0];
-        var chart_type_object_type = chart_type.getObjectType();
-
-        if(hor_axis)
-        {
-            ret.putShowHorAxis(!hor_axis.bDelete);
-            ret.putHorAxisProps(hor_axis.getMenuProps());
+        var oOrderedAxes = chart_space.getOrderedAxes();
+        var aAx = oOrderedAxes.getHorizontalAxes();
+        var nAx;
+        for(nAx = 0; nAx < aAx.length; ++nAx) {
+            ret.addHorAxesProps(aAx[nAx].getMenuProps());
         }
-        else
-        {
-            if(vert_axis)
-            {
-                if(vert_axis.getObjectType() === AscDFH.historyitem_type_ValAx)
-                {
-                    ret.putShowHorAxis(false);
-                    var _cat_ax_pr = new AscCommon.asc_CatAxisSettings();
-                    _cat_ax_pr.setDefault();
-                    ret.putHorAxisProps(_cat_ax_pr);
-                }
-                else
-                {
-                    ret.putShowHorAxis(false);
-                    var _val_ax_pr = new AscCommon.asc_ValAxisSettings();
-                    _val_ax_pr.setDefault();
-                    ret.putHorAxisProps(_val_ax_pr);
-                }
-            }
+        aAx = oOrderedAxes.getVerticalAxes();
+        for(nAx = 0; nAx < aAx.length; ++nAx) {
+            ret.addVertAxesProps(aAx[nAx].getMenuProps());
         }
-        ret.putHorGridLines(calc_grid_lines(vert_axis));
 
-        if(vert_axis)
-        {
-            ret.putShowVerAxis(!vert_axis.bDelete);
-            ret.putVertAxisProps(vert_axis.getMenuProps());
-            if(chart_type.getObjectType() === AscDFH.historyitem_type_AreaChart && !AscFormat.isRealNumber(vert_axis.crossBetween))
-            {
-                var oHorAxProps = ret.getHorAxisProps();
-                if(oHorAxProps)
-                {
-                    oHorAxProps.putLabelsPosition(Asc.c_oAscLabelsPosition.byDivisions);
-                }
-            }
+        if(chart.legend) {
+            ret.putLegendPos(AscFormat.isRealNumber(chart.legend.legendPos) ? chart.legend.legendPos : c_oAscChartLegendShowSettings.bottom);
         }
-        ret.putVertGridLines(calc_grid_lines(hor_axis));
-
-        ret.putHorAxisLabel(hor_axis && hor_axis.title ? c_oAscChartHorAxisLabelShowSettings.noOverlay : c_oAscChartTitleShowSettings.none);
-        var _label;
-        if(vert_axis && vert_axis.title)
-        {
-            var tx_body;
-            if(vert_axis.title.tx && vert_axis.title.tx.rich)
-            {
-                tx_body  =  vert_axis.title.tx.rich;
-            }
-            else if(vert_axis.title.txPr)
-            {
-                tx_body  =  vert_axis.title.txPr;
-            }
-            if(tx_body)
-            {
-                var oBodyPr = vert_axis.title.getBodyPr();
-                if(oBodyPr && oBodyPr.vert === AscFormat.nVertTThorz)
-                {
-                    _label = c_oAscChartVertAxisLabelShowSettings.horizontal;
-                }
-                else
-                {
-                    _label = c_oAscChartVertAxisLabelShowSettings.rotated;
-                }
-            }
-            else
-            {
-                _label = c_oAscChartVertAxisLabelShowSettings.none;
-            }
+        else {
+            ret.putLegendPos(c_oAscChartLegendShowSettings.none);
         }
-        else
-        {
-            _label = c_oAscChartVertAxisLabelShowSettings.none;
-        }
-        ret.putVertAxisLabel(_label);
+        ret.putType(chart_space.getChartType());
 
-        var data_labels = plot_area.charts[0].dLbls;
-        var nDefaultDatalabelsPos = chart_type && chart_type.getDefaultDataLabelsPosition ? chart_type.getDefaultDataLabelsPosition() :  c_oAscChartDataLabelsPos.none;
-
-        if(data_labels)
-        {
-            if(chart_type.series[0] && chart_type.series[0].dLbls){
-                this.collectPropsFromDLbls(nDefaultDatalabelsPos, chart_type.series[0].dLbls, ret);
+        //TODO: change work with labels and markers
+        var aPositions = chart_space.getPossibleDLblsPosition();
+        var nDefaultDatalabelsPos;
+        nDefaultDatalabelsPos = aPositions[0];
+        var oFirstChart = plot_area.charts[0];
+        var aSeries = oFirstChart.series;
+        var nSer, oSeries;
+        var oFirstSeries = aSeries[0];
+        var data_labels = oFirstChart.dLbls;
+        if(data_labels) {
+            if(oFirstSeries && oFirstSeries.dLbls) {
+                this.collectPropsFromDLbls(nDefaultDatalabelsPos, oFirstSeries.dLbls, ret);
             }
-            else{
+            else {
                 this.collectPropsFromDLbls(nDefaultDatalabelsPos, data_labels, ret);
             }
         }
-        else
-        {
-            if(chart_type.series[0] && chart_type.series[0].dLbls){
-                this.collectPropsFromDLbls(nDefaultDatalabelsPos, chart_type.series[0].dLbls, ret);
+        else {
+            if(oFirstSeries && oFirstSeries.dLbls) {
+                this.collectPropsFromDLbls(nDefaultDatalabelsPos, oFirstSeries.dLbls, ret);
             }
-            else{
+            else {
                 ret.putShowSerName(false);
                 ret.putShowCatName(false);
                 ret.putShowVal(false);
@@ -4904,172 +4834,122 @@ DrawingObjectsController.prototype =
                 ret.putDataLabelsPos(c_oAscChartDataLabelsPos.none);
             }
         }
-
-        if(chart.legend)
-        {
-            ret.putLegendPos(AscFormat.isRealNumber(chart.legend.legendPos) ? chart.legend.legendPos : c_oAscChartLegendShowSettings.bottom);
-        }
-        else
-        {
-            ret.putLegendPos(c_oAscChartLegendShowSettings.none);
-        }
-
-
-        var calc_chart_type = chart_space.getChartType();
-
-        if(chart_type_object_type === AscDFH.historyitem_type_LineChart)
-        {
-            var bShowMarker = false;
-            if(chart_type.marker !== false)
-            {
-                for(var j = 0; j < chart_type.series.length; ++j)
-                {
-                    if(!chart_type.series[j].marker)
-                    {
+        var bShowMarker, bNoLine, bSmooth;
+        if(oFirstChart.getObjectType() === AscDFH.historyitem_type_LineChart) {
+            bShowMarker = false;
+            if(oFirstChart.marker !== false) {
+                for(nSer = 0; nSer < aSeries.length; ++nSer) {
+                    oSeries = aSeries[nSer];
+                    if(!oSeries.marker) {
                         bShowMarker = true;
                         break;
                     }
-                    if(chart_type.series[j].marker.symbol !== AscFormat.SYMBOL_NONE)
-                    {
+                    if(oSeries.marker.symbol !== AscFormat.SYMBOL_NONE) {
                         bShowMarker = true;
                         break;
                     }
                 }
             }
             ret.putShowMarker(bShowMarker);
-            var b_no_line = true;
-            for(var i = 0; i < chart_type.series.length; ++i)
-            {
-                if(!(chart_type.series[i].spPr && chart_type.series[i].spPr.ln &&
-                    chart_type.series[i].spPr.ln.Fill &&chart_type.series[i].spPr.ln.Fill.fill && chart_type.series[i].spPr.ln.Fill.fill.type === c_oAscFill.FILL_TYPE_NOFILL))
-                {
-                    b_no_line = false;
+            bNoLine = true;
+            for(nSer = 0; nSer < aSeries.length; ++nSer) {
+                oSeries = aSeries[nSer];
+                if(!(oSeries.spPr
+                    && oSeries.spPr.ln
+                    && oSeries.spPr.ln.Fill
+                    && oSeries.spPr.ln.Fill.fill
+                    && oSeries.spPr.ln.Fill.fill.type === c_oAscFill.FILL_TYPE_NOFILL)) {
+                    bNoLine = false;
                     break;
                 }
             }
-            var b_smooth = true;
-            for(var i = 0; i < chart_type.series.length; ++i)
-            {
-                if(chart_type.series[i].smooth === false)
-                {
-                    b_smooth = false;
+            bSmooth = true;
+            for(nSer = 0; nSer < aSeries.length; ++nSer) {
+                oSeries = aSeries[nSer];
+                if(oSeries.smooth === false) {
+                    bSmooth = false;
                     break;
                 }
             }
-            if(!b_no_line)
-            {
+            if(!bNoLine) {
                 ret.putLine(true);
-                ret.putSmooth(b_smooth);
+                ret.putSmooth(bSmooth);
             }
-            else
-            {
+            else {
                 ret.putLine(false);
             }
         }
-        else if(chart_type_object_type === AscDFH.historyitem_type_AreaChart)
-        {
-            switch(chart_type.grouping)
-            {
-                case GROUPING_PERCENT_STACKED :
-                {
-                    calc_chart_type = c_oAscChartTypeSettings.areaStackedPer;
-                    break;
-                }
-                case GROUPING_STACKED         :
-                {
-                    calc_chart_type = c_oAscChartTypeSettings.areaStacked;
-                    break;
-                }
-                default        :
-                {
-                    calc_chart_type = c_oAscChartTypeSettings.areaNormal;
-                    break;
-                }
-            }
-        }
-        else if(chart_type_object_type === AscDFH.historyitem_type_ScatterChart)
-        {
-            switch(chart_type.scatterStyle)
-            {
-                case SCATTER_STYLE_LINE:
-                {
+        else if(oFirstChart.getObjectType() === AscDFH.historyitem_type_ScatterChart) {
+            switch(oFirstChart.scatterStyle) {
+                case SCATTER_STYLE_LINE: {
                     ret.bLine = true;
                     ret.smooth = false;
                     ret.showMarker = false;
                     break;
                 }
-                case SCATTER_STYLE_LINE_MARKER:
-                {
+                case SCATTER_STYLE_LINE_MARKER: {
                     ret.bLine = true;
                     ret.smooth = false;
                     ret.showMarker = true;
                     break;
                 }
-                case SCATTER_STYLE_MARKER:
-                {
+                case SCATTER_STYLE_MARKER: {
                     ret.bLine = false;
                     ret.showMarker = false;
-                    for(var j = 0; j < chart_type.series.length; ++j)
-                    {
-                        if(!(chart_type.series[j].marker && chart_type.series[j].marker.symbol === AscFormat.SYMBOL_NONE))
-                        {
+                    for(nSer = 0; nSer < aSeries.length; ++nSer) {
+                        oSeries = aSeries[nSer];
+                        if(!(oSeries.marker && oSeries.marker.symbol === AscFormat.SYMBOL_NONE)) {
                             ret.showMarker = true;
                             break;
                         }
                     }
                     break;
                 }
-                case SCATTER_STYLE_NONE:
-                {
+                case SCATTER_STYLE_NONE: {
                     ret.bLine = false;
                     ret.showMarker = false;
                     break;
                 }
-                case SCATTER_STYLE_SMOOTH:
-                {
+                case SCATTER_STYLE_SMOOTH: {
                     ret.bLine = true;
                     ret.smooth = true;
                     ret.showMarker = false;
                     break;
                 }
-                case SCATTER_STYLE_SMOOTH_MARKER:
-                {
+                case SCATTER_STYLE_SMOOTH_MARKER: {
                     ret.bLine = true;
                     ret.smooth = true;
                     ret.showMarker = true;
                     break;
                 }
             }
-            if(ret.bLine)
-            {
-                for(var i = 0; i < chart_type.series.length; ++i)
-                {
-                    if(!(chart_type.series[i].spPr && chart_type.series[i].spPr.ln &&
-                        chart_type.series[i].spPr.ln.Fill &&chart_type.series[i].spPr.ln.Fill.fill && chart_type.series[i].spPr.ln.Fill.fill.type === c_oAscFill.FILL_TYPE_NOFILL))
-                    {
+            if(ret.bLine) {
+                for(nSer = 0; nSer < aSeries.length; ++nSer) {
+                    oSeries = aSeries[nSer];
+                    if(!(oSeries.spPr
+                        && oSeries.spPr.ln
+                        && oSeries.spPr.ln.Fill
+                        && oSeries.spPr.ln.Fill.fill
+                        && oSeries.spPr.ln.Fill.fill.type === c_oAscFill.FILL_TYPE_NOFILL)) {
                         break;
                     }
                 }
-                if(i === chart_type.series.length)
-                {
+                if(nSer === aSeries.length) {
                     ret.bLine = false;
                 }
-                var b_smooth = ret.smooth;
-                if(b_smooth)
-                {
-                    for(var i = 0; i < chart_type.series.length; ++i)
-                    {
-                        if(!chart_type.series[i].smooth)
-                        {
-                            b_smooth = false;
+                bSmooth = ret.smooth;
+                if(bSmooth) {
+                    for(nSer = 0; nSer < aSeries.length; ++nSer) {
+                        oSeries = aSeries[nSer];
+                        if(!oSeries.smooth) {
+                            bSmooth = false;
                             break;
                         }
                     }
                 }
-                ret.putSmooth(b_smooth);
+                ret.putSmooth(bSmooth);
             }
         }
-        ret.type = calc_chart_type;
         return ret;
     },
 

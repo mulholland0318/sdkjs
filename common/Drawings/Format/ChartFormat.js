@@ -14991,7 +14991,7 @@ function CChart()
         this.plotArea.checkDlblsPosition();
     };
     CChart.prototype.getPossibleDLblsPosition = function() {
-        this.plotArea.getPossibleDLblsPosition();
+        return this.plotArea.getPossibleDLblsPosition();
     };
     CChart.prototype.check3DOptions = function(is3D, bPerspective) {
         if(is3D) {

@@ -16051,7 +16051,11 @@ CChartSpace.prototype.onDataUpdate = function() {
         this.chart.checkDlblsPosition();
     };
     CChartSpace.prototype.getPossibleDLblsPosition = function() {
-        this.chart.getPossibleDLblsPosition();
+        var aPositions = this.chart.getPossibleDLblsPosition();
+        if(aPositions.length === 0) {
+            aPositions.push(c_oAscChartDataLabelsPos.show);
+        }
+        return aPositions;
     };
     CChartSpace.prototype.setDlblsProps = function(oProps) {
         this.chart.setDlblsProps(oProps);
