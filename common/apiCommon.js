@@ -396,6 +396,37 @@
 		this.buildNumber = v;
 	};
 
+	function asc_CAxNumFmt(oNumFmt) {
+		this.formatCode = null;
+		this.sourceLinked = null;
+		if(oNumFmt) {
+			this.formatCode = oNumFmt.formatCode;
+			this.sourceLinked = oNumFmt.sourceLinked;
+		}
+	}
+
+	asc_CAxNumFmt.prototype.getFormatCode = function() {
+		return this.formatCode;
+	};
+	asc_CAxNumFmt.prototype.putFormatCode = function(v) {
+		this.formatCode = v;
+	};
+	asc_CAxNumFmt.prototype.getSourceLinked = function() {
+		return this.sourceLinked;
+	};
+	asc_CAxNumFmt.prototype.putSourceLinked = function(v) {
+		this.sourceLinked = v;
+	};
+	asc_CAxNumFmt.prototype.isEqual = function(v) {
+		if(!v) {
+			return false;
+		}
+		return this.formatCode === v.formatCode && this.sourceLinked === v.sourceLinked;
+	};
+	asc_CAxNumFmt.prototype.isCorrect = function() {
+		return typeof this.formatCode === "string" && this.formatCode.length > 0;
+	};
+
 	/** @constructor */
 	function asc_ValAxisSettings() {
 		this.minValRule = null;
@@ -420,6 +451,7 @@
 		this.show = true;
 		this.label = null;
 		this.gridlines = null;
+		this.numFmt = null;
 	}
 	asc_ValAxisSettings.prototype.isEqual = function(oPr){
 		if(!oPr){
@@ -480,6 +512,16 @@
 			return false;
 		}
 		if(this.gridlines !== oPr.gridlines) {
+			return false;
+		}
+		var bEqualNumFmt = false;
+		if(this.numFmt) {
+			bEqualNumFmt = this.numFmt.isEqual(oPr.numFmt);
+		}
+		else {
+			bEqualNumFmt = (this.numFmt === oPr.numFmt);
+		}
+		if(!bEqualNumFmt) {
 			return false;
 		}
 		return true;
@@ -607,6 +649,12 @@
 	};
 	asc_ValAxisSettings.prototype.putGridlines = function(v) {
 		this.gridlines = v;
+	};
+	asc_ValAxisSettings.prototype.getNumFmt = function() {
+		return this.numFmt;
+	};
+	asc_ValAxisSettings.prototype.putNumFmt = function(v) {
+		this.numFmt = v;
 	};
 	asc_ValAxisSettings.prototype.read = function(_params, _cursor){
 		var _continue = true;
@@ -810,6 +858,7 @@
 		this.show = true;
 		this.label = null;
 		this.gridlines = null;
+		this.numFmt = null;
 	}
 	asc_CatAxisSettings.prototype.isEqual = function(oPr){
 		if(!oPr){
@@ -864,6 +913,16 @@
 			return false;
 		}
 		if(this.gridlines !== oPr.gridlines) {
+			return false;
+		}
+		var bEqualNumFmt = false;
+		if(this.numFmt) {
+			bEqualNumFmt = this.numFmt.isEqual(oPr.numFmt);
+		}
+		else {
+			bEqualNumFmt = (this.numFmt === oPr.numFmt);
+		}
+		if(!bEqualNumFmt) {
 			return false;
 		}
 		return true;
@@ -979,6 +1038,12 @@
 	};
 	asc_CatAxisSettings.prototype.putGridlines = function(v) {
 		this.gridlines = v;
+	};
+	asc_CatAxisSettings.prototype.getNumFmt = function() {
+		return this.numFmt;
+	};
+	asc_CatAxisSettings.prototype.putNumFmt = function(v) {
+		this.numFmt = v;
 	};
 	asc_CatAxisSettings.prototype.read = function(_params, _cursor){
 		var _continue = true;
@@ -5320,6 +5385,13 @@
 	prot["asc_getBuildNumber"] = prot.asc_getBuildNumber;
 	prot["asc_getIsBeta"] = prot.asc_getIsBeta;
 
+	window["AscCommon"].asc_CAxNumFmt = asc_CAxNumFmt;
+	prot = asc_CAxNumFmt.prototype;
+	prot["getFormatCode"] = prot.getFormatCode;
+	prot["putFormatCode"] = prot.putFormatCode;
+	prot["getSourceLinked"] = prot.getSourceLinked;
+	prot["putSourceLinked"] = prot.putSourceLinked;
+
 	window["AscCommon"].asc_ValAxisSettings = asc_ValAxisSettings;
 	prot = asc_ValAxisSettings.prototype;
 	prot["putMinValRule"] = prot.putMinValRule;
@@ -5361,6 +5433,8 @@
 	prot["getLabel"] = prot.getLabel;
 	prot["putGridlines"] = prot.putGridlines;
 	prot["getGridlines"] = prot.getGridlines;
+	prot["putNumFmt"] = prot.putNumFmt;
+	prot["getNumFmt"] = prot.getNumFmt;
 
 	window["AscCommon"].asc_CatAxisSettings = asc_CatAxisSettings;
 	prot = asc_CatAxisSettings.prototype;
@@ -5399,6 +5473,8 @@
 	prot["putLabel"] = prot.putLabel;
 	prot["putGridlines"] = prot.putGridlines;
 	prot["getGridlines"] = prot.getGridlines;
+	prot["putNumFmt"] = prot.putNumFmt;
+	prot["getNumFmt"] = prot.getNumFmt;
 
 	window["Asc"]["asc_ChartSettings"] = window["Asc"].asc_ChartSettings = asc_ChartSettings;
 	prot = asc_ChartSettings.prototype;
@@ -5472,8 +5548,6 @@
 	prot["getHorAxesProps"] = prot.getHorAxesProps;
 	prot["getVertAxesProps"] = prot.getVertAxesProps;
 	prot["getDepthAxesProps"] = prot.getDepthAxesProps;
-
-
 
 	window["AscCommon"].asc_CRect = asc_CRect;
 	prot = asc_CRect.prototype;
