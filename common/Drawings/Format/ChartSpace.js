@@ -16048,15 +16048,19 @@ CChartSpace.prototype.onDataUpdate = function() {
         }
     };
     CChartSpace.prototype.checkDlblsPosition = function() {
-        var b3D = AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(this);
-        this.chart.checkDlblsPosition(b3D);
+        this.chart.checkDlblsPosition();
     };
     CChartSpace.prototype.getPossibleDLblsPosition = function() {
-        var b3D = AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(this);
-        this.chart.getPossibleDLblsPosition(b3D);
+        this.chart.getPossibleDLblsPosition();
+    };
+    CChartSpace.prototype.setDlblsProps = function(oProps) {
+        this.chart.setDlblsProps(oProps);
     };
     CChartSpace.prototype.getOrderedAxes = function() {
         return this.chart.getOrderedAxes();
+    };
+    CChartSpace.prototype.is3dChart = function() {
+        return AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(this);
     };
 function getNumLit(ser) {
     if(ser) {
