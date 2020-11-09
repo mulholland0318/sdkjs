@@ -631,6 +631,7 @@
 		this.putMajorTickMark(c_oAscTickMark.TICK_MARK_OUT);
 		this.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
 		this.putCrossesRule(Asc.c_oAscCrossesRule.auto);
+		this.putShow(true);
 	};
 	asc_ValAxisSettings.prototype.getShow = function() {
 		return this.show;
@@ -1020,6 +1021,7 @@
 		this.putMinorTickMark(c_oAscTickMark.TICK_MARK_NONE);
 		this.putIntervalBetweenTick(1);
 		this.putCrossesRule(Asc.c_oAscCrossesRule.auto);
+		this.putShow(true);
 	};
 	asc_CatAxisSettings.prototype.getShow = function() {
 		return this.show;
@@ -1356,6 +1358,11 @@
 	asc_ChartSettings.prototype.addDepthAxesProps = function(v) {
 		this.depthAxes.push(v);
 	};
+	asc_ChartSettings.prototype.removeAllAxesProps = function(v) {
+		this.horizontalAxes.length = 0;
+		this.verticalAxes.length = 0;
+		this.depthAxes.length = 0;
+	};
 	asc_ChartSettings.prototype.equalBool = function(a, b){
 		return ((!!a) === (!!b));
 	};
@@ -1651,6 +1658,8 @@
 	asc_ChartSettings.prototype.read = function(_params, _cursor) {
 		var _continue = true;
 		var oAxPr;
+		var nHorAxislabel = null, nVertAxisLabel = null;
+		var nHorGridlines = null, nVertGridlines = null;
 		while (_continue)
 		{
 			var _attr = _params[_cursor.pos++];
@@ -1673,12 +1682,12 @@
 				}
 				case 3:
 				{
-					this.putHorAxisLabel(_params[_cursor.pos++]);
+					nHorAxislabel = _params[_cursor.pos++];
 					break;
 				}
 				case 4:
 				{
-					this.putVertAxisLabel(_params[_cursor.pos++]);
+					nVertAxisLabel = _params[_cursor.pos++];
 					break;
 				}
 				case 5:
@@ -1703,12 +1712,12 @@
 				}
 				case 9:
 				{
-					this.putHorGridLines(_params[_cursor.pos++]);
+					nHorGridlines = _params[_cursor.pos++];
 					break;
 				}
 				case 10:
 				{
-					this.putVertGridLines(_params[_cursor.pos++]);
+					nVertGridlines = _params[_cursor.pos++];
 					break;
 				}
 				case 11:
@@ -1740,14 +1749,14 @@
 				{
 					oAxPr = new asc_ValAxisSettings();
 					oAxPr.read(_params, _cursor);
-					this.putHorAxisProps(oAxPr);
+					this.addHorAxesProps(oAxPr);
 					break;
 				}
 				case 17:
 				{
 					oAxPr = new asc_ValAxisSettings();
 					oAxPr.read(_params, _cursor);
-					this.putVertAxisProps(oAxPr);
+					this.addVertAxesProps(oAxPr);
 					break;
 				}
 				case 18:
@@ -1779,14 +1788,14 @@
 				{
 					oAxPr = new asc_CatAxisSettings();
 					oAxPr.read(_params, _cursor);
-					this.putHorAxisProps(oAxPr);
+					this.addHorAxesProps(oAxPr);
 					break;
 				}
 				case 24:
 				{
 					oAxPr = new asc_CatAxisSettings();
 					oAxPr.read(_params, _cursor);
-					this.putVertAxisProps(oAxPr);
+					this.addVertAxesProps(oAxPr);
 					break;
 				}
 
@@ -1796,6 +1805,24 @@
 					_continue = false;
 					break;
 				}
+			}
+		}
+		oAxPr = this.horizontalAxes[0];
+		if(oAxPr) {
+			if(nHorAxislabel !== null) {
+				oAxPr.putLabel(nHorAxislabel);
+			}
+			if(nVertGridlines !== null) {
+				oAxPr.putGridlines(nVertGridlines);
+			}
+		}
+		oAxPr = this.verticalAxes[0];
+		if(oAxPr) {
+			if(nVertAxisLabel !== null) {
+				oAxPr.putLabel(nVertAxisLabel);
+			}
+			if(nHorGridlines !== null) {
+				oAxPr.putGridlines(nHorGridlines);
 			}
 		}
 
@@ -1818,13 +1845,13 @@
 			_stream["WriteByte"](2);
 			_stream["WriteLong"](this.rowCols);
 		}
-		var nLabel = this.getHorAxisLabel();
+		var nLabel = this.horizontalAxes[0] && this.horizontalAxes[0].getLabel();
 		if (nLabel !== undefined && nLabel !== null)
 		{
 			_stream["WriteByte"](3);
 			_stream["WriteLong"](nLabel);
 		}
-		nLabel = this.getVertAxisLabel();
+		nLabel = this.verticalAxes[0] && this.verticalAxes[0].getLabel();
 		if (nLabel !== undefined && nLabel !== null)
 		{
 			_stream["WriteByte"](4);
@@ -1840,13 +1867,13 @@
 			_stream["WriteByte"](6);
 			_stream["WriteLong"](this.dataLabelsPos);
 		}
-		var nGridlines = this.getHorGridLines();
+		var nGridlines = this.verticalAxes[0] && this.verticalAxes[0].getGridlines();
 		if (nGridlines !== undefined && nGridlines !== null)
 		{
 			_stream["WriteByte"](9);
 			_stream["WriteLong"](nGridlines);
 		}
-		nGridlines = this.getVertGridLines();
+		nGridlines = this.horizontalAxes[0] && this.horizontalAxes[0].getGridlines();
 		if (nGridlines !== undefined && nGridlines !== null)
 		{
 			_stream["WriteByte"](10);
@@ -1881,8 +1908,8 @@
 		}
 
 
-		var oHorAx = this.getHorAxisProps();
-		var oVertAx = this.getVertAxisProps();
+		var oHorAx = this.getHorAxesProps()[0];
+		var oVertAx = this.getVertAxesProps()[0];
 		if (undefined != oHorAx
 			&& null != oHorAx
 			&& oHorAx.getAxisType() == Asc.c_oAscAxisType.val) {

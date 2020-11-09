@@ -6671,12 +6671,12 @@ DrawingObjectsController.prototype =
                 {
                     var new_hor_axis_settings = new AscCommon.asc_ValAxisSettings();
                     new_hor_axis_settings.setDefault();
-                    options.putHorAxisProps(new_hor_axis_settings);
+                    new_hor_axis_settings.putGridlines(c_oAscGridLinesSettings.major);
+                    options.addHorAxesProps(new_hor_axis_settings);
                     var new_vert_axis_settings = new AscCommon.asc_ValAxisSettings();
                     new_vert_axis_settings.setDefault();
-                    options.putVertAxisProps(new_vert_axis_settings);
-                    options.putHorGridLines(c_oAscGridLinesSettings.major);
-                    options.putVertGridLines(c_oAscGridLinesSettings.major);
+                    new_vert_axis_settings.putGridlines(c_oAscGridLinesSettings.major);
+                    options.addVertAxesProps(new_vert_axis_settings);
                     options.putShowMarker(true);
                     options.putSmooth(null);
                     options.putLine(false);

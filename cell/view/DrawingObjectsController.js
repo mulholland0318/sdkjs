@@ -439,8 +439,7 @@ DrawingObjectsController.prototype.addChartDrawingObject = function(options)
             var old_range = options.getRange();
             options.putRange(null);
             options.putStyle(null);
-            options.putHorAxisProps(null);
-            options.putVertAxisProps(null);
+            options.removeAllAxesProps();
             options.putShowMarker(null);
             this.editChartCallback(options);
             options.putStyle(1);

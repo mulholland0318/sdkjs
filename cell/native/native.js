@@ -4066,8 +4066,18 @@ function OfflineEditor () {
         
         settings.putStyle(2);
         settings.putTitle(Asc.c_oAscChartTitleShowSettings.noOverlay);
-        settings.putShowHorAxis(true);
-        settings.putShowVerAxis(true);
+        var vert_axis_settings = new AscCommon.asc_ValAxisSettings();
+        vert_axis_settings.setDefault();
+        vert_axis_settings.putLabel(Asc.c_oAscChartVertAxisLabelShowSettings.none);
+        vert_axis_settings.putGridlines(Asc.c_oAscGridLinesSettings.major);
+        settings.addVertAxesProps(vert_axis_settings);
+
+        var hor_axis_settings = new AscCommon.asc_CatAxisSettings();
+        hor_axis_settings.setDefault();
+        hor_axis_settings.putLabel(Asc.c_oAscChartHorAxisLabelShowSettings.none);
+        hor_axis_settings.putGridlines(Asc.c_oAscGridLinesSettings.none);
+        settings.addHorAxesProps(hor_axis_settings);
+
         var series = AscFormat.getChartSeries(ws.model, settings);
         if(series && series.series.length > 1)
         {
@@ -4077,23 +4087,11 @@ function OfflineEditor () {
         {
             settings.putLegendPos(Asc.c_oAscChartLegendShowSettings.none);
         }
-        settings.putHorAxisLabel(Asc.c_oAscChartHorAxisLabelShowSettings.none);
-        settings.putVertAxisLabel(Asc.c_oAscChartVertAxisLabelShowSettings.none);
         settings.putDataLabelsPos(Asc.c_oAscChartDataLabelsPos.none);
-        settings.putHorGridLines(Asc.c_oAscGridLinesSettings.major);
-        settings.putVertGridLines(Asc.c_oAscGridLinesSettings.none);
-        //settings.putInColumns(false);
         settings.putSeparator(",");
         settings.putLine(true);
         settings.putShowMarker(false);
-        
-        var vert_axis_settings = new AscCommon.asc_ValAxisSettings();
-        settings.putVertAxisProps(vert_axis_settings);
-        vert_axis_settings.setDefault();
-        
-        var hor_axis_settings = new AscCommon.asc_CatAxisSettings();
-        settings.putHorAxisProps(hor_axis_settings);
-        hor_axis_settings.setDefault();
+
         
         settings.left = left;
         settings.top = top;
