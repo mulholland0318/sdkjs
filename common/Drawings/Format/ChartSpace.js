@@ -16053,7 +16053,7 @@ CChartSpace.prototype.onDataUpdate = function() {
     CChartSpace.prototype.getPossibleDLblsPosition = function() {
         var aPositions = this.chart.getPossibleDLblsPosition();
         if(aPositions.length === 0) {
-            aPositions.push(c_oAscChartDataLabelsPos.show);
+            aPositions.push(Asc.c_oAscChartDataLabelsPos.show);
         }
         return aPositions;
     };

@@ -3395,6 +3395,25 @@ function getMinMaxFromArrPoints(aPoints)
         }
         this.dLbls.setSettings(nPos, oProps);
     };
+    CSeriesBase.prototype.canChangeAxisType = function() {
+        if(!this.parent) {
+            return false;
+        }
+        return this.parent.canChangeAxisType();
+    };
+    CSeriesBase.prototype["asc_canChangeAxisType"] = CSeriesBase.prototype.canChangeAxisType;
+    CSeriesBase.prototype.changeAxisType = function(bIsSecondary) {
+        if(!this.parent) {
+            return;
+        }
+        if(!this.canChangeAxisType()) {
+            return;
+        }
+        if(bIsSecondary === this.isSecondaryAxis()) {
+            return;
+        }
+        this.parent.changeSeriesType(this, this.parent.getChartType(), bIsSecondary);
+    };
 
 function CPlotArea()
 {
@@ -4835,6 +4854,70 @@ function CPlotArea()
             for(var nSer = 0; nSer < this.series.length; ++nSer) {
                 this.series[nSer].setDlblsProps(oProps);
             }
+        }
+    };
+    CChartBase.prototype.canChangeAxisType = function() {
+        if(this.getObjectType() === AscDFH.historyitem_type_PieChart ||
+        this.getObjectType() === AscDFH.historyitem_type_DoughnutChart) {
+            //TODO: implement
+            //<c:extLst>
+            // <c:ext uri="{C3380CC4-5D6E-409C-BE32-E72D297353CC}" xmlns:c16="http://schemas.microsoft.com/office/drawing/2014/chart">
+            //    <c16:uniqueId val="{0000000D-5343-412C-A86B-69BCE2BFEEEB}"/>
+            // </c:ext>
+            //</c:extLst>
+            return false;
+        }
+        var bHBarChart = this.isHBar();
+        var aCharts = this.parent.charts;
+        var nChart, oChart;
+        if(this.getObjectType() === AscDFH.historyitem_type_BarChart &&
+            this.barDir === AscFormat.BAR_DIR_BAR) {
+            bHBarChart = true;
+        }
+        for(nChart = 0; nChart < aCharts.length; ++nChart) {
+            oChart = aCharts[nChart];
+            if(bHBarChart !== oChart.isHBar()) {
+                return false;
+            }
+        }
+        return true;
+    };
+    CChartBase.prototype.isHBar = function() {
+        return (this.getObjectType() === AscDFH.historyitem_type_BarChart &&
+        this.barDir === AscFormat.BAR_DIR_BAR);
+    };
+    CChartBase.prototype.changeSeriesType = function(oSeries, nNewType, bIsSecondary) {
+        if(!this.parent) {
+            return;
+        }
+        var nCurType = this.getChartType();
+        var bCurIsSecondary = this.isSecondaryAxis();
+        var oNewSeries;
+        if(nCurType === nNewType && bCurIsSecondary === bIsSecondary) {
+            return;
+        }
+        var aCharts = this.parent.charts;
+        var nChart, oChart;
+        var oChartToAdd = null;
+        for(nChart = 0; nChart < aCharts.length; ++nChart) {
+            oChart = aCharts[nChart];
+            if(oChart.getChartType() === nNewType
+                && oChart.isSecondaryAxis() === bIsSecondary) {
+                oChartToAdd = oChart;
+                break;
+            }
+        }
+        if(!oChartToAdd) {
+            for(nChart = 0; nChart < aCharts.length; ++nChart) {
+                
+            }
+        }
+        if(oChartToAdd) {
+            oNewSeries = oChartToAdd.getSeriesConstructor();
+            oNewSeries.setFromOtherSeries(oSeries);
+            this.removeSeries(this.getSeriesArrayIdx(oSeries));
+            oChartToAdd.addSer(oNewSeries);
+            return
         }
     };
 
