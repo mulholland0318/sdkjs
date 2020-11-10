@@ -4488,11 +4488,11 @@ DrawingObjectsController.prototype =
             oTypedChart = oPlotArea.charts[nChart];
             if(oTypedChart.getObjectType() === AscDFH.historyitem_type_LineChart )
             {
-                if(!AscFormat.isRealBool(oProps.showMarker) || AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(chartSpace))
+                if(!AscFormat.isRealBool(oProps.showMarker) || AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(oChartSpace))
                 {
                     oProps.showMarker = false;
                 }
-                if(!AscFormat.isRealBool(oProps.bLine) || AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(chartSpace))
+                if(!AscFormat.isRealBool(oProps.bLine) || AscFormat.CChartsDrawer.prototype._isSwitchCurrent3DChart(oChartSpace))
                 {
                     oProps.bLine = true;
                 }

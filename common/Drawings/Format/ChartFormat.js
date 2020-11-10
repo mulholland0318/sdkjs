@@ -3925,8 +3925,117 @@ function CPlotArea()
         for(var nAx = 0; nAx < aAxes.length; ++nAx) {
             var oAxis = aAxes[nAx];
             this.addAxis(oAxis);
-            oTypedChart.addAxId(oAxis)
         }
+    };
+    CPlotArea.prototype.getBarAxisNumFormatByType = function(nType, aSeries) {
+        var oCT = Asc.c_oAscChartTypeSettings;
+        var sNewNumFormat;
+        if(nType === oCT.barStackedPer
+            || nType === oCT.barStackedPer3d
+            || nType === oCT.hBarStackedPer
+            || nType === oCT.hBarStackedPer3d) {
+            sNewNumFormat = "0%";
+        }
+        else {
+            sNewNumFormat = aSeries[0] && aSeries[0].getFirstPointFormatCode()|| "General"
+        }
+        return sNewNumFormat;
+    };
+    CPlotArea.prototype.getGroupingByType = function(nType) {
+        var oCT = Asc.c_oAscChartTypeSettings;
+        var nGrouping = null;
+        switch(nType) {
+            case oCT.barNormal:
+            case oCT.hBarNormal:
+            case oCT.barNormal3d:
+            case oCT.hBarNormal3d: {
+                nGrouping = AscFormat.BAR_GROUPING_CLUSTERED;
+                break;
+            }
+            case oCT.barStacked:
+            case oCT.hBarStacked:
+            case oCT.barStacked3d:
+            case oCT.hBarStacked3d: {
+                nGrouping = AscFormat.BAR_GROUPING_STACKED;
+                break;
+            }
+            case oCT.barNormal3dPerspective: {
+                nGrouping = AscFormat.BAR_GROUPING_STANDARD;
+                break;
+            }
+            case oCT.hBarStackedPer3d:
+            case oCT.hBarStackedPer:
+            case oCT.barStackedPer3d:
+            case oCT.barStackedPer: {
+                nGrouping = AscFormat.BAR_GROUPING_PERCENT_STACKED;
+                break;
+            }
+        }
+        return nGrouping;
+    };
+    CPlotArea.prototype.getBarDirByType = function(nType) {
+        if(this.isBarType(nType)) {
+            return AscFormat.BAR_DIR_COL;
+        }
+        else if(this.isHBarType(nType)) {
+            return AscFormat.BAR_DIR_BAR;
+        }
+    };
+    CPlotArea.prototype.getIs3dByType = function(nType) {
+        var oCT = Asc.c_oAscChartTypeSettings;
+        return nType === oCT.barNormal3d ||
+            nType === oCT.barStacked3d ||
+            nType === oCT.barStackedPer3d ||
+            nType === oCT.barNormal3dPerspective ||
+            nType === oCT.hBarNormal3d ||
+            nType === oCT.hBarStacked3d ||
+            nType === oCT.hBarStackedPer3d;
+    };
+    CPlotArea.prototype.getIsPerspective = function(nType) {
+        var oCT = Asc.c_oAscChartTypeSettings;
+        return oCT.barNormal3dPerspective === nType;
+    };
+
+    CPlotArea.prototype.check3DOptions = function(nType) {
+        this.parent.check3DOptions(this.getIs3dByType(nType),  this.getIsPerspective(nType));
+    };
+    CPlotArea.prototype.createBarChart = function(nType, aSeries, aAxes, oOldChart) {
+        var nNewGrouping;
+        var isNew3D;
+        var nSeries, oSeries;
+        var nNewBarDir;
+        var oBarChart = new AscFormat.CBarChart();
+        nNewGrouping = this.getGroupingByType(nType);
+        nNewBarDir = this.getBarDirByType(nType);
+        oBarChart.mergeNoSeries(oOldChart);
+        oBarChart.setVaryColors(false);
+        for(nSeries = 0; nSeries < aSeries.length; ++nSeries) {
+            oSeries = new AscFormat.CBarSeries();
+            oSeries.setFromOtherSeries(aSeries[nSeries]);
+            oBarChart.addSer(oSeries);
+        }
+        oBarChart.setBarDir(nNewBarDir);
+        oBarChart.setGrouping(nNewGrouping);
+        oBarChart.setGapWidth(150);
+        if(AscFormat.BAR_GROUPING_PERCENT_STACKED === nNewGrouping
+            || AscFormat.BAR_GROUPING_STACKED === nNewGrouping) {
+            oBarChart.setOverlap(100);
+        }
+        isNew3D = this.getIs3dByType(nType);
+        this.parent.check3DOptions(isNew3D, this.getIsPerspective(nType));
+        if(isNew3D) {
+            if(oBarChart.b3D !== true) {
+                oBarChart.set3D(true);
+            }
+        }
+        else {
+            if(oBarChart.b3D !== false) {
+                oBarChart.set3D(false);
+            }
+        }
+        oBarChart.addAxes(aAxes);
+        return oBarChart;
+
     };
     CPlotArea.prototype.switchToCombo = function() {
         if(this.charts.length < 1) {
@@ -3983,174 +4092,21 @@ function CPlotArea()
         if(aCharts.length < 1) {
             return;
         }
-        var nAx, oAxes, aAxes, oAxis;
-        var nNewGrouping;
-        var oCT = Asc.c_oAscChartTypeSettings;
-        switch(nType) {
-            case oCT.barNormal:
-            case oCT.hBarNormal:
-            case oCT.barNormal3d:
-            case oCT.hBarNormal3d: {
-                nNewGrouping = AscFormat.BAR_GROUPING_CLUSTERED;
-                break;
-            }
-            case oCT.barStacked:
-            case oCT.hBarStacked:
-            case oCT.barStacked3d:
-            case oCT.hBarStacked3d: {
-                nNewGrouping = AscFormat.BAR_GROUPING_STACKED;
-                break;
-            }
-            case oCT.barNormal3dPerspective: {
-                nNewGrouping = AscFormat.BAR_GROUPING_STANDARD;
-                break;
-            }
-            default: {
-                nNewGrouping = AscFormat.BAR_GROUPING_PERCENT_STACKED;
-                break;
+        if(aCharts.length === 1) {
+            if(aCharts[0].tryChangeType(nType)) {
+                return;
             }
         }
-        var isNew3D = nType === oCT.barNormal3d ||
-            nType === oCT.barStacked3d ||
-            nType === oCT.barStackedPer3d ||
-            nType === oCT.barNormal3dPerspective ||
-            nType === oCT.hBarNormal3d ||
-            nType === oCT.hBarStacked3d ||
-            nType === oCT.hBarStackedPer3d;
-
-        var aSeries = this.getAllSeries(), nSeries, oSeries;
-        var sFirstPointFormatCode = aSeries[0] && aSeries[0].getFirstPointFormatCode()|| "General";
-        var sNewNumFormat;
-        if(nType === oCT.barNormal || nType === oCT.barStacked ||
-            nType === oCT.barNormal3d || nType === oCT.barStacked3d ||
-            nType === oCT.hBarNormal || nType === oCT.hBarStacked ||
-            nType === oCT.hBarNormal3d || nType === oCT.hBarStacked3d ||
-            nType === oCT.barNormal3dPerspective) {
-            sNewNumFormat = sFirstPointFormatCode;
+        var aAxes;
+        var oBarChart;
+        if(this.getBarDirByType(nType) === AscFormat.BAR_DIR_COL) {
+            aAxes = this.createRegularAxes(this.getBarAxisNumFormatByType(nType, this.getAllSeries()));
         }
         else {
-            sNewNumFormat = "0%";
+            aAxes = this.createHBarAxes(this.getBarAxisNumFormatByType(nType, this.getAllSeries()));
         }
-        var nNewBarDir;
-        if(nType === oCT.barNormal
-            || nType === oCT.barStacked
-            || nType === oCT.barStackedPer
-            || nType === oCT.barNormal3d
-            || nType === oCT.barStacked3d
-            || nType === oCT.barStackedPer3d
-            || nType === oCT.barNormal3dPerspective) {
-            nNewBarDir = AscFormat.BAR_DIR_COL;
-        }
-        else {
-            nNewBarDir = AscFormat.BAR_DIR_BAR;
-        }
-        var oTypedChart = this.charts[0];
-        if(aCharts.length === 1 &&
-            oTypedChart.getObjectType() === AscDFH.historyitem_type_BarChart) {
-            var bChangedGrouping = false;
-            var nOldGrouping = oTypedChart.grouping;
-            if(oTypedChart.grouping !== nNewGrouping) {
-                oTypedChart.setGrouping(nNewGrouping);
-                bChangedGrouping = true;
-            }
-            if(!AscFormat.isRealNumber(oTypedChart.gapWidth)) {
-                oTypedChart.setGapWidth(150);
-            }
-            if(AscFormat.BAR_GROUPING_PERCENT_STACKED === nNewGrouping
-                || AscFormat.BAR_GROUPING_STACKED === nNewGrouping) {
-                if(!AscFormat.isRealNumber(oTypedChart.overlap)
-                    || nOldGrouping !== AscFormat.BAR_GROUPING_PERCENT_STACKED
-                    || nOldGrouping !== AscFormat.BAR_GROUPING_STACKED) {
-                    oTypedChart.setOverlap(100);
-                }
-            }
-            else {
-                if(bChangedGrouping && oTypedChart.overlap !== null) {
-                    oTypedChart.setOverlap(null);
-                }
-            }
-            this.parent.check3DOptions(isNew3D, oCT.barNormal3dPerspective === nType);
-            if(isNew3D) {
-                if(oTypedChart.b3D !== true) {
-                    oTypedChart.set3D(true);
-                }
-            }
-            else {
-                if(oTypedChart.b3D !== false) {
-                    oTypedChart.set3D(false);
-                }
-            }
-            oAxes = oTypedChart.getAxisByTypes();
-            if(oTypedChart.barDir !== nNewBarDir) {
-                oTypedChart.setBarDir(nNewBarDir);
-            }
-            //check the axes position
-            aAxes = oAxes.valAx;
-            for(nAx = 0; nAx < aAxes.length; ++nAx) {
-                oAxis = aAxes[nAx];
-                if(nNewBarDir === AscFormat.BAR_DIR_COL) {
-                    if(oAxis.axPos !== AX_POS_L && oAxis.axPos !== AX_POS_R) {
-                        oAxis.setAxPos(AX_POS_L);
-                    }
-                }
-                else {
-                    if(oAxis.axPos !== AX_POS_T && oAxis.axPos !== AX_POS_B) {
-                        oAxis.setAxPos(AX_POS_B);
-                    }
-                }
-            }
-            aAxes = oAxes.catAx.concat(oAxes.dateAx);
-            for(nAx = 0; nAx < aAxes.length; ++nAx) {
-                oAxis = aAxes[nAx];
-                if(nNewBarDir === AscFormat.BAR_DIR_COL) {
-                    if(oAxis.axPos !== AX_POS_T && oAxis.axPos !== AX_POS_B) {
-                        oAxis.setAxPos(AX_POS_B);
-                    }
-                }
-                else {
-                    if(oAxis.axPos !== AX_POS_L && oAxis.axPos !== AX_POS_R) {
-                        oAxis.setAxPos(AX_POS_L);
-                    }
-                }
-            }
-        }
-        else
-        {
-            var oBarChart = new AscFormat.CBarChart();
-            oBarChart.mergeNoSeries(this.charts[0]);
-            oBarChart.setVaryColors(false);
-            for(nSeries = 0; nSeries < aSeries.length; ++nSeries) {
-                oSeries = new AscFormat.CBarSeries();
-                oSeries.setFromOtherSeries(aSeries[nSeries]);
-                oBarChart.addSer(oSeries);
-            }
-            oBarChart.setBarDir(nNewBarDir);
-            oBarChart.setGrouping(nNewGrouping);
-            oBarChart.setGapWidth(150);
-
-            if(AscFormat.BAR_GROUPING_PERCENT_STACKED === nNewGrouping
-                || AscFormat.BAR_GROUPING_STACKED === nNewGrouping) {
-                oBarChart.setOverlap(100);
-            }
-            this.parent.check3DOptions(isNew3D, oCT.barNormal3dPerspective === nType);
-            if(isNew3D) {
-                if(oBarChart.b3D !== true) {
-                    oBarChart.set3D(true);
-                }
-            }
-            else {
-                if(oBarChart.b3D !== false) {
-                    oBarChart.set3D(false);
-                }
-            }
-            if(nNewBarDir === AscFormat.BAR_DIR_COL) {
-                aAxes = this.createRegularAxes(sNewNumFormat);
-            }
-            else {
-                aAxes = this.createHBarAxes(sNewNumFormat);
-            }
-            this.addChartWithAxes(oBarChart, aAxes);
-        }
+        oBarChart = this.createBarChart(nType, this.getAllSeries(), aAxes, this.charts[0]);
+        this.addChartWithAxes(oBarChart, aAxes);
     };
     CPlotArea.prototype.switchToLineChart = function(nType) {
         var nNewGrouping, sNewNumFormat;
@@ -4185,6 +4141,7 @@ function CPlotArea()
             oLineChart.addSer(oSeries);
         }
         var aAxes = this.createRegularAxes(sNewNumFormat);
+        oLineChart.addAxes(aAxes);
         this.addChartWithAxes(oLineChart, aAxes);
         this.parent.check3DOptions(nType === oCT.line3d, false);
     };
@@ -4260,6 +4217,7 @@ function CPlotArea()
             oAreaChart.addSer(oSeries);
         }
         var aAxes = this.createRegularAxes(sNewNumFormat);
+        oAreaChart.addAxes(aAxes);
         this.addChartWithAxes(oAreaChart, aAxes);
         this.parent.check3DOptions(nType === oCT.line3d, false);
     };
@@ -4287,6 +4245,7 @@ function CPlotArea()
         oScatterChart.setScatterStyle(AscFormat.SCATTER_STYLE_MARKER);
         var sFirstPointFormatCode = aSeries[0] && aSeries[0].getFirstPointFormatCode() || "General";
         var aAxes = this.createScatterAxes(sFirstPointFormatCode);
+        oScatterChart.addAxes(aAxes);
         this.addChartWithAxes(oScatterChart, aAxes);
         this.parent.check3DOptions(false, false);
     };
@@ -4305,6 +4264,7 @@ function CPlotArea()
         oStockChart.upDownBars.setUpBars(new AscFormat.CSpPr());
         oStockChart.upDownBars.setDownBars(new AscFormat.CSpPr());
         var aAxes = this.createRegularAxes("General");
+        oStockChart.addAxes(aAxes);
         this.addChartWithAxes(oStockChart, aAxes);
         this.parent.check3DOptions(false, false);
     };
@@ -4319,66 +4279,29 @@ function CPlotArea()
         if(nCurType === nType) {
             return;
         }
-        switch (nType) {
-            case Asc.c_oAscChartTypeSettings.combo: {
-                this.switchToCombo();
-                break;
-            }
-            case Asc.c_oAscChartTypeSettings.barNormal:
-            case Asc.c_oAscChartTypeSettings.barStacked:
-            case Asc.c_oAscChartTypeSettings.barStackedPer:
-            case Asc.c_oAscChartTypeSettings.barNormal3d:
-            case Asc.c_oAscChartTypeSettings.barStacked3d:
-            case Asc.c_oAscChartTypeSettings.barStackedPer3d:
-            case Asc.c_oAscChartTypeSettings.barNormal3dPerspective:
-            case Asc.c_oAscChartTypeSettings.hBarNormal:
-            case Asc.c_oAscChartTypeSettings.hBarStacked:
-            case Asc.c_oAscChartTypeSettings.hBarStackedPer:
-            case Asc.c_oAscChartTypeSettings.hBarNormal3d:
-            case Asc.c_oAscChartTypeSettings.hBarStacked3d:
-            case Asc.c_oAscChartTypeSettings.hBarStackedPer3d: {
-                this.switchToBarChart(nType);
-                break;
-            }
-            case Asc.c_oAscChartTypeSettings.lineNormal:
-            case Asc.c_oAscChartTypeSettings.lineStacked:
-            case Asc.c_oAscChartTypeSettings.lineStackedPer:
-            case Asc.c_oAscChartTypeSettings.lineNormalMarker:
-            case Asc.c_oAscChartTypeSettings.lineStackedMarker:
-            case Asc.c_oAscChartTypeSettings.lineStackedPerMarker:
-            case Asc.c_oAscChartTypeSettings.line3d: {
-                this.switchToLineChart(nType);
-                break;
-            }
-            case Asc.c_oAscChartTypeSettings.pie:
-            case Asc.c_oAscChartTypeSettings.pie3d: {
-                this.switchToPieChart(nType);
-                break;
-            }
-            case Asc.c_oAscChartTypeSettings.doughnut: {
-                this.switchToDoughnutChart();
-                break;
-            }
-            case Asc.c_oAscChartTypeSettings.areaNormal:
-            case Asc.c_oAscChartTypeSettings.areaStacked:
-            case Asc.c_oAscChartTypeSettings.areaStackedPer: {
-                this.switchToAreaChart(nType);
-                break;
-            }
-            case Asc.c_oAscChartTypeSettings.scatter:
-            case Asc.c_oAscChartTypeSettings.scatterLine:
-            case Asc.c_oAscChartTypeSettings.scatterLineMarker:
-            case Asc.c_oAscChartTypeSettings.scatterMarker:
-            case Asc.c_oAscChartTypeSettings.scatterNone:
-            case Asc.c_oAscChartTypeSettings.scatterSmooth:
-            case Asc.c_oAscChartTypeSettings.scatterSmoothMarker: {
-                this.switchToScatterChart();
-                break;
-            }
-            case Asc.c_oAscChartTypeSettings.stock: {
-                this.switchToStockChart();
-                break;
-            }
+        if(nType === Asc.c_oAscChartTypeSettings.combo) {
+            this.switchToCombo();
+        }
+        else if(this.isBarType(nType) || this.isHBarType(nType)) {
+            this.switchToBarChart(nType);
+        }
+        else if(this.isLineType(nType)) {
+            this.switchToLineChart(nType);
+        }
+        else if(this.isPieType(nType)) {
+            this.switchToPieChart(nType);
+        }
+        else if(this.isDoughnutType(nType)) {
+            this.switchToDoughnutChart();
+        }
+        else if(this.isAreaType(nType)) {
+            this.switchToAreaChart(nType);
+        }
+        else if(this.isScatterType(nType)) {
+            this.switchToScatterChart();
+        }
+        else if(this.isStockChart(nType)) {
+            this.switchToStockChart();
         }
     };
     CPlotArea.prototype.getAllSeries = function() {
@@ -4554,6 +4477,80 @@ function CPlotArea()
     CPlotArea.prototype.getOrderedAxes = function() {
         return new COrderedAxes(this);
     };
+    CPlotArea.prototype.isBarType = function(nType) {
+        if(Asc.c_oAscChartTypeSettings.barNormal === nType
+        || Asc.c_oAscChartTypeSettings.barStacked === nType
+        || Asc.c_oAscChartTypeSettings.barStackedPer === nType
+        || Asc.c_oAscChartTypeSettings.barNormal3d === nType
+        || Asc.c_oAscChartTypeSettings.barStacked3d === nType
+        || Asc.c_oAscChartTypeSettings.barStackedPer3d === nType
+        || Asc.c_oAscChartTypeSettings.barNormal3dPerspective === nType) {
+            return true;
+        }
+        return false;
+    };
+    CPlotArea.prototype.isHBarType = function(nType) {
+        if(Asc.c_oAscChartTypeSettings.hBarNormal === nType
+        || Asc.c_oAscChartTypeSettings.hBarStacked === nType
+        || Asc.c_oAscChartTypeSettings.hBarStackedPer === nType
+        || Asc.c_oAscChartTypeSettings.hBarNormal3d === nType
+        || Asc.c_oAscChartTypeSettings.hBarStacked3d === nType
+        || Asc.c_oAscChartTypeSettings.hBarStackedPer3d === nType) {
+            return true;
+        }
+        return false;
+    };
+    CPlotArea.prototype.isLineType = function(nType) {
+        if(Asc.c_oAscChartTypeSettings.lineNormal === nType
+        || Asc.c_oAscChartTypeSettings.lineStacked === nType
+        || Asc.c_oAscChartTypeSettings.lineStackedPer === nType
+        || Asc.c_oAscChartTypeSettings.lineNormalMarker === nType
+        || Asc.c_oAscChartTypeSettings.lineStackedMarker === nType
+        || Asc.c_oAscChartTypeSettings.lineStackedPerMarker === nType
+        || Asc.c_oAscChartTypeSettings.line3d === nType) {
+            return true
+        }
+        return false;
+    };
+    CPlotArea.prototype.isPieType = function(nType) {
+        if(Asc.c_oAscChartTypeSettings.pie === nType
+        || Asc.c_oAscChartTypeSettings.pie3d === nType) {
+            return true
+        }
+        return false;
+    };
+    CPlotArea.prototype.isDoughnutType = function(nType) {
+        if(Asc.c_oAscChartTypeSettings.doughnut === nType) {
+            return true
+        }
+        return false;
+    };
+    CPlotArea.prototype.isAreaType = function(nType) {
+        if(Asc.c_oAscChartTypeSettings.areaNormal === nType
+        || Asc.c_oAscChartTypeSettings.areaStacked === nType
+        || Asc.c_oAscChartTypeSettings.areaStackedPer === nType) {
+            return true
+        }
+        return false;
+    };
+    CPlotArea.prototype.isScatterType = function(nType) {
+        if(Asc.c_oAscChartTypeSettings.scatter === nType
+            || Asc.c_oAscChartTypeSettings.scatterLine === nType
+            || Asc.c_oAscChartTypeSettings.scatterLineMarker === nType
+            || Asc.c_oAscChartTypeSettings.scatterMarker === nType
+            || Asc.c_oAscChartTypeSettings.scatterNone === nType
+            || Asc.c_oAscChartTypeSettings.scatterSmooth === nType
+            || Asc.c_oAscChartTypeSettings.scatterSmoothMarker === nType) {
+            return true
+        }
+        return false;
+    };
+    CPlotArea.prototype.isStockChart = function(nType) {
+        if(Asc.c_oAscChartTypeSettings.stock === nType) {
+            return true
+        }
+        return false;
+    };
     CPlotArea.prototype.setDlblsProps = function(oProps) {
         for(var nChart = 0; nChart < this.charts.length; ++nChart) {
             this.charts[nChart].setDlblsProps(oProps);
@@ -4698,6 +4695,11 @@ function CPlotArea()
         for(i = 0; i < this.series.length; ++i) {
             if(typeof this.series[i].setDLbls === "function" && this.series[i].dLbls)
                 this.series[i].setDLbls(null);
+        }
+    };
+    CChartBase.prototype.addAxes = function(aAxes) {
+        for(var nAx = 0; nAx < aAxes.length; ++nAx) {
+            this.addAxId(aAxes[nAx]);
         }
     };
     CChartBase.prototype.addAxId = function(pr) {
@@ -4920,21 +4922,24 @@ function CPlotArea()
             return
         }
     };
+    CChartBase.prototype.tryChangeType = function(nNewType) {
+        return this.getChartType() === nNewType;
+    };
 
-function CBarChart()
-{
-    CChartBase.call(this);
-    this.barDir      = null;
-    this.gapWidth    = null;
-    this.grouping    = null;
-    this.overlap     = null;
-    this.serLines    = null;
-    this.varyColors  = null;
+    function CBarChart()
+    {
+        CChartBase.call(this);
+        this.barDir      = null;
+        this.gapWidth    = null;
+        this.grouping    = null;
+        this.overlap     = null;
+        this.serLines    = null;
+        this.varyColors  = null;
 
-    this.b3D = null;
-    this.gapDepth = null;
-    this.shape = null;
-}
+        this.b3D = null;
+        this.gapDepth = null;
+        this.shape = null;
+    }
     CBarChart.prototype = Object.create(CChartBase.prototype);
     CBarChart.prototype.constructor = CBarChart;
     CBarChart.prototype.set3D = function(pr)
@@ -5197,6 +5202,64 @@ function CBarChart()
             }
         }
         return nType;
+    };
+    CBarChart.prototype.tryChangeType = function(nType) {
+        if(this.getChartType() === nType) {
+            return true;
+        }
+        if(!this.parent) {
+            return false;
+        }
+        if(this.isHBar() && !this.parent.isHBarType(nType)
+        || !this.isHBar() && !this.parent.isBarType(nType)) {
+            return false;
+        }
+        var nNewBarDir = this.parent.getBarDirByType(nType);
+        var bChangedGrouping = false;
+        var nOldGrouping = this.grouping;
+        var nNewGrouping = this.parent.getGroupingByType(nType);
+        if(this.grouping !== nNewGrouping) {
+            this.setGrouping(nNewGrouping);
+            bChangedGrouping = true;
+        }
+        if(!AscFormat.isRealNumber(this.gapWidth)) {
+            this.setGapWidth(150);
+        }
+        if(AscFormat.BAR_GROUPING_PERCENT_STACKED === nNewGrouping
+            || AscFormat.BAR_GROUPING_STACKED === nNewGrouping) {
+            if(!AscFormat.isRealNumber(this.overlap)
+                || nOldGrouping !== AscFormat.BAR_GROUPING_PERCENT_STACKED
+                || nOldGrouping !== AscFormat.BAR_GROUPING_STACKED) {
+                this.setOverlap(100);
+            }
+        }
+        else {
+            if(bChangedGrouping && this.overlap !== null) {
+                this.setOverlap(null);
+            }
+        }
+        var isNew3D = this.parent.getIs3dByType(nType);
+        this.parent.check3DOptions(nType);
+        if(isNew3D) {
+            if(this.b3D !== true) {
+                this.set3D(true);
+            }
+        }
+        else {
+            if(this.b3D !== false) {
+                this.set3D(false);
+            }
+        }
+        var oAxes = this.getAxisByTypes(), aAxes, nAx, oAxis;
+        if(this.barDir !== nNewBarDir) {
+            this.setBarDir(nNewBarDir);
+        }
+        aAxes = oAxes.valAx;
+        for(nAx = 0; nAx < aAxes.length; ++nAx) {
+            oAxis = aAxes[nAx];
+            oAxis.checkNumFormat(this.parent.getBarAxisNumFormatByType(nType, this.series));
+        }
+        return true;
     };
 
 function CAreaChart()
@@ -8014,15 +8077,17 @@ function CValAx()
         }
     };
     CValAx.prototype.checkNumFormat = function(sNewFormat) {
-        if(!this.numFmt) {
-            this.setNumFmt(new AscFormat.CNumFmt());
-        }
-        var oNumFmt = this.numFmt;
-        if(oNumFmt.formatCode !== sNewFormat) {
-            oNumFmt.setFormatCode(sNewFormat);
-        }
-        if(oNumFmt.sourceLinked !== true) {
-            oNumFmt.setSourceLinked(true);
+        if(typeof sNewFormat === "string" && sNewFormat.length > 0) {
+            if(!this.numFmt) {
+                this.setNumFmt(new AscFormat.CNumFmt());
+            }
+            var oNumFmt = this.numFmt;
+            if(oNumFmt.formatCode !== sNewFormat) {
+                oNumFmt.setFormatCode(sNewFormat);
+            }
+            if(oNumFmt.sourceLinked !== true) {
+                oNumFmt.setSourceLinked(true);
+            }
         }
     };
 
