@@ -4061,28 +4061,11 @@ function CPlotArea()
         if(aSeries.length < 2) {
             return;
         }
-        //merge settings from current axes
+        var aAxes = this.createRegularAxes(this.getAxisNumFormatByType(Asc.c_oAscChartTypeSettings.barNormal, aSeries));
         oTypedChart = this.charts[0];
-        //create a bar clustered chart and a line chart
-        var oBarChart = AscFormat.CreateTypedBarChart(AscFormat.BAR_GROUPING_CLUSTERED, false);
-        oBarChart.mergeNoSeries(oTypedChart);
-        var nLength = (aSeries.length / 2 + 0.5) >> 0, oSeries;
-        for(nSeries = 0; nSeries < nLength; ++nSeries) {
-            oSeries = new AscFormat.CBarSeries();
-            oSeries.setFromOtherSeries(aSeries[nSeries]);
-            oBarChart.addSer(oSeries);
-        }
-        var oLineChart = AscFormat.CreateTypedLineChart(AscFormat.GROUPING_STANDARD);
-        oLineChart.mergeNoSeries(oTypedChart);
-        for(nSeries = nLength; nSeries < oTypedChart.series.length; ++nSeries) {
-            oSeries = new AscFormat.CLineSeries();
-            oSeries.setFromOtherSeries(aSeries[nSeries]);
-            oLineChart.addSer(oSeries);
-        }
-        oLineChart.setMarkerValue(false);
-        var sFirstPointFormatCode = aSeries[0] && aSeries[0].getFirstPointFormatCode();
-        var sNewFormatCode = sFirstPointFormatCode ? sFirstPointFormatCode : "General";
-        var aAxes = this.createRegularAxes(sNewFormatCode);
+        var nLength = (aSeries.length / 2 + 0.5) >> 0;
+        var oBarChart = this.createBarChart(Asc.c_oAscChartTypeSettings.barNormal, aSeries.slice(0, nLength), aAxes, oTypedChart);
+        var oLineChart = this.createLineChart(Asc.c_oAscChartTypeSettings.lineNormal, aSeries.slice(nLength), aAxes, oTypedChart);
         var oAxis;
         this.removeAllCharts();
         this.removeAllAxes();
@@ -4091,8 +4074,6 @@ function CPlotArea()
         for(var nAx = 0; nAx < aAxes.length; ++nAx) {
             oAxis = aAxes[nAx];
             this.addAxis(oAxis);
-            oBarChart.addAxId(oAxis);
-            oLineChart.addAxId(oAxis);
         }
     };
     CPlotArea.prototype.switchToBarChart = function(nType) {
@@ -4157,6 +4138,18 @@ function CPlotArea()
         return oLineChart;
     };
     CPlotArea.prototype.switchToLineChart = function(nType) {
+        if(!this.parent) {
+            return;
+        }
+        var aCharts = this.charts;
+        if(aCharts.length < 1) {
+            return;
+        }
+        if(aCharts.length === 1) {
+            if(aCharts[0].tryChangeType(nType)) {
+                return;
+            }
+        }
         var aSeries = this.getAllSeries();
         var aAxes = this.createRegularAxes(this.getAxisNumFormatByType(nType, aSeries));
         var oLineChart = this.createLineChart(nType, aSeries, aAxes, this.charts[0]);
@@ -4191,6 +4184,18 @@ function CPlotArea()
         return oPieChart;
     };
     CPlotArea.prototype.switchToPieChart = function(nType) {
+        if(!this.parent) {
+            return;
+        }
+        var aCharts = this.charts;
+        if(aCharts.length < 1) {
+            return;
+        }
+        if(aCharts.length === 1) {
+            if(aCharts[0].tryChangeType(nType)) {
+                return;
+            }
+        }
         var aSeries = this.getAllSeries();
         var oPieChart = this.createPieChart(nType, aSeries, this.charts[0]);
         this.addChartWithAxes(oPieChart);
@@ -4208,6 +4213,18 @@ function CPlotArea()
         return oDoughnutChart;
     };
     CPlotArea.prototype.switchToDoughnutChart = function(nType) {
+        if(!this.parent) {
+            return;
+        }
+        var aCharts = this.charts;
+        if(aCharts.length < 1) {
+            return;
+        }
+        if(aCharts.length === 1) {
+            if(aCharts[0].tryChangeType(nType)) {
+                return;
+            }
+        }
         var oDoughnutChart = this.createDoughnutChart(nType, this.getAllSeries(), this.charts[0]);
         this.addChartWithAxes(oDoughnutChart);
     };
@@ -4228,6 +4245,18 @@ function CPlotArea()
         return oAreaChart;
     };
     CPlotArea.prototype.switchToAreaChart = function(nType) {
+        if(!this.parent) {
+            return;
+        }
+        var aCharts = this.charts;
+        if(aCharts.length < 1) {
+            return;
+        }
+        if(aCharts.length === 1) {
+            if(aCharts[0].tryChangeType(nType)) {
+                return;
+            }
+        }
         var aSeries = this.getAllSeries();
         var aAxes = this.createRegularAxes(this.getAxisNumFormatByType(nType, aSeries));
         var oAreaChart = this.createAreaChart(nType, aSeries, aAxes, this.charts[0]);
@@ -4250,16 +4279,17 @@ function CPlotArea()
         return oScatterChart;
     };
     CPlotArea.prototype.switchToScatterChart = function(nType) {
-        var nCurType = this.getChartType();
-        var oCT = Asc.c_oAscChartTypeSettings;
-        if(nCurType === oCT.scatter
-        || nCurType === oCT.scatterLine
-        || nCurType === oCT.scatterLineMarker
-        || nCurType === oCT.scatterMarker
-        || nCurType === oCT.scatterNone
-        || nCurType === oCT.scatterSmooth
-        || nCurType === oCT.scatterSmoothMarker) {
+        if(!this.parent) {
             return;
+        }
+        var aCharts = this.charts;
+        if(aCharts.length < 1) {
+            return;
+        }
+        if(aCharts.length === 1) {
+            if(aCharts[0].tryChangeType(nType)) {
+                return;
+            }
         }
         var aSeries = this.getAllSeries();
         var aAxes = this.createScatterAxes(this.getAxisNumFormatByType(nType, aSeries));
@@ -4285,6 +4315,18 @@ function CPlotArea()
         return oStockChart;
     };
     CPlotArea.prototype.switchToStockChart = function(nType) {
+        if(!this.parent) {
+            return;
+        }
+        var aCharts = this.charts;
+        if(aCharts.length < 1) {
+            return;
+        }
+        if(aCharts.length === 1) {
+            if(aCharts[0].tryChangeType(nType)) {
+                return;
+            }
+        }
         var aAxes = this.createRegularAxes("General");
         var oStockChart = this.createStockChart(nType, this.getAllSeries(), aAxes, this.charts[0]);
         this.addChartWithAxes(oStockChart);
