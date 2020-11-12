@@ -244,7 +244,9 @@
 
 			LargeRangeWarning: -900,
 
-			LockedEditView: -950
+			LockedEditView: -950,
+
+			SecondaryAxis: 1001
 		}
 	};
 
