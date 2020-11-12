@@ -4513,6 +4513,9 @@ CDocument.prototype.Recalculate_PageColumn                   = function()
 		}
 		else
 		{
+			this.FullRecalc.Id           = null;
+			this.FullRecalc.MainStartPos = -1;
+
 			this.private_CheckUnusedFields();
 			this.private_CheckCurPage();
 			this.DrawingDocument.OnEndRecalculate(true);
@@ -4523,9 +4526,6 @@ CDocument.prototype.Recalculate_PageColumn                   = function()
 				this.Selection.UpdateOnRecalc = false;
 				this.DrawingDocument.OnSelectEnd();
 			}
-
-			this.FullRecalc.Id           = null;
-			this.FullRecalc.MainStartPos = -1;
 
 			// Основной пересчет окончен, если в колонтитулах есть элемент с количеством страниц, тогда нам надо
 			// запустить дополнительный пересчет колонтитулов.
@@ -13676,8 +13676,11 @@ CDocument.prototype.private_UpdateCurPage = function()
 
 	this.private_CheckCurPage();
 };
-CDocument.prototype.private_UpdateCursorXY = function(bUpdateX, bUpdateY)
+CDocument.prototype.private_UpdateCursorXY = function(bUpdateX, bUpdateY, isUpdateTarget)
 {
+	if (undefined === isUpdateTarget)
+		isUpdateTarget = true;
+
 	this.private_UpdateCurPage();
 
 	var NewCursorPos = null;
@@ -13685,7 +13688,7 @@ CDocument.prototype.private_UpdateCursorXY = function(bUpdateX, bUpdateY)
 	if (true !== this.IsSelectionUse() || true === this.IsSelectionEmpty())
 	{
 		this.DrawingDocument.UpdateTargetTransform(null);
-		NewCursorPos = this.Controller.RecalculateCurPos(bUpdateX, bUpdateY);
+		NewCursorPos = this.Controller.RecalculateCurPos(bUpdateX, bUpdateY, isUpdateTarget);
 		if (NewCursorPos && NewCursorPos.Transform)
 		{
 			var x = NewCursorPos.Transform.TransformPointX(NewCursorPos.X, NewCursorPos.Y);
@@ -13772,7 +13775,7 @@ CDocument.prototype.private_MoveCursorDown = function(StartX, StartY, AddToSelec
 				while (true)
 				{
 					this.MoveCursorToXY(StartX, StartY, AddToSelect);
-					this.private_UpdateCursorXY(false, true);
+					this.private_UpdateCursorXY(false, true, false);
 
 					if (this.CurPage < NewPage)
 					{
@@ -13810,8 +13813,9 @@ CDocument.prototype.private_MoveCursorDown = function(StartX, StartY, AddToSelec
 		}
 
 
+
 		this.MoveCursorToXY(StartX, CurY, AddToSelect);
-		this.private_UpdateCursorXY(false, true);
+		this.private_UpdateCursorXY(false, true, false);
 
 		if (this.CurPos.RealY > StartY + 0.001)
 		{
@@ -13822,6 +13826,9 @@ CDocument.prototype.private_MoveCursorDown = function(StartX, StartY, AddToSelec
 
 	this.CheckEmptyElementsOnSelection = true;
 	this.TurnOn_InterfaceEvents(true);
+
+	this.private_UpdateCursorXY(false, true, true);
+
 	return Result;
 };
 CDocument.prototype.private_MoveCursorUp = function(StartX, StartY, AddToSelect)
@@ -13861,7 +13868,7 @@ CDocument.prototype.private_MoveCursorUp = function(StartX, StartY, AddToSelect)
 				while (true)
 				{
 					this.MoveCursorToXY(StartX, StartY, AddToSelect);
-					this.private_UpdateCursorXY(false, true);
+					this.private_UpdateCursorXY(false, true, false);
 
 					if (this.CurPage > NewPage)
 					{
@@ -13902,7 +13909,7 @@ CDocument.prototype.private_MoveCursorUp = function(StartX, StartY, AddToSelect)
 		}
 
 		this.MoveCursorToXY(StartX, CurY, AddToSelect);
-		this.private_UpdateCursorXY(false, true);
+		this.private_UpdateCursorXY(false, true, false);
 
 		if (this.CurPos.RealY < StartY - 0.001)
 		{
@@ -13913,6 +13920,7 @@ CDocument.prototype.private_MoveCursorUp = function(StartX, StartY, AddToSelect)
 
 	this.CheckEmptyElementsOnSelection = true;
 	this.TurnOn_InterfaceEvents(true);
+	this.private_UpdateCursorXY(false, true, true);
 	return Result;
 };
 CDocument.prototype.MoveCursorPageDown = function(AddToSelect, NextPage)
@@ -17422,13 +17430,13 @@ CDocument.prototype.controller_CanUpdateTarget = function()
 
 	return true;
 };
-CDocument.prototype.controller_RecalculateCurPos = function(bUpdateX, bUpdateY)
+CDocument.prototype.controller_RecalculateCurPos = function(bUpdateX, bUpdateY, isUpdateTarget)
 {
 	if (this.controller_CanUpdateTarget())
 	{
 		this.private_CheckCurPage();
 		var nPos = this.private_GetSelectionPos(true).End;
-		return this.Content[nPos].RecalculateCurPos(bUpdateX, bUpdateY);
+		return this.Content[nPos].RecalculateCurPos(bUpdateX, bUpdateY, isUpdateTarget);
 	}
 
 	return {X : 0, Y : 0, Height : 0, PageNum : 0, Internal : {Line : 0, Page : 0, Range : 0}, Transform : null};
@@ -23578,13 +23586,45 @@ CDocument.prototype.GetSectionsByApplyType = function(nType)
 		if (docpostype_Content !== this.GetDocPosType())
 			return [];
 
-		var oParagraph = this.GetCurrentParagraph();
-		if (!oParagraph)
-			return [];
+		if (this.IsSelectionUse())
+		{
+			var arrParagraphs = this.GetSelectedParagraphs();
+			if (arrParagraphs.length > 0)
+			{
+				var oSectPrS = arrParagraphs[0].GetDocumentSectPr();
+				var oSectPrE = arrParagraphs[arrParagraphs.length - 1].GetDocumentSectPr();
 
-		var oSectPr = oParagraph.GetDocumentSectPr();
-		if (oSectPr)
-			return [oSectPr];
+				var nStartIndex = this.SectionsInfo.Find(oSectPrS);
+				var nEndIndex   = this.SectionsInfo.Find(oSectPrE);
+				if (-1 === nStartIndex || -1 === nEndIndex)
+					return [oSectPrE];
+
+				if (nStartIndex > nEndIndex)
+				{
+					var nTemp = nStartIndex;
+					nStartIndex = nEndIndex;
+					nEndIndex   = nTemp;
+				}
+
+				var arrSectPr = [];
+				for (var nIndex = nStartIndex; nIndex <= nEndIndex; ++nIndex)
+				{
+					arrSectPr.push(this.SectionsInfo.Get(nIndex).SectPr);
+				}
+				return arrSectPr;
+			}
+		}
+		else
+		{
+
+			var oParagraph = this.GetCurrentParagraph();
+			if (!oParagraph)
+				return [];
+
+			var oSectPr = oParagraph.GetDocumentSectPr();
+			if (oSectPr)
+				return [oSectPr];
+		}
 	}
 	else if (Asc.c_oAscSectionApplyType.ToEnd === nType)
 	{
