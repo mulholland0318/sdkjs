@@ -4648,6 +4648,11 @@ function CPlotArea()
         }
         return false;
     };
+    CPlotArea.prototype.addAxes = function(aAxes) {
+        for(var nAx = 0; nAx < aAxes.length; ++nAx) {
+            this.addAxis(aAxes[nAx]);
+        }
+    };
 
 
     function COrderedAxes(oPlotArea) {
@@ -5028,7 +5033,33 @@ function CPlotArea()
             }
         }
         else if(this.parent.isHBarType(nType)) {
-
+            for(nChart = 0; nChart < aCharts.length; ++nChart) {
+                oChart = aCharts[nChart];
+                if(bIsSecondaryAxis !== undefined) {
+                    if(oChart.isSecondaryAxis() !== bIsSecondaryAxis) {
+                        continue;
+                    }
+                }
+                nCurType = oChart.getChartType();
+                if(this.parent.isHBarType(nCurType)) {
+                    oChartForAxes = oChart;
+                }
+                if(oChartForAxes) {
+                    aNewAxes = oChartForAxes.axId;
+                }
+                else {
+                    if(this.parent.hasChartWithSecondaryAxis()) {
+                        nResult = Asc.c_oAscError.ID.SecondaryAxis;
+                    }
+                    else {
+                        aNewAxes = this.parent.createHBarAxes(this.parent.getAxisNumFormatByType(nType, [oSeries]));
+                        this.parent.addAxes(aNewAxes);
+                    }
+                }
+                if(aNewAxes.length > 0) {
+                    oNewChart = this.parent.createBarChart(nType, [oSeries], aNewAxes, this);
+                }
+            }
         }
         else {
             var bIsScatter = this.parent.isScatterType(nType);
@@ -5075,6 +5106,24 @@ function CPlotArea()
                         else {
                             aNewAxes = this.parent.createRegularAxes(this.parent.getAxisNumFormatByType(nType, [oSeries]));
                         }
+                        this.parent.addAxes(aNewAxes);
+                    }
+                }
+                if(aNewAxes.length > 0) {
+                    if(this.isBarType(nType)) {
+                        oNewChart = this.createBarChart(nType, [oSeries], aNewAxes, this);
+                    }
+                    else if(this.isLineType(nType)) {
+                        oNewChart = this.createLineChart(nType, [oSeries], aNewAxes, this);
+                    }
+                    else if(this.isAreaType(nType)) {
+                        oNewChart = this.createAreaChart(nType, [oSeries], aNewAxes, this);
+                    }
+                    else if(this.isScatterType(nType)) {
+                        oNewChart = this.createScatterChart(nType, [oSeries], aNewAxes, this);
+                    }
+                    else if(this.isStockChart(nType)) {
+                        oNewChart = this.createStockChart(nType, [oSeries], aNewAxes, this);
                     }
                 }
             }
@@ -5083,6 +5132,7 @@ function CPlotArea()
             if(this.series.length === 0) {
                 this.parent.removeChart(this);
             }
+            this.parent.addChart(oNewChart, 0);
         }
         return nResult;
     };
